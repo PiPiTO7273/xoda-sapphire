@@ -1,0 +1,54 @@
+
+#include"hsp3_64.as"
+#include"dxlib.as"
+#include"bass.as"
+
+#include"func_Default.hsp"
+
+#define DispWidth		1920
+#define DispHeight		1080
+#define BlurBufWidth	640
+#define BlurBufHeight	360
+
+#enum iLayer_Scene		=	0
+#enum iLayer_Blur
+#enum iLayer_System
+
+#packopt hide 1
+
+	gsel 0,-1
+	SetOutApplicationLogValidFlag 0
+	ChangeWindowMode TRUE
+	SetGraphMode DispWidth,DispHeight,32
+	SetAlwaysRunFlag TRUE
+	SetWaitVSyncFlag TRUE
+	SetMainWindowText"XODA SAPPHIRE"
+	dxlib_Init
+	if stat==-1 {
+		dialog"グラフィック機能の初期化に失敗しました。"
+	}
+
+	BASS_Init -1,44100,0,hwnd,0
+	if stat==0 {
+		dialog"オーディオ機能の初期化に失敗しました。"
+	}
+
+	dim FrameCount
+
+*MainLoop
+
+	ProcessMessage
+	if stat==-1 :goto*Exit
+
+	SetDrawScreen DX_SCREEN_BACK
+	ClearDrawScreen
+
+	FrameCount++
+
+	ScreenFlip
+
+	goto*MainLoop
+
+*Exit
+	dxlib_End
+	end

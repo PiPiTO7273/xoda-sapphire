@@ -1,0 +1,34 @@
+
+#module
+	#defcfunc ConvUTF8toANSI str _p
+		sdim tmpstr,512
+		cnvstoa tmpstr,_p
+		return tmpstr
+
+	#defcfunc GetINIvalue str _inibuf,str _section,str _key
+		sdim INIBuf:sdim NoteLine:sdim curSection:sdim resValue
+		INIBuf=_inibuf
+
+		notesel INIBuf
+		repeat notemax
+			noteget NoteLine,cnt
+			if strmid(NoteLine,0,1)=="["&strmid(NoteLine,-1,1)=="]" {
+				curSection=NoteLine
+			}
+			if (getpath(curSection,16)==("["+getpath(_section,16)+"]"))|curSection=="" {
+				sdim INIprm:split NoteLine,"=",INIprm
+				if getpath(INIprm(0),16)==getpath(_key,16) {
+					resValue=INIprm(1)
+					break
+				}
+			}
+		loop
+
+		noteunsel
+
+		repeat varsize(resValue)
+			if peek(resValue,cnt)==10 :poke resValue,cnt,0
+			if peek(resValue,cnt)==13 :poke resValue,cnt,0
+		loop
+		return resValue
+#global
