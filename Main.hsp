@@ -1,0 +1,59 @@
+
+#include"hsp3_64.as"
+#include"dxlib.as"
+#include"bass.as"
+
+#include"NameSpace.hsp"
+#include"func_Default.hsp"
+#include"func_Load.hsp"
+#include"func_Sync.hsp"
+#include"svc_Layer.hsp"
+#include"svc_Online.hsp"
+#include"scene_Launcher.hsp"
+#include"scene_Title.hsp"
+#include"scene_Login.hsp"
+#include"scene_ModeSelect.hsp"
+#include"scene_MusicSelect.hsp"
+#include"scene_Play.hsp"
+#include"scene_Result.hsp"
+
+#packopt hide 1
+
+	gsel 0,-1
+
+	LoadCoreSettings"core.ini"
+	InitDxlib
+	InitBASSlib
+	LoadCoreImages
+	InitCoreSceneMan
+	InitScene ID_PLAY,"PLAY"
+
+	InitGamePlayFonts
+	OpenChartFile"Data/bebd8dec-ae33-6c98-d315-cbc75e951749/ctm_chaos.xct"
+
+*MainLoop
+
+	ProcessMessage
+	if stat==-1 :goto*Exit
+
+	SetDrawScreen hdximg(iScene)
+	ClearDrawScreen
+
+	switch curSceneID
+		case ID_PLAY:DrawGamePlay FrameCount:swbreak
+	swend
+
+	SetDrawScreen DX_SCREEN_BACK
+	ClearDrawScreen
+	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+	DrawGraph 0,0,hdximg(iScene),TRUE
+
+	FrameCount++
+
+	ScreenFlip
+
+	goto*MainLoop
+
+*Exit
+	dxlib_End
+	end
