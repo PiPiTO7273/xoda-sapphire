@@ -1,2 +1,61 @@
 
-*func_loadImage
+#module _Load_
+
+	#deffunc LoadCoreSettings str _filename
+		exist _filename
+		if strsize==-1 :return -1
+		sdim coreBuf,strsize
+		bload _filename,coreBuf
+
+		dim DispWidth@
+		DispWidth@=int(GetINIvalue(coreBuf,"Graphics","Display.Width"))
+		dim DispHeight@
+		DispHeight@=int(GetINIvalue(coreBuf,"Graphics","Display.Height"))
+		dim BufWidth@
+		BufWidth@=int(GetINIvalue(coreBuf,"Graphics","Buffer.Width"))
+		dim BufHeight@
+		BufHeight@=int(GetINIvalue(coreBuf,"Graphics","Buffer.Height"))
+		dim FPSvalue@
+		FPSvalue@=int(GetINIvalue(coreBuf,"Graphics","Refresh"))
+		dim VsyncFlag@
+		VsyncFlag@=ConvStrToBool(GetINIvalue(coreBuf,"Graphics","Vsync"))
+
+	return
+
+	#deffunc InitDxlib
+		SetOutApplicationLogValidFlag 0
+		;ChangeWindowMode TRUE
+		SetGraphMode DispWidth@,DispHeight@,32
+		SetAlwaysRunFlag TRUE
+		SetWaitVSyncFlag VsyncFlag@
+		SetMainWindowText"XODA SAPPHIRE"
+		dxlib_Init
+		if stat==-1 {
+			dialog"グラフィック機能の初期化に失敗しました。"
+		}
+	return
+
+	#deffunc InitBASSlib
+		BASS_Init -1,44100,0,hwnd,0
+		if stat==0 {
+			dialog"オーディオ機能の初期化に失敗しました。"
+		}
+	return
+
+	#deffunc LoadCoreImages
+		SetUsePremulAlphaConvertLoad TRUE
+		hdximg@(iScene)=MakeScreen(BufWidth@,BufHeight@,TRUE)
+	return
+
+	#deffunc InitCoreSceneMan
+		dim FrameCount@
+	return
+
+	#deffunc InitScene int _sceneid
+		dim SceneCount@
+		dim SceneHalfCount@
+		dim curSceneID@
+		curSceneID@=_sceneid
+	return
+
+#global

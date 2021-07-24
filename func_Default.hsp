@@ -31,4 +31,8 @@
 			if peek(resValue,cnt)==13 :poke resValue,cnt,0
 		loop
 		return resValue
+
+	#defcfunc ConvStrToBool str _in
+		if _in=="TRUE" :return 1
+		return 0
 #global

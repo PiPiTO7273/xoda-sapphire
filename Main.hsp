@@ -3,45 +3,53 @@
 #include"dxlib.as"
 #include"bass.as"
 
+#include"NameSpace.hsp"
 #include"func_Default.hsp"
-
-#define DispWidth		1920
-#define DispHeight		1080
-#define BlurBufWidth	640
-#define BlurBufHeight	360
-
-#enum iLayer_Scene		=	0
-#enum iLayer_Blur
-#enum iLayer_System
+#include"func_Load.hsp"
+#include"func_Sync.hsp"
+#include"svc_Layer.hsp"
+#include"svc_Online.hsp"
+#include"scene_Launcher.hsp"
+#include"scene_Title.hsp"
+#include"scene_Login.hsp"
+#include"scene_ModeSelect.hsp"
+#include"scene_MusicSelect.hsp"
+#include"scene_Play.hsp"
+#include"scene_Result.hsp"
 
 #packopt hide 1
 
 	gsel 0,-1
-	SetOutApplicationLogValidFlag 0
-	ChangeWindowMode TRUE
-	SetGraphMode DispWidth,DispHeight,32
-	SetAlwaysRunFlag TRUE
-	SetWaitVSyncFlag TRUE
-	SetMainWindowText"XODA SAPPHIRE"
-	dxlib_Init
-	if stat==-1 {
-		dialog"グラフィック機能の初期化に失敗しました。"
-	}
 
-	BASS_Init -1,44100,0,hwnd,0
-	if stat==0 {
-		dialog"オーディオ機能の初期化に失敗しました。"
-	}
+	LoadCoreSettings"core.ini"
+	InitDxlib
+	InitBASSlib
+	LoadCoreImages
+	InitCoreSceneMan
+	InitScene ID_PLAY
 
-	dim FrameCount
+	LoadGamePlayImages
+	InitGamePlayFonts
+	OpenChartFile"Data/bebd8dec-ae33-6c98-d315-cbc75e951749/ctm_hard.xct"
+
+	StartGameplay
 
 *MainLoop
 
 	ProcessMessage
 	if stat==-1 :goto*Exit
 
+	SetDrawScreen hdximg(iScene)
+	ClearDrawScreen
+
+	switch curSceneID
+		case ID_PLAY:DrawGamePlay FrameCount:swbreak
+	swend
+
 	SetDrawScreen DX_SCREEN_BACK
 	ClearDrawScreen
+	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+	DrawExtendGraph 0,0,DispWidth@,DispHeight@,hdximg(iScene),TRUE
 
 	FrameCount++
 

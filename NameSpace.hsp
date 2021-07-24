@@ -1,0 +1,21 @@
+
+//DXライブラリグラフィック(global)
+#enum iScene		=	0
+#enum iBlur
+#enum iConsole
+
+//シーンID
+#enum ID_BOOT		=	0
+#enum ID_PLAY
+
+//譜面情報の識別子
+#enum global META_TITLE	=	0
+#enum global META_ARTIST
+#enum global META_SOURCE
+#enum global META_DIFFICULTY
+#enum global META_LEVEL
+#enum global META_BGA
+#enum global META_BGM
+#enum global META_BGAOFFSET
+#enum global META_BGMOFFSET
+#enum global META_BGAIMAGE

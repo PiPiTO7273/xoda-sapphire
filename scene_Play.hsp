@@ -1,0 +1,301 @@
+
+#module _Play_
+
+	//DXライブラリグラフィック(gameplay)
+	#enum ibg_0			=	0
+	#enum ibg_top
+	#enum ibg_bottom
+	#enum ibg_songinfo
+	#enum ibg_playerdata
+	#enum ichip_key
+
+	//DXライブラリフォントハンドル(gameplay)
+	#enum fEOEXB16			=	0
+	#enum fEOEXB20
+	#enum fFAB50
+	#enum fNSCJM12
+	#enum fNSCJM15
+	#enum fNSCJM16
+	#enum fNSCJM20
+	#enum fNSCJM32
+	#enum fPS14
+	#enum fPS16
+	#enum fPS18
+	#enum fPS20
+	#enum fSQNUM40
+	#enum fSQNUM64
+
+	#const OBJ_SINGLENOTE	0
+	#const OBJ_holdSTART	1
+	#const OBJ_holdEND		2
+
+	#deffunc LoadGamePlayImages
+		dim hdximg
+		hdximg(ibg_0)=LoadGraph("Data/bg_0.png")
+		hdximg(ibg_top)=LoadGraph("Data/bg_Top.png")
+		hdximg(ibg_bottom)=LoadGraph("Data/bg_Bottom.png")
+		hdximg(ibg_songinfo)=LoadGraph("Data/bg_SongInfo.png")
+		hdximg(ibg_playerdata)=LoadGraph("Data/bg_playerdata.png")
+		hdximg(ichip_key)=LoadGraph("Data/chip_Key.png")
+	return
+
+	#deffunc InitGamePlayFonts
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
+		hdxfont(fEOEXB20)=LoadFontDataToHandle("Data/eoexb20.bin")
+		hdxfont(fFAB50)=LoadFontDataToHandle("Data/fab50.bin")
+		hdxfont(fNSCJM12)=LoadFontDataToHandle("Data/nscjm12.bin")
+		hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
+		hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
+		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
+		hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
+		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
+		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
+		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+		hdxfont(fSQNUM64)=LoadFontDataToHandle("Data/sqnum64.bin")
+	return
+
+	#deffunc OpenChartFile str _filename
+		sdim chartFileName
+		chartFileName=_filename
+		exist chartFileName
+		if strsize==-1 {
+			return -1
+		}
+		sdim chartFileBuf,strsize
+		bload chartFileName,chartFileBuf
+
+		sdim chartMetaInfo
+		chartMetaInfo(META_TITLE)=GetINIvalue(chartFileBuf,"Metadata","Title")
+		chartMetaInfo(META_ARTIST)=GetINIvalue(chartFileBuf,"Metadata","Artist")
+		chartMetaInfo(META_SOURCE)=GetINIvalue(chartFileBuf,"Metadata","Source")
+		chartMetaInfo(META_DIFFICULTY)=GetINIvalue(chartFileBuf,"Metadata","Difficulty")
+		chartMetaInfo(META_LEVEL)=GetINIvalue(chartFileBuf,"Metadata","Level")
+		chartMetaInfo(META_BGA)=GetINIvalue(chartFileBuf,"Metadata","Background.Video")
+		chartMetaInfo(META_BGM)=GetINIvalue(chartFileBuf,"Metadata","Background.Audio")
+		chartMetaInfo(META_BGAOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Background.Video.Offset")
+		chartMetaInfo(META_BGMOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Background.Audio.Offset")
+
+		notesel chartFileBuf
+		sdim INIline
+		sdim INIkey:sdim INIval
+
+		dim objTiming
+		dim objLaneID
+		dim objType
+		dim objSoundID
+		dim objSoundVol
+		dim objLength
+		dim objAssignFlag
+		dim objAutoFlag
+		dim objJudgeFlag
+		dim objDrawPos
+		ddim objBPM,1
+		dim ObjMax
+
+		sdim SoundDBFileName
+		dim SoundDBMax
+
+		dim PreTime
+		PreTime=2000
+
+		dim BPMTiming
+		dim BPMValue
+		dim BPMpointMax
+
+		dim SndEventID
+		dim SndEventTime
+		ddim SndEventVol,1
+		dim SndEventMax
+		dim SndPlayFlag
+
+		repeat notemax
+			noteget INIline,cnt
+			split INIline,"=",INIkey,INIval
+			switch INIkey
+				case"Sound.Set"		//キーサウンドを定義
+					split INIval,",",Objinfoprm
+					SoundDBFileName(int(Objinfoprm(0)))=Objinfoprm(1)
+					SoundDBMax++
+				swbreak
+				case"BPM.Set"			//BPM変更地点
+					sdim BPMinfoprm
+					split INIval,",",BPMinfoprm
+					if int(BPMinfoprm(0))==0 {
+						BPMTiming(BPMpointMax)=int(BPMinfoprm(0))
+					} else {
+						BPMTiming(BPMpointMax)=int(BPMinfoprm(0))+PreTime
+					}
+					BPMValue(BPMpointMax)=double(BPMinfoprm(1))
+					BPMpointMax++
+				swbreak
+				case"Note.Single"		//シングルノート
+					split INIval,",",Objinfoprm
+					ObjLaneID(ObjMax)=int(Objinfoprm(0))
+					if flagSideNote==FALSE :ObjLaneID(ObjMax)++		//サイドノーツ分を移動
+					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime
+					ObjSoundID(ObjMax)=int(Objinfoprm(2))
+					ObjSoundVol(ObjMax)=int(Objinfoprm(3))
+					ObjLength(ObjMax)=1
+					ObjType(ObjMax)=OBJ_SINGLENOTE
+					ObjJudgeFlag(ObjMax)=0
+					ObjAssignFlag(ObjMax)=0
+					ObjAutoFlag(ObjMax)=0
+					ObjMax++
+				swbreak
+				case"Note.Hold.Start"	//ホールドノーツ（始点）
+					split INIval,",",Objinfoprm
+					ObjLaneID(ObjMax)=int(Objinfoprm(0))
+					if flagSideNote==FALSE :ObjLaneID(ObjMax)++		//サイドノーツ分を移動
+					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime
+					ObjSoundID(ObjMax)=int(Objinfoprm(3))
+					ObjSoundVol(ObjMax)=int(Objinfoprm(4))
+					ObjLength(ObjMax)=int(Objinfoprm(2))
+					ObjType(ObjMax)=OBJ_holdSTART
+					ObjJudgeFlag(ObjMax)=0
+					ObjAssignFlag(ObjMax)=0
+					ObjAutoFlag(ObjMax)=0
+					ObjMax++
+				swbreak
+				case"Note.Hold.End"		//ホールドノーツ（終点）
+					split INIval,",",Objinfoprm
+					ObjLaneID(ObjMax)=int(Objinfoprm(0))
+					if flagSideNote==FALSE :ObjLaneID(ObjMax)++		//サイドノーツ分を移動
+					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime
+					ObjSoundID(ObjMax)=-1
+					ObjSoundVol(ObjMax)=0
+					ObjLength(ObjMax)=1
+					ObjType(ObjMax)=OBJ_holdEND
+					ObjJudgeFlag(ObjMax)=0
+					ObjAssignFlag(ObjMax)=0
+					ObjAutoFlag(ObjMax)=0
+					ObjMax++
+				swbreak
+				case"Play"			//サウンドイベント
+					split INIval,",",Objinfoprm
+					SndEventTime(SndEventMax)=int(Objinfoprm(0))
+					SndEventID(SndEventMax)=int(Objinfoprm(1))
+					SndEventVol(SndEventMax)=double(Objinfoprm(2))/100.0
+					SndPlayFlag(SndEventMax)=0
+					SndEventMax++
+				swbreak
+			swend
+		loop
+
+		//BPM値をノーツに割り当て
+			dim SearchNoteID
+			repeat ObjMax
+				ObjBPM(SearchNoteID)=0.0
+				repeat BPMpointMax
+					if BPMTiming(cnt)<ObjTiming(SearchNoteID) {
+						ObjBPM(SearchNoteID)=BPMValue(cnt)
+					}
+				loop
+
+				SearchNoteID++
+			loop
+
+		//ノーツ位置を計算
+			dimtype ObjPosition,vartype("double")
+			dimtype TmpNotepos,vartype("double")
+			dimtype AlyNotepos,vartype("double")
+			repeat ObjMax
+				if cnt==0 {
+					ObjPosition(cnt)=TmpNotepos-(double(ObjTiming(cnt))*ObjBPM(cnt)/400.0)
+				} else {
+					ObjPosition(cnt)=TmpNotepos-(double(ObjTiming(cnt)-ObjTiming(cnt-1))*ObjBPM(cnt)/400.0)
+				}
+				TmpNotepos=ObjPosition(cnt)
+			loop
+	return
+
+	#defcfunc GetChartInfo int _id
+	return chartMetaInfo(_id)
+
+	#deffunc StartGameplay
+		if GetChartInfo(META_BGA)!"" {
+			dim hdximg_gameplaybga
+			hdximg_gameplaybga=LoadGraph(getpath(chartFileName,32)+GetChartInfo(META_BGA))
+			PlayMovieToGraph hdximg_gameplaybga
+		}
+	return
+
+	#deffunc DrawGamePlay int _count
+		//背景画像
+			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+			if GetChartInfo(META_BGA)=="" {
+				DrawGraph 0,0,hdximg(ibg_0),FALSE
+			} else {
+				DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
+			}
+
+		//レーン
+			//x4
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),780,64,1140,864,780,64,DX_GRAPH_FILTER_GAUSS,32,6400
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
+				DrawBox 780,64,1140,864,GetColor(255,255,255),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
+				repeat 4
+					DrawBox 780+90*cnt,64,780+90*(cnt+1),864,GetColor(0,0,0),FALSE
+				loop
+			//side(l)
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),662,64,772,864,662,64,DX_GRAPH_FILTER_GAUSS,32,6400
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
+				DrawBox 662,64,772,864,GetColor(255,255,255),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
+				DrawBox 662,64,772,864,GetColor(0,0,0),FALSE
+			//side(r)
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),1148,64,1258,864,1148,64,DX_GRAPH_FILTER_GAUSS,32,6400
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
+				DrawBox 1148,64,1258,864,GetColor(255,255,255),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
+				DrawBox 1148,64,1258,864,GetColor(0,0,0),FALSE
+
+		//判定バー
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,70
+			DrawBox 0,868,BufWidth@,868+3,$58EEE3,TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawBox 640,864,640+640,864+10,$58EEE3,TRUE
+
+		//上部パネル
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,0,hdximg(ibg_top),TRUE
+
+		//下部パネル
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,874,hdximg(ibg_bottom),TRUE
+
+		//左パネル
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,380,hdximg(ibg_playerdata),TRUE
+
+		//キー
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 682,886,hdximg(ichip_Key),TRUE
+			DrawGraph 791,894,hdximg(ichip_Key),TRUE
+			DrawGraph 881,894,hdximg(ichip_Key),TRUE
+			DrawGraph 971,894,hdximg(ichip_Key),TRUE
+			DrawGraph 1061,894,hdximg(ichip_Key),TRUE
+			DrawGraph 1168,886,hdximg(ichip_Key),TRUE
+
+		//曲情報
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,100,hdximg(ibg_songinfo),TRUE
+			//値
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawStringToHandle 40,128,GetChartInfo(META_TITLE),GetColor(10,10,10),hdxfont(fNSCJM32)
+			DrawStringToHandle 40,183,GetChartInfo(META_ARTIST),GetColor(30,30,30),hdxfont(fNSCJM20)
+			DrawStringToHandle 40,222,GetChartInfo(META_SOURCE),GetColor(50,50,50),hdxfont(fNSCJM16)
+			DrawStringToHandle 40,311,GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL),GetColor(240,240,240),hdxfont(fEOEXB20)
+
+		//ステータス
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,GetColor(50,50,50),TRUE
+			DrawStringToHandle 24,1048,"XODA SAPPHIRE",GetColor(230,230,230),hdxfont(fPS20)
+			DrawStringToHandle 220,1052,"Now playing "+GetChartInfo(META_ARTIST)+" - "+GetChartInfo(META_TITLE)+" ["+GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL)+"]",GetColor(210,210,210),hdxfont(fPS14)
+	return
+
+#global
