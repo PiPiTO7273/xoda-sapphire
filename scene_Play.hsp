@@ -8,6 +8,7 @@
 	#enum ibg_songinfo
 	#enum ibg_playerdata
 	#enum ichip_key
+	#enum inote_0
 
 	//DXライブラリフォントハンドル(gameplay)
 	#enum fEOEXB16			=	0
@@ -37,6 +38,7 @@
 		hdximg(ibg_songinfo)=LoadGraph("Data/bg_SongInfo.png")
 		hdximg(ibg_playerdata)=LoadGraph("Data/bg_playerdata.png")
 		hdximg(ichip_key)=LoadGraph("Data/chip_Key.png")
+		hdximg(inote_0)=LoadGraph("Data/note_0.png")
 	return
 
 	#deffunc InitGamePlayFonts
@@ -100,10 +102,10 @@
 		dim SoundDBMax
 
 		dim PreTime
-		PreTime=2000
+		PreTime=0
 
 		dim BPMTiming
-		dim BPMValue
+		ddim BPMValue,1
 		dim BPMpointMax
 
 		dim SndEventID
@@ -210,6 +212,23 @@
 				}
 				TmpNotepos=ObjPosition(cnt)
 			loop
+
+		//キーサウンドの読み込み
+			dim64 hSndDB:dim64 hsmpSndDB:dim keysndIndexID
+			sdim keysndBuf:dim hLoadCnt
+			binpkg_Load getpath(chartFileName,32)+"musicdata.pkg"
+			repeat SoundDBMax
+				keysndIndexID(hLoadCnt)=binpkg_GetIndex(SoundDBFileName(hLoadCnt))
+				if keysndIndexID(hLoadCnt)!-1 {
+					;binpkg_extract SoundDBFileName(hLoadCnt),"Cache/"+SoundDBFileName(hLoadCnt)
+					binpkg_CopytoBuffer keysndBuf,keysndIndexID(hLoadCnt)
+					hsmpSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(keysndBuf),0,binpkg_GetFileLength(keysndIndexID(hLoadCnt)),32,0)
+					if hsmpSndDB(hLoadCnt)==0 :logmes""+SoundDBFileName(hLoadCnt)+"\nError Code : "+BASS_ErrorGetCode()
+					hSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndDB(hLoadCnt),TRUE)
+					hLoadCnt++
+				}
+			loop
+			binpkg_Free
 	return
 
 	#defcfunc GetChartInfo int _id
@@ -221,6 +240,7 @@
 			hdximg_gameplaybga=LoadGraph(getpath(chartFileName,32)+GetChartInfo(META_BGA))
 			PlayMovieToGraph hdximg_gameplaybga
 		}
+		stdCount=GetNowCount()
 	return
 
 	#deffunc DrawGamePlay int _count
@@ -253,6 +273,82 @@
 				DrawBox 1148,64,1258,864,GetColor(255,255,255),TRUE
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
 				DrawBox 1148,64,1258,864,GetColor(0,0,0),FALSE
+
+		//スクロール速度
+			ddim ScrollSpeed,1
+			repeat BPMpointMax
+				if BPMTiming(cnt)<curCount {
+					ScrollSpeed=BPMValue(cnt)/400.0
+					CurBPM=BPMValue(cnt)
+				}
+			loop
+
+		//ノーツ
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			easeAddSpeedRes=3.0
+			NoteHeight=32
+			repeat ObjMax
+				if ScrollSpeed!0.0&curCount>0 :ObjPosition(cnt)+(1000.0/60.0*ScrollSpeed)
+				ObjDrawPos(cnt)=864+(ObjPosition(cnt)*easeAddSpeedRes)-NoteHeight-DispOffset
+				DrawPosY=ObjDrawPos(cnt)
+				if ObjType(cnt)==OBJ_holdSTART {
+					tmpholdStartID=cnt
+				}
+				if ObjType(cnt)==OBJ_SINGLENOTE {
+					if DrawPosY<0 :continue
+					if DrawPosY>BufHeight@ :continue
+				}
+				if ObjJudgeFlag(cnt)==TRUE :continue
+
+				//基本ノーツ画像
+					if DrawPosY>0&DrawPosY+NoteHeight<864 {
+						if ObjLaneID(cnt)\2!0 {
+							CopyMatImageHwnd=hdximg(inote_0)
+						} else {
+							CopyMatImageHwnd=hdximg(inote_0)
+						}
+						if ObjLaneID(cnt)==0|ObjLaneID(cnt)==5 {
+							if ObjLaneID(cnt)==0 :DrawGraph 662,DrawPosY,hdximg(inote_0),TRUE
+							if ObjLaneID(cnt)==5 :DrawGraph 1148,DrawPosY,hdximg(inote_0),TRUE
+						} else {
+							DrawGraph 780+(ObjLaneID(cnt)-1)*90,DrawPosY,CopyMatImageHwnd,TRUE
+						}
+					}
+
+			//ロングノーツ
+				if ObjType(cnt)==OBJ_holdEND {
+					tmpholdNoteHeight=ObjDrawPos(tmpholdStartID)-(DrawPosY+NoteHeight)
+					if DrawPosY+tmpholdNoteHeight+NoteHeight>864 :tmpholdNoteHeight=864-DrawPosY-NoteHeight
+					if ObjLaneID(cnt)==0|ObjLaneID(cnt)==5 {
+						if ObjLaneID(cnt)==0 :CopyMatImageHwnd=hdximg(ihold_0)
+						if ObjLaneID(cnt)==5 :CopyMatImageHwnd=hdximg(ihold_0)
+					} else {
+						if ObjLaneID(cnt)\2==0 {
+							CopyMatImageHwnd=hdximg(ihold_0)
+						} else {
+							CopyMatImageHwnd=hdximg(ihold_0)
+						}
+					}
+					//描画位置(x)
+					if ObjLaneID(cnt)==0|ObjLaneID(cnt)==5 {
+						if ObjLaneID(cnt)==0 :DrawPosX=258
+						if ObjLaneID(cnt)==5 :DrawPosX=536
+					} else {
+						DrawPosX=280+(ObjLaneID(cnt)-1)*64
+					}
+					if tmpholdNoteHeight<1024 {
+						//素材より短いロングノーツ
+						DrawRectGraph DrawPosX,DrawPosY+NoteHeight,0,0,64,tmpholdNoteHeight,CopyMatImageHwnd,TRUE
+					} else {
+						//素材より長いロングノーツ
+						progObjID=cnt
+						repeat tmpholdNoteHeight/1024
+							DrawRectGraph DrawPosX,DrawPosY+1024*cnt+NoteHeight,0,0,64,1024,CopyMatImageHwnd,TRUE
+						loop
+						DrawRectGraph DrawPosX,DrawPosY+tmpholdNoteHeight/1024*1024+NoteHeight,0,0,64,tmpholdNoteHeight\1024,CopyMatImageHwnd,TRUE
+					}
+				}
+			loop
 
 		//判定バー
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,70
@@ -296,6 +392,23 @@
 			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,GetColor(50,50,50),TRUE
 			DrawStringToHandle 24,1048,"XODA SAPPHIRE",GetColor(230,230,230),hdxfont(fPS20)
 			DrawStringToHandle 220,1052,"Now playing "+GetChartInfo(META_ARTIST)+" - "+GetChartInfo(META_TITLE)+" ["+GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL)+"]",GetColor(210,210,210),hdxfont(fPS14)
+
+		//サウンドイベントの処理
+			dim LastPlaySndID
+			LastPlaySndID=-1
+			repeat SndEventMax
+				if SndPlayFlag(cnt)==0&curCount>SndEventTime(cnt)+PreTime&SndEventID(cnt)!-1 {
+					cfunc64v BASS_ChannelSetAttribute,hSndDB(SndEventID(cnt)),BASS_ATTRIB_VOL,d2f(SndEventVol(cnt))
+					cfunc64v BASS_ChannelSetPosition,hSndDB(SndEventID(cnt)),0,0,0
+					cfunc64v BASS_ChannelPlay,hSndDB(SndEventID(cnt))
+					LastPlaySndID=SndEventID(cnt)
+					PlaySndCount++
+					SndPlayFlag(cnt)=1
+				}
+			loop
+
+		//カウンタ
+			curCount=GetNowCount()-stdCount
 	return
 
 #global

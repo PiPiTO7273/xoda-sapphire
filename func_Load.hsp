@@ -24,10 +24,10 @@
 
 	#deffunc InitDxlib
 		SetOutApplicationLogValidFlag 0
-		;ChangeWindowMode TRUE
+		ChangeWindowMode TRUE
 		SetGraphMode DispWidth@,DispHeight@,32
 		SetAlwaysRunFlag TRUE
-		SetWaitVSyncFlag VsyncFlag@
+		SetWaitVSyncFlag TRUE;VsyncFlag@
 		SetMainWindowText"XODA SAPPHIRE"
 		dxlib_Init
 		if stat==-1 {

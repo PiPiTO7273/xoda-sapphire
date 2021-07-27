@@ -1,9 +1,11 @@
 
 #include"hsp3_64.as"
-#include"dxlib.as"
-#include"bass.as"
+#include"dxlib_x64.as"
+#include"bass_x64.as"
+#include"hspint64.as"
 
 #include"NameSpace.hsp"
+#include"mod_BinPkg.hsp"
 #include"func_Default.hsp"
 #include"func_Load.hsp"
 #include"func_Sync.hsp"

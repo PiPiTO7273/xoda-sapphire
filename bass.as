@@ -22,7 +22,7 @@
 	#cfunc global BASS_GetVolume "BASS_GetVolume"
 	#func global BASS_SetVolume "BASS_SetVolume" int
 
-	#cfunc global BASS_SampleLoad "BASS_SampleLoad" int, sptr, int, int, int, int, int
+	#cfunc global BASS_SampleLoad "BASS_SampleLoad" sptr,sptr, sptr, sptr, sptr, sptr
 	#cfunc global BASS_SampleGetChannel "BASS_SampleGetChannel" int, int
 	#func global BASS_SampleStop "BASS_SampleStop" int
 	#func global BASS_SampleFree "BASS_SampleFree" int
