@@ -24,7 +24,7 @@
 
 	#deffunc InitDxlib
 		SetOutApplicationLogValidFlag 0
-		ChangeWindowMode TRUE
+		;ChangeWindowMode TRUE
 		SetGraphMode DispWidth@,DispHeight@,32
 		SetAlwaysRunFlag TRUE
 		SetWaitVSyncFlag TRUE;VsyncFlag@
@@ -33,6 +33,10 @@
 		if stat==-1 {
 			dialog"グラフィック機能の初期化に失敗しました。"
 		}
+
+		//変数初期化
+			dim KeyFlag@,256
+			dim bfKeyFlag@,256
 	return
 
 	#deffunc InitBASSlib

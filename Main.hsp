@@ -1,11 +1,13 @@
 
 #include"hsp3_64.as"
 #include"dxlib_x64.as"
+#include"a2d.hsp"
 #include"bass_x64.as"
 #include"hspint64.as"
 
 #include"NameSpace.hsp"
 #include"mod_BinPkg.hsp"
+#include"mod_dxlibplus.hsp"
 #include"func_Default.hsp"
 #include"func_Load.hsp"
 #include"func_Sync.hsp"
@@ -29,10 +31,16 @@
 	LoadCoreImages
 	InitCoreSceneMan
 	InitScene ID_PLAY
+	randomize
 
 	LoadGamePlayImages
 	InitGamePlayFonts
-	OpenChartFile"Data/bebd8dec-ae33-6c98-d315-cbc75e951749/ctm_hard.xct"
+	OpenChartFile"Data/026fc9f6-e3d6-d993-076e-bbd19531207d/ctm_chaos.xct"
+
+	repeat 120
+		ProcessMessage
+		ScreenFlip
+	loop
 
 	StartGameplay
 
@@ -40,6 +48,9 @@
 
 	ProcessMessage
 	if stat==-1 :goto*Exit
+
+	//ÉLÅ[îªíË
+	repeat 256:KeyFlag(cnt)=CheckHitKey(cnt):loop
 
 	SetDrawScreen hdximg(iScene)
 	ClearDrawScreen
@@ -54,6 +65,7 @@
 	DrawExtendGraph 0,0,DispWidth@,DispHeight@,hdximg(iScene),TRUE
 
 	FrameCount++
+	repeat 256:bfKeyFlag(cnt)=KeyFlag(cnt):loop
 
 	ScreenFlip
 
