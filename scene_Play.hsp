@@ -328,10 +328,13 @@
 			dim curScore
 			dim BonusScore
 			dim GaugeType
-			ddim curGauge
+			ddim curGauge,1
 			dim BGAplayflag
 			dim burstCount
 			dim AutoPlayFlag
+			ddim TotalRagMs,1
+			dim curCount
+			ddim curCount_f,1
 			AutoPlayFlag=0
 			burstCount=-1
 
@@ -354,6 +357,12 @@
 	return
 
 	#deffunc DrawGamePlay int _count
+
+		//遅延補正
+			TotalRagMs+double(curCount)-curCount_f
+			curCount=GetNowCount()-stdCount-TotalRagMs
+			curCount_f+1000.0/60.0
+
 		//判定処理
 			dim KeybtJudge,2,6
 			KeybtJudge(0,0)=bfKeyFlag@(KEY_INPUT_S)
@@ -519,7 +528,7 @@
 			easeAddSpeedRes=3.6
 			NoteHeight=32
 			repeat ObjMax
-				if ScrollSpeed!0.0&curCount>0 :ObjPosition(cnt)+(1000.0/60.0*ScrollSpeed)
+				if ScrollSpeed!0.0&curCount>0 :ObjPosition(cnt)+(1000.0/double(FPSvalue@)*ScrollSpeed)
 				ObjDrawPos(cnt)=864+(ObjPosition(cnt)*easeAddSpeedRes)-DispOffset
 				DrawPosY=ObjDrawPos(cnt)
 				if ObjType(cnt)==OBJ_holdSTART {
@@ -709,9 +718,9 @@
 
 		//ボーナス表示
 			if bonusDispCount!-1 {
-				if bonusDispCount>15+60*2 {
+				if bonusDispCount>15+FPSvalue@*2 {
 					setease 150,0,ease_cubic_out
-					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(bonusDispCount-15-60*2,15)
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(bonusDispCount-15-FPSvalue@*2,15)
 				} else {
 					setease 0,150,ease_cubic_out
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(bonusDispCount,15)
@@ -719,7 +728,7 @@
 				setease 32,0,ease_cubic_out
 				DrawGraph 780,450+getease(bonusDispCount,15),bonusDispImg,TRUE
 				bonusDispCount++
-				if bonusDispCount>15+60*2+15 :bonusDispCount=-1
+				if bonusDispCount>15+FPSvalue@*2+15 :bonusDispCount=-1
 			}
 
 		//自動判定
@@ -781,7 +790,6 @@
 			loop
 
 		//カウンタ
-			curCount=GetNowCount()-stdCount
 			JudgeAfCnt++
 	return
 
@@ -880,7 +888,7 @@
 
 		//バースト発動条件
 			if curCombo!0 {
-				if curCombo==50 :burstCount=0:bonusDispImg=hdximg(ieff_bonus_combo):bonusDispCount=0
+				;if curCombo==50 :burstCount=0:bonusDispImg=hdximg(ieff_bonus_combo):bonusDispCount=0
 				if curCombo\100==0 :burstCount=0:bonusDispImg=hdximg(ieff_bonus_combo):bonusDispCount=0
 			}
 	return
