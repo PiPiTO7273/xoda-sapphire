@@ -35,7 +35,7 @@
 
 	LoadGamePlayImages
 	InitGamePlayFonts
-	OpenChartFile"Data/026fc9f6-e3d6-d993-076e-bbd19531207d/ctm_chaos.xct"
+	OpenChartFile"Data/93d824a2-82ce-f04e-003a-bd3aee6fd8c3/ctm_chaos.xct"
 
 	repeat 120
 		ProcessMessage

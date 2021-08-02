@@ -7,6 +7,8 @@
 	#enum ibg_bottom
 	#enum ibg_songinfo
 	#enum ibg_playerdata
+	#enum ibg_scoregraph
+	#enum ibg_score
 	#enum ichip_key
 	#enum ichip_key_active
 	#enum inote_0
@@ -41,8 +43,8 @@
 	#enum fPS16
 	#enum fPS18
 	#enum fPS20
+	#enum fSQNUM16
 	#enum fSQNUM40
-	#enum fSQNUM64
 
 	//オブジェクトの種類
 	#enum OBJ_DUMMY		=	0
@@ -78,6 +80,8 @@
 		hdximg(ibg_bottom)=LoadGraph("Data/bg_Bottom.png")
 		hdximg(ibg_songinfo)=LoadGraph("Data/bg_SongInfo.png")
 		hdximg(ibg_playerdata)=LoadGraph("Data/bg_playerdata.png")
+		hdximg(ibg_scoregraph)=LoadGraph("Data/bg_scoregraph.png")
+		hdximg(ibg_score)=LoadGraph("Data/bg_score.png")
 		hdximg(ichip_key)=LoadGraph("Data/chip_Key.png")
 		hdximg(ichip_key_active)=LoadGraph("Data/chip_key_active.png")
 		hdximg(inote_0)=LoadGraph("Data/note_0.png")
@@ -123,7 +127,7 @@
 		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
 		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
 		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
-		hdxfont(fSQNUM64)=LoadFontDataToHandle("Data/sqnum64.bin")
+		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
 	return
 
 	#deffunc OpenChartFile str _filename
@@ -297,6 +301,12 @@
 				}
 			loop
 			binpkg_Free
+
+		//スコア計算
+			dim ObjHitScore
+			ObjHitScore=10000000/ObjMax
+			dim BonusScore
+			BonusScore=10000000\ObjMax
 	return
 
 	#defcfunc GetChartInfo int _id
@@ -326,7 +336,6 @@
 			dim MaxCombo
 			dim judgeSign
 			dim curScore
-			dim BonusScore
 			dim GaugeType
 			ddim curGauge,1
 			dim BGAplayflag
@@ -335,7 +344,7 @@
 			ddim TotalRagMs,1
 			dim curCount
 			ddim curCount_f,1
-			AutoPlayFlag=0
+			AutoPlayFlag=1
 			burstCount=-1
 
 		if GetChartInfo(META_BGA)!"" {
@@ -361,7 +370,7 @@
 		//遅延補正
 			TotalRagMs+double(curCount)-curCount_f
 			curCount=GetNowCount()-stdCount-TotalRagMs
-			curCount_f+1000.0/60.0
+			curCount_f+1000.0/double(FPSvalue@)
 
 		//判定処理
 			dim KeybtJudge,2,6
@@ -451,13 +460,13 @@
 			loop
 
 		//背景画像
-			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
-			if GetChartInfo(META_BGA)=="*"&GetChartInfo(META_BGAIMAGE)=="" {
+			;SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+			;if GetChartInfo(META_BGA)=="*"&GetChartInfo(META_BGAIMAGE)=="" {
 				DrawGraph 0,0,hdximg(ibg_0),FALSE
-			} else {
-				if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga
-				DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
-			}
+			;} else {
+			;	if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga
+			;	DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
+			;}
 
 		//レーン
 			//x4
@@ -730,6 +739,19 @@
 				bonusDispCount++
 				if bonusDispCount>15+FPSvalue@*2+15 :bonusDispCount=-1
 			}
+
+		//スコアグラフ
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1500,240,hdximg(ibg_scoregraph),TRUE
+
+		//スコア
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1416,100,hdximg(ibg_score),TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			setease easeScoreA,easeScoreB,ease_linear
+			DrawStringToHandle 1580,124,strf("%08d",getease(easeScoreCount,FPSvalue@/2)),GetColor(0,0,0),hdxfont(fSQNUM40)
+			easeScoreCount++
+			DrawStringToHandle 1618,182,"00.00",GetColor(30,30,30),hdxfont(fSQNUM16)
 
 		//自動判定
 			repeat ObjMax
