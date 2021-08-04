@@ -140,7 +140,7 @@
 		sdim chartFileBuf,strsize
 		bload chartFileName,chartFileBuf
 
-		sdim chartMetaInfo
+		sdim chartMetaInfo,META_MAX
 		chartMetaInfo(META_TITLE)=GetINIvalue(chartFileBuf,"Metadata","Title")
 		chartMetaInfo(META_ARTIST)=GetINIvalue(chartFileBuf,"Metadata","Artist")
 		chartMetaInfo(META_SOURCE)=GetINIvalue(chartFileBuf,"Metadata","Source")
@@ -151,6 +151,7 @@
 		chartMetaInfo(META_BGAOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Background.Video.Offset")
 		chartMetaInfo(META_BGMOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Background.Audio.Offset")
 		chartMetaInfo(META_BGAIMAGE)=GetINIvalue(chartFileBuf,"Metadata","Background.Image")
+		chartMetaInfo(META_EVOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Event.Sound.Offset")
 		if chartMetaInfo(META_BGA)=="" :chartMetaInfo(META_BGA)="general-movie-*.ogv"
 
 		notesel chartFileBuf
@@ -302,6 +303,14 @@
 			loop
 			binpkg_Free
 
+		//BGM
+			if GetChartInfo(META_BGM)!"" {
+				dim64 hSndBGM:dim64 hsmpSndBGM
+				hsmpSndBGM=cfunc64(RET_INT64,BASS_SampleLoad,FALSE,getpath(chartFileName,32)+GetChartInfo(META_BGM),0,0,32,0)
+				if hsmpSndBGM==0 :logmes""+SoundDBFileName(hLoadCnt)+"\nError Code : "+BASS_ErrorGetCode()
+				hSndBGM=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndBGM,TRUE)
+			}
+
 		//ÉXÉRÉAåvéZ
 			dim ObjHitScore
 			ObjHitScore=10000000/ObjMax
@@ -339,6 +348,7 @@
 			dim GaugeType
 			ddim curGauge,1
 			dim BGAplayflag
+			dim BGMplayflag
 			dim burstCount
 			dim AutoPlayFlag
 			ddim TotalRagMs,1
@@ -351,7 +361,7 @@
 			exist getpath(chartFileName,32)+GetChartInfo(META_BGA)
 			dim hdximg_gameplaybga
 			if strsize==-1 {
-				hdximg_gameplaybga=LoadGraph("Data/general-movie-"+rnd(8)+".ogv")
+				hdximg_gameplaybga=LoadGraph("Data/general-movie-"+rnd(7)+".ogv")
 			} else {
 				hdximg_gameplaybga=LoadGraph(getpath(chartFileName,32)+GetChartInfo(META_BGA))
 			}
@@ -460,13 +470,18 @@
 			loop
 
 		//îwåiâÊëú
-			;SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
-			;if GetChartInfo(META_BGA)=="*"&GetChartInfo(META_BGAIMAGE)=="" {
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(curCount-PreTime,1000)
+			if GetChartInfo(META_BGA)=="*"&GetChartInfo(META_BGAIMAGE)=="" {
 				DrawGraph 0,0,hdximg(ibg_0),FALSE
-			;} else {
-			;	if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga
-			;	DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
-			;}
+			} else {
+				if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga,DX_PLAYTYPE_LOOP
+				DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
+			}
+			;GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+
+		//BGM
+			if int(GetChartInfo(META_BGMOFFSET))<curCount-PreTime&BGMplayflag==FALSE :BGMplayflag=TRUE:cfunc64v BASS_ChannelPlay,hSndBGM
 
 		//ÉåÅ[Éì
 			//x4
@@ -801,7 +816,7 @@
 			dim LastPlaySndID
 			LastPlaySndID=-1
 			repeat SndEventMax
-				if SndPlayFlag(cnt)==0&curCount>SndEventTime(cnt)+PreTime&SndEventID(cnt)!-1 {
+				if SndPlayFlag(cnt)==0&curCount>SndEventTime(cnt)+PreTime+int(GetChartInfo(META_EVOFFSET))&SndEventID(cnt)!-1 {
 					cfunc64v BASS_ChannelSetAttribute,hSndDB(SndEventID(cnt)),BASS_ATTRIB_VOL,d2f(SndEventVol(cnt))
 					cfunc64v BASS_ChannelSetPosition,hSndDB(SndEventID(cnt)),0,0,0
 					cfunc64v BASS_ChannelPlay,hSndDB(SndEventID(cnt))

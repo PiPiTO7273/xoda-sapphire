@@ -19,3 +19,6 @@
 #enum global META_BGAOFFSET
 #enum global META_BGMOFFSET
 #enum global META_BGAIMAGE
+#enum global META_EVOFFSET
+
+#enum global META_MAX
