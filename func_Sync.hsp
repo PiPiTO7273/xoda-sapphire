@@ -1,0 +1,22 @@
+
+#module _sync_
+
+	#deffunc SetDefaultSaveData
+		sdim AccessID@portalsync		//アクセスID
+		sdim RegName@portalsync		//名前
+		sdim RegAuth@portalsync		//認証キー
+		sdim RegBadge@portalsync		//称号
+		sdim RegCharName@portalsync	//パートナーの名前
+		dim RegCharLev@portalsync	//パートナーのレベル
+		ddim RegPfPoint@portalsync,1	//総合能力値
+		AccessID@portalsync=uuid_new()
+		RegName@portalsync="******"
+		RegAuth@portalsync=""
+		RegBadge@portalsync="******"
+		RegCharName@portalsync="******"
+		RegCharLev@portalsync=0
+		RegPfPoint@portalsync=0.0
+		 
+	return
+
+#global

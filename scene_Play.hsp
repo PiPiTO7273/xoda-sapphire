@@ -348,22 +348,32 @@
 			dim GaugeType
 			ddim curGauge,1
 			dim BGAplayflag
+			dim BGAgenflag
 			dim BGMplayflag
 			dim burstCount
 			dim AutoPlayFlag
 			ddim TotalRagMs,1
 			dim curCount
 			ddim curCount_f,1
-			AutoPlayFlag=1
+			AutoPlayFlag=0
 			burstCount=-1
 
 		if GetChartInfo(META_BGA)!"" {
 			exist getpath(chartFileName,32)+GetChartInfo(META_BGA)
 			dim hdximg_gameplaybga
 			if strsize==-1 {
-				hdximg_gameplaybga=LoadGraph("Data/general-movie-"+rnd(7)+".ogv")
+				SetDXArchiveExtension"bin"
+				if GetMovieAlias(GetChartInfo(META_BGA))!-1 {
+					hdximg_gameplaybga=LoadGraph("Data/res_movie_p/"+BGAquality@+"_m"+GetMovieAlias(GetChartInfo(META_BGA))+".ogv")
+					BGAgenflag=TRUE
+				} else {
+					hdximg_gameplaybga=LoadGraph("Data/res_movie_p/"+BGAquality@+"_m"+rnd(36)+".ogv")
+					BGAgenflag=TRUE
+				}
+				PlayMovieToGraph hdximg_gameplaybga,DX_PLAYTYPE_LOOP
 			} else {
 				hdximg_gameplaybga=LoadGraph(getpath(chartFileName,32)+GetChartInfo(META_BGA))
+				BGAgenflag=FALSE
 			}
 		}
 		if GetChartInfo(META_BGAIMAGE)!"" {
@@ -472,10 +482,13 @@
 		//”wŒi‰æ‘œ
 			setease 0,256,ease_linear
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(curCount-PreTime,1000)
+			if BGAgenflag==TRUE :SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 			if GetChartInfo(META_BGA)=="*"&GetChartInfo(META_BGAIMAGE)=="" {
 				DrawGraph 0,0,hdximg(ibg_0),FALSE
 			} else {
-				if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga,DX_PLAYTYPE_LOOP
+				if BGAgenflag==FALSE {
+					if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga,DX_PLAYTYPE_LOOP
+				}
 				DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
 			}
 			;GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
@@ -549,7 +562,7 @@
 
 		//ƒm[ƒc
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-			easeAddSpeedRes=3.6
+			easeAddSpeedRes=3.4
 			NoteHeight=32
 			repeat ObjMax
 				if ScrollSpeed!0.0&curCount>0 :ObjPosition(cnt)+(1000.0/double(FPSvalue@)*ScrollSpeed)

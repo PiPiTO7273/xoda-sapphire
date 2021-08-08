@@ -19,6 +19,16 @@
 		FPSvalue@=int(GetINIvalue(coreBuf,"Graphics","Refresh"))
 		dim VsyncFlag@
 		VsyncFlag@=ConvStrToBool(GetINIvalue(coreBuf,"Graphics","Vsync"))
+		dim BGAblurlev@
+		sdim tmpstr:tmpstr=GetINIvalue(coreBuf,"Graphics","Movie.Blur")
+		strrep tmpstr,"x",""
+		BGAblurlev@=int(tmpstr)
+		sdim BGAquality@
+		switch GetINIvalue(coreBuf,"Graphics","Movie.Quality")
+			case"high":BGAquality@="hq":swbreak
+			case"mid":BGAquality@="mq":swbreak
+			case"low":BGAquality@="lq":swbreak
+		swend
 
 	return
 
@@ -61,5 +71,16 @@
 		dim curSceneID@
 		curSceneID@=_sceneid
 	return
+
+	#defcfunc GetMovieAlias str _alias
+		sdim tmpalias_lib:dim resid
+		 tmpalias_lib(0)="hexa","wave","ring","sq3d","cub0","li3d","cve0","tri0","cyb0","cir0","synp","wav1","city","dna*","cyb1","wav2"
+		tmpalias_lib(16)="cir1","tri1","tri2","mn3d","cub1","cyb2","cyb3","glas","wav3","cyb4","tri3","ball","cve1","lght","cbci","spce"
+		tmpalias_lib(32)="cir2"
+		resid=-1
+		repeat length(tmpalias_lib)
+			if _alias==tmpalias_lib(cnt) :resid=cnt:break
+		loop
+	return resid
 
 #global

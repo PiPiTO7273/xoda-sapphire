@@ -4,6 +4,7 @@
 #include"a2d.hsp"
 #include"bass_x64.as"
 #include"hspint64.as"
+#include"uuid.hsp"
 
 #include"NameSpace.hsp"
 #include"mod_BinPkg.hsp"
