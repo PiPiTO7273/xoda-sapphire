@@ -1,35 +1,26 @@
 #ifndef __UUID__
-     #define __UUID__
-     
-     #uselib "Rpcrt4.dll"
-     #func global UuidCreate "UuidCreate" sptr
-     #func global UuidToString "UuidToStringA" sptr, sptr
-     #func global RpcStringFree "RpcStringFreeA" sptr
-     
-     #module uuid
-     
-     #defcfunc uuid_new
-     
-             sdim guid,   4+2+2+1*8
-             sdim string, 39
-             
-             result = 0
-     
-             UuidCreate   varptr(guid)
-             UuidToString varptr(guid), varptr(result)
-             
-             dupptr orig, result, 39, 2
-             
-             repeat 39
-             
-                     poke string, cnt, peek(orig, cnt)
-             
-             loop
-             
-             RpcStringFree varptr(result)
-             
-     return string
-     
-     #global
-     
+#define __UUID__
+
+#uselib "Rpcrt4.dll"
+#func global UuidCreate "UuidCreate" sptr
+#func global UuidToString "UuidToStringA" sptr, sptr
+#func global RpcStringFree "RpcStringFreeA" sptr
+
+#module uuid
+
+	#defcfunc uuid_new
+		sdim guid,   4+2+2+1*8
+		sdim string, 39
+		dim64 result
+		result = 0
+		cfunc64v UuidCreate,varptr64(guid)
+		cfunc64v UuidToString,varptr64(guid),varptr64(result)
+		repeat 39
+			poke string, cnt, peek(result, cnt)
+		loop
+		cfunc64v RpcStringFree,varptr64(result)
+	return string
+
+#global
+
 #endif

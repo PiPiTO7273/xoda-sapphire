@@ -4,7 +4,6 @@
 #include"a2d.hsp"
 #include"bass_x64.as"
 #include"hspint64.as"
-#include"uuid.hsp"
 
 #include"NameSpace.hsp"
 #include"mod_BinPkg.hsp"
@@ -24,6 +23,12 @@
 
 #packopt hide 1
 
+	sdim dir_def
+	dir_def=dir_cur
+	dialog"xct",16,"XODA-sapphire,Dropbeat•ˆ–Êƒtƒ@ƒCƒ‹"
+	tmpfilename=refstr
+	chdir dir_def
+
 	gsel 0,-1
 
 	LoadCoreSettings"core.ini"
@@ -36,7 +41,21 @@
 
 	LoadGamePlayImages
 	InitGamePlayFonts
-	OpenChartFile"Data/2598af90-4d0b-24e4-63fd-afc3ddc6038f/ctm_chaos.xct"
+	LoadPartnerIcon
+	SetDefaultSaveData
+	OpenChartFile tmpfilename
+
+	WebAPI_Init 0
+	sdim LoginUserInfo
+	LoginUserInfo(ID_HOST)="pipitosoftware.ml"
+	LoginUserInfo(ID_NAME)=GetINIvalue(coreBuf@_load_,"Auth","Name")
+	LoginUserInfo(ID_KEY)=GetINIvalue(coreBuf@_load_,"Auth","Password")
+	LoginUserInfo(ID_DECODE)=GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_0")
+	LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_1")
+	LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_2")
+	LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_3")
+	RegLoginInfo LoginUserInfo
+	WebAPI_SyncProfile
 
 	StartGameplay
 

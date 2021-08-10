@@ -73,6 +73,7 @@
 	#enum GAUGE_EXPERT
 	#enum GAUGE_MADNESS
 
+	//プレイ画面の画像リソースを読み込み
 	#deffunc LoadGamePlayImages
 		dim hdximg
 		hdximg(ibg_0)=LoadGraph("Data/bg_0.png")
@@ -111,6 +112,7 @@
 			loop
 	return
 
+	//プレイ画面で使用するフォントの初期化
 	#deffunc InitGamePlayFonts
 		InitFontToHandle
 		dim hdxfont
@@ -130,6 +132,7 @@
 		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
 	return
 
+	//譜面ファイルを開く
 	#deffunc OpenChartFile str _filename
 		sdim chartFileName
 		chartFileName=_filename
@@ -158,6 +161,7 @@
 		sdim INIline
 		sdim INIkey:sdim INIval
 
+		//オブジェクト関連の変数を初期化
 		dim objTiming
 		dim objLaneID
 		dim objType
@@ -171,22 +175,27 @@
 		ddim objBPM,1
 		dim ObjMax
 
+		//サウンドライブラリ関連の変数を初期化
 		sdim SoundDBFileName
 		dim SoundDBMax
 
+		//プレイ開始前の待機時間(ms)
 		dim PreTime
 		PreTime=3000
 
+		//BPM関連の変数を初期化
 		dim BPMTiming
 		ddim BPMValue,1
 		dim BPMpointMax
 
+		//サウンドイベント関連の変数を初期化
 		dim SndEventID
 		dim SndEventTime
 		ddim SndEventVol,1
 		dim SndEventMax
 		dim SndPlayFlag
 
+		//譜面ファイルの構文を解析
 		repeat notemax
 			noteget INIline,cnt
 			split INIline,"=",INIkey,INIval
@@ -316,11 +325,15 @@
 			ObjHitScore=10000000/ObjMax
 			dim BonusScore
 			BonusScore=10000000\ObjMax
+
+		//自己ベストデータを読み込み
 	return
 
+	//譜面ファイルのメタデータを取得
 	#defcfunc GetChartInfo int _id
 	return chartMetaInfo(_id)
 
+	//プレイ開始時の初期化処理
 	#deffunc StartGameplay
 
 		//変数初期化
@@ -357,7 +370,9 @@
 			ddim curCount_f,1
 			AutoPlayFlag=0
 			burstCount=-1
+			DispOffset=0
 
+	//BGAファイルの処理
 		if GetChartInfo(META_BGA)!"" {
 			exist getpath(chartFileName,32)+GetChartInfo(META_BGA)
 			dim hdximg_gameplaybga
@@ -381,10 +396,9 @@
 			hdximg_gameplaybga=LoadGraph(getpath(chartFileName,32)+GetChartInfo(META_BGAIMAGE))
 		}
 		stdCount=GetNowCount()
-
-		DispOffset=0
 	return
 
+	//プレイ画面の毎フレーム処理
 	#deffunc DrawGamePlay int _count
 
 		//遅延補正
@@ -781,6 +795,24 @@
 			easeScoreCount++
 			DrawStringToHandle 1618,182,"00.00",GetColor(30,30,30),hdxfont(fSQNUM16)
 
+		//プロフィール
+			//アイコン
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 20,390,hCharImg@charicon(RegCharID@portalsync),TRUE
+			//名前
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringToHandle 182,400,RegName@portalsync,GetColor(10,10,10),hdxfont(fNSCJM20)
+			//レベル
+				DrawStringToHandle 182,435,str(RegLev@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)
+			//称号
+				DrawStringToHandle 182,461,RegBadge@portalsync,GetColor(10,10,10),hdxfont(fNSCJM16)
+			//パートナーの名前
+				DrawStringToHandle 182,500,CharName@charicon(RegCharID@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)
+			//パートナーレベル
+				DrawStringToHandle 182,526,str(CharLev@charicon(RegCharID@portalsync)),GetColor(10,10,10),hdxfont(fNSCJM16)
+			//総合能力値
+				DrawStringToHandle 182,564,strf("%.3f",RegPfPoint@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)
+
 		//自動判定
 			repeat ObjMax
 				if ObjAutoFlag(cnt)==1 :continue
@@ -843,6 +875,7 @@
 			JudgeAfCnt++
 	return
 
+	//オブジェクトの判定処理
 	#deffunc ObjJudgeProg
 		ResJudge=jres_Unknown
 		if NearNoteGap(ProgLaneID)<=jWid_Miss		:ResJudge=jres_Miss		//MISS
@@ -881,7 +914,7 @@
 
 		easeScoreA=curScore
 		switch _judgeres
-			case jres_Excellent
+			case jres_Excellent		//EXCELLENT判定
 				numExcellent++
 				curCombo++
 				if curCombo>MaxCombo :MaxCombo=curCombo
@@ -893,20 +926,20 @@
 				}
 				curGauge+ObjHitGauge
 			swbreak
-			case jres_Great
+			case jres_Great		//GREAT判定
 				numGreat++
 				curCombo++
 				if curCombo>MaxCombo :MaxCombo=curCombo
 				curScore+ObjHitScore/2
 				curGauge+ObjHitGauge/2.0
 			swbreak
-			case jres_Good
+			case jres_Good			//GOOD判定
 				numGood++
 				curCombo++
 				if curCombo>MaxCombo :MaxCombo=curCombo
 				curScore+ObjHitScore/4
 			swbreak
-			case jres_Bad
+			case jres_Bad			//BAD判定
 				numBad++
 				numCombobreak++
 				curCombo=0
@@ -918,7 +951,7 @@
 					case GAUGE_MADNESS:curGauge-8.0:swbreak
 				swend
 			swbreak
-			case jres_Miss
+			case jres_Miss			//MISS判定
 				numMiss++
 				numCombobreak++
 				curCombo=0

@@ -1,6 +1,7 @@
 
 #module _Load_
 
+	//起動設定を読み込み
 	#deffunc LoadCoreSettings str _filename
 		exist _filename
 		if strsize==-1 :return -1
@@ -32,6 +33,7 @@
 
 	return
 
+	//DXライブラリを初期化
 	#deffunc InitDxlib
 		SetOutApplicationLogValidFlag 0
 		;ChangeWindowMode TRUE
@@ -49,6 +51,7 @@
 			dim bfKeyFlag@,256
 	return
 
+	//BASS Audio Libraryを初期化
 	#deffunc InitBASSlib
 		BASS_Init -1,44100,0,hwnd,0
 		if stat==0 {
@@ -56,15 +59,18 @@
 		}
 	return
 
+	//グローバル空間のグラフィックを作成
 	#deffunc LoadCoreImages
 		SetUsePremulAlphaConvertLoad TRUE
 		hdximg@(iScene)=MakeScreen(BufWidth@,BufHeight@,TRUE)
 	return
 
+	//グローバル空間の変数を初期化
 	#deffunc InitCoreSceneMan
 		dim FrameCount@
 	return
 
+	//シーンを初期化
 	#deffunc InitScene int _sceneid
 		dim SceneCount@
 		dim SceneHalfCount@
@@ -72,9 +78,10 @@
 		curSceneID@=_sceneid
 	return
 
+	//ムービーのエイリアスからIDを生成
 	#defcfunc GetMovieAlias str _alias
 		sdim tmpalias_lib:dim resid
-		 tmpalias_lib(0)="hexa","wave","ring","sq3d","cub0","li3d","cve0","tri0","cyb0","cir0","synp","wav1","city","dna*","cyb1","wav2"
+		tmpalias_lib(0)="hexa","wave","ring","sq3d","cub0","li3d","cve0","tri0","cyb0","cir0","synp","wav1","city","dna*","cyb1","wav2"
 		tmpalias_lib(16)="cir1","tri1","tri2","mn3d","cub1","cyb2","cyb3","glas","wav3","cyb4","tri3","ball","cve1","lght","cbci","spce"
 		tmpalias_lib(32)="cir2"
 		resid=-1
@@ -82,5 +89,35 @@
 			if _alias==tmpalias_lib(cnt) :resid=cnt:break
 		loop
 	return resid
+
+	//パートナーのアイコンを読み込み
+	#deffunc LoadPartnerIcon
+		exist"Data/res_char.bin"
+		if strsize==-1 {
+			return -1
+		}
+
+		dim CharMax@charicon
+		sdim CharImgPath@charicon
+		dim hCharImg@charicon
+		sdim CharName@charicon
+		sdim CharDesc@charicon
+		sdim CharSkill@charicon
+		dim CharLev@charicon
+		CharMax@charicon=int(GetINIvalue(coreBuf,"Partner","Reg.Max"))*2
+		SetDXArchiveExtension"bin"
+		repeat CharMax@charicon/2
+			CharImgPath@charicon(cnt*2)=GetINIvalue(coreBuf,"Partner","Char."+cnt+".Path")
+			hCharImg@charicon(cnt*2)=LoadGraph("Data/"+CharImgPath@charicon(cnt*2))
+			CharName@charicon(cnt*2)=GetINIvalue(coreBuf,"Partner","Char."+cnt+".Name")
+			CharDesc@charicon(cnt*2)=GetINIvalue(coreBuf,"Partner","Char."+cnt+".Desc")
+			CharSkill@charicon(cnt*2)=GetINIvalue(coreBuf,"Partner","Char."+cnt+".Skill")
+			CharImgPath@charicon(cnt*2+1)=GetINIvalue(coreBuf,"Partner","Char."+cnt+"a.Path")
+			hCharImg@charicon(cnt*2+1)=LoadGraph("Data/"+CharImgPath@charicon(cnt*2+1))
+			CharName@charicon(cnt*2+1)=GetINIvalue(coreBuf,"Partner","Char."+cnt+"a.Name")
+			CharDesc@charicon(cnt*2+1)=GetINIvalue(coreBuf,"Partner","Char."+cnt+"a.Desc")
+			CharSkill@charicon(cnt*2+1)=GetINIvalue(coreBuf,"Partner","Char."+cnt+"a.Skill")
+		loop
+	return
 
 #global

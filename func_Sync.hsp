@@ -1,22 +1,148 @@
 
 #module _sync_
 
+	//セーブデータの既定値を設定
 	#deffunc SetDefaultSaveData
 		sdim AccessID@portalsync		//アクセスID
 		sdim RegName@portalsync		//名前
+		dim RegLev@portalsync		//レベル
 		sdim RegAuth@portalsync		//認証キー
 		sdim RegBadge@portalsync		//称号
-		sdim RegCharName@portalsync	//パートナーの名前
-		dim RegCharLev@portalsync	//パートナーのレベル
+		dim RegCharID@portalsync		//パートナーのID
 		ddim RegPfPoint@portalsync,1	//総合能力値
-		AccessID@portalsync=uuid_new()
+		AccessID@portalsync="*"
 		RegName@portalsync="******"
+		RegLev@portalsync=1
 		RegAuth@portalsync=""
 		RegBadge@portalsync="******"
-		RegCharName@portalsync="******"
-		RegCharLev@portalsync=0
+		RegCharID@portalsync=0
 		RegPfPoint@portalsync=0.0
-		 
+
+		//セーブデータを読み込み
+		repeat CharMax@charicon
+			CharLev@charicon(cnt)=1
+		loop
+
+	return
+
+	//WebAPIを初期化
+	#deffunc WebAPI_Init int _windowid
+		WebAPIControl_WindowID=_windowid
+		screen _windowid,640,480,2
+		title"Portal WebAPI Control"
+		axobj IEobj,"Shell.Explorer.2"
+		sdim WebAPILogBuf
+	return
+
+	//HTTPリクエストを発行し、結果を取得
+	#defcfunc WebAPI_PostandGet str _url
+		IEobj->"Navigate" _url
+		repeat:wait:if IEobj("Busy")=0 {break}:loop	//待機
+		IEmes=IEobj("Document")
+		IEmes=IEmes("body")
+		IErawdata=IEmes("innerHTML")
+		ConvBR IErawdata
+	return IErawdata
+
+	//HTTPリクエストを発行
+	#deffunc WebAPI_Post str _url
+		IEobj->"Navigate" _url
+	return
+
+	//HTTPリクエストの結果を取得
+	#defcfunc WebAPI_Get
+		repeat:wait:if IEobj("Busy")=0 {break}:loop	//待機
+		IEmes=IEobj("Document")
+		IEmes=IEmes("body")
+		IErawdata=IEmes("innerHTML")
+		ConvBR IErawdata
+	return IErawdata
+
+	//HTMLタグの改行を変換
+	#deffunc ConvBR var _raw
+		strrep _raw,"<BR>","\n"
+		strrep _raw,"<br>","\n"
+		strrep _raw,"</br>","\n"
+	return
+
+	//ユーザー情報を登録
+	#const global ID_HOST	0
+	#const global ID_NAME	1
+	#const global ID_KEY	2
+	#const global ID_DECODE	3
+	#deffunc RegLoginInfo array _struct
+		sdim WebAPI_HostAddress
+		sdim WebAPI_DecodeKey
+		WebAPI_HostAddress=_struct(ID_HOST)
+		RegName@portalsync=_struct(ID_NAME)
+		RegAuth@portalsync=_struct(ID_KEY)
+		WebAPI_DecodeKey=_struct(ID_DECODE)
+	return
+
+	//ユーザープロファイルを取得
+	#defcfunc WebAPI_GetProfile
+		sdim WebAPI_resraw
+		WebAPI_resraw=WebAPI_PostandGet("http://"+WebAPI_HostAddress+"/API-GetProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetProfile")+"&decode="+WebAPI_DecodeKey+"&id="+RegName@portalsync+"&password="+RegAuth@portalsync)
+		switch WebAPI_resraw
+			case"ERROR_AUTH_APIKEY"
+			swbreak
+			case"ERROR_AUTH_PASSWORD"
+			swbreak
+			case"ERROR_UNKNOWN_ID"
+			swbreak
+			case"ERROR_UNKNOWN_PRM"
+			swbreak
+		swend
+	return WebAPI_resraw
+
+	//プロファイルを同期
+	#deffunc WebAPI_SyncProfile
+		sdim syncINIdata
+		syncINIdata=WebAPI_GetProfile()
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LEVEL")=="" :syncINIdata+"XODA.LEVEL=1\n"
+		RegLev@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LEVEL"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.RATE")=="" :syncINIdata+"XODA.RATE=0.0\n"
+		RegPfPoint@portalsync=double(GetINIvalue(syncINIdata,"SAVEDATA","XODA.RATE"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.BADGE")=="" :syncINIdata+"XODA.BADGE=\n"
+		RegBadge@portalsync=GetINIvalue(syncINIdata,"SAVEDATA","XODA.BADGE")
+
+	return
+
+	//スコアデータを取得
+	#enum global ID_REC_UUID		=	0
+	#enum global ID_REC_PLAYER
+	#enum global ID_REC_SCORE
+	#enum global ID_REC_EXCELLENT
+	#enum global ID_REC_GREAT
+	#enum global ID_REC_GOOD
+	#enum global ID_REC_BAD
+	#enum global ID_REC_MISS
+	#enum global ID_REC_EARLY
+	#enum global ID_REC_LATE
+	#enum global ID_REC_MAXCOMBO
+	#enum global ID_REC_PACE_BASE64
+	#enum global ID_REC_CLEARTYPE
+	#enum global ID_REC_DATE
+	#deffunc WebAPI_SyncRecord str _uuid,array _struct
+		sdim WebAPI_resraw
+		WebAPI_resraw=WebAPI_PostandGet("http://"+WebAPI_HostAddress+"/API-GetRecord.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetRecord")+"&name="+RegName@portalsync)
+		_struct(ID_REC_UUID)=GetINIvalue(WebAPI_resraw,_uuid,"ID")
+		_struct(ID_REC_PLAYER)=GetINIvalue(WebAPI_resraw,_uuid,"Name")
+		_struct(ID_REC_SCORE)=GetINIvalue(WebAPI_resraw,_uuid,"Score")
+		_struct(ID_REC_EXCELLENT)=GetINIvalue(WebAPI_resraw,_uuid,"NumExcellent")
+		_struct(ID_REC_GREAT)=GetINIvalue(WebAPI_resraw,_uuid,"NumGreat")
+		_struct(ID_REC_GOOD)=GetINIvalue(WebAPI_resraw,_uuid,"NumGood")
+		_struct(ID_REC_BAD)=GetINIvalue(WebAPI_resraw,_uuid,"NumBad")
+		_struct(ID_REC_MISS)=GetINIvalue(WebAPI_resraw,_uuid,"NumMiss")
+		_struct(ID_REC_EARLY)=GetINIvalue(WebAPI_resraw,_uuid,"NumEarly")
+		_struct(ID_REC_LATE)=GetINIvalue(WebAPI_resraw,_uuid,"NumLate")
+		_struct(ID_REC_MAXCOMBO)=GetINIvalue(WebAPI_resraw,_uuid,"MaxCombo")
+		_struct(ID_REC_PACE_BASE64)=GetINIvalue(WebAPI_resraw,_uuid,"Graph")
+		_struct(ID_REC_CLEARTYPE)=GetINIvalue(WebAPI_resraw,_uuid,"Type")
+		_struct(ID_REC_DATE)=GetINIvalue(WebAPI_resraw,_uuid,"Date")
 	return
 
 #global
