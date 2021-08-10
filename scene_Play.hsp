@@ -44,6 +44,7 @@
 	#enum fPS18
 	#enum fPS20
 	#enum fSQNUM16
+	#enum fSQNUM24
 	#enum fSQNUM40
 
 	//オブジェクトの種類
@@ -129,6 +130,7 @@
 		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
 		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
 		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
 		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
 	return
 
@@ -155,7 +157,15 @@
 		chartMetaInfo(META_BGMOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Background.Audio.Offset")
 		chartMetaInfo(META_BGAIMAGE)=GetINIvalue(chartFileBuf,"Metadata","Background.Image")
 		chartMetaInfo(META_EVOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Event.Sound.Offset")
-		if chartMetaInfo(META_BGA)=="" :chartMetaInfo(META_BGA)="general-movie-*.ogv"
+
+		//UUID取り出し
+			sdim tmpstr:tmpstr=chartFileName:strrep tmpstr,"\\","/"
+			split tmpstr,"/",tmpstr
+			chartMetaInfo(META_UUID)=tmpstr(length(tmpstr)-2)
+
+		//汎用ムービーのパス指定
+			if chartMetaInfo(META_BGA)=="" :chartMetaInfo(META_BGA)="general-movie-*.ogv"
+			if BGAquality@=="*" :chartMetaInfo(META_BGA)="*"
 
 		notesel chartFileBuf
 		sdim INIline
@@ -327,6 +337,8 @@
 			BonusScore=10000000\ObjMax
 
 		//自己ベストデータを読み込み
+			sdim MybestRecordBuf
+			WebAPI_SyncRecord GetChartInfo(META_UUID),MybestRecordBuf
 	return
 
 	//譜面ファイルのメタデータを取得
@@ -505,14 +517,16 @@
 				}
 				DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
 			}
-			;GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+			if BGAblurlev@!0 {
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800*BGAblurlev@
+			}
 
 		//BGM
 			if int(GetChartInfo(META_BGMOFFSET))<curCount-PreTime&BGMplayflag==FALSE :BGMplayflag=TRUE:cfunc64v BASS_ChannelPlay,hSndBGM
 
 		//レーン
 			//x4
-				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),780,64,1140,864,780,64,DX_GRAPH_FILTER_GAUSS,32,6400
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),780,64,1140,864,780,64,DX_GRAPH_FILTER_GAUSS,32,6400*BGAblurlev@
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,100
 				DrawBox 780,64,1140,864,GetColor(255,255,255),TRUE
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
@@ -520,13 +534,13 @@
 					DrawBox 780+90*cnt,64,780+90*(cnt+1),864,GetColor(0,0,0),FALSE
 				loop
 			//side(l)
-				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),662,64,772,864,662,64,DX_GRAPH_FILTER_GAUSS,32,6400
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),662,64,772,864,662,64,DX_GRAPH_FILTER_GAUSS,32,6400*BGAblurlev@
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,100
 				DrawBox 662,64,772,864,GetColor(255,255,255),TRUE
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
 				DrawBox 662,64,772,864,GetColor(0,0,0),FALSE
 			//side(r)
-				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),1148,64,1258,864,1148,64,DX_GRAPH_FILTER_GAUSS,32,6400
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),1148,64,1258,864,1148,64,DX_GRAPH_FILTER_GAUSS,32,6400*BGAblurlev@
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,100
 				DrawBox 1148,64,1258,864,GetColor(255,255,255),TRUE
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
@@ -696,6 +710,18 @@
 		//下部パネル
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 0,874,hdximg(ibg_bottom),TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			//平均オフセット
+				DrawStringToHandle 396,909,"+0",GetColor(255,255,255),hdxfont(fSQNUM24)
+			//スコアランク
+				DrawStringToHandle 436,974,"AAA+",GetColor(255,255,255),hdxfont(fSQNUM24)
+			//最大コンボ
+				DrawStringToHandle 1596,909,"0000",GetColor(255,255,255),hdxfont(fSQNUM24)
+			//ノーツの速度
+				;DrawStringToHandle 1556,974,"1.00",GetColor(255,255,255),hdxfont(fSQNUM24)
+				ddim curFPS,1
+				curFPS=double(cfunc64(RET_FLOAT,GetFPS))
+				DrawStringToHandle 1556,974,str(curFPS),GetColor(255,255,255),hdxfont(fSQNUM24)
 
 		//左パネル
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256

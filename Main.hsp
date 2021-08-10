@@ -39,23 +39,24 @@
 	InitScene ID_PLAY
 	randomize
 
+	//セーブデータ同期
+		SetDefaultSaveData
+		WebAPI_Init 0
+		sdim LoginUserInfo
+		LoginUserInfo(ID_HOST)="pipitosoftware.ml"
+		LoginUserInfo(ID_NAME)=GetINIvalue(coreBuf@_load_,"Auth","Name")
+		LoginUserInfo(ID_KEY)=GetINIvalue(coreBuf@_load_,"Auth","Password")
+		LoginUserInfo(ID_DECODE)=GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_0")
+		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_1")
+		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_2")
+		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_3")
+		RegLoginInfo LoginUserInfo
+		WebAPI_SyncProfile
+
 	LoadGamePlayImages
 	InitGamePlayFonts
 	LoadPartnerIcon
-	SetDefaultSaveData
 	OpenChartFile tmpfilename
-
-	WebAPI_Init 0
-	sdim LoginUserInfo
-	LoginUserInfo(ID_HOST)="pipitosoftware.ml"
-	LoginUserInfo(ID_NAME)=GetINIvalue(coreBuf@_load_,"Auth","Name")
-	LoginUserInfo(ID_KEY)=GetINIvalue(coreBuf@_load_,"Auth","Password")
-	LoginUserInfo(ID_DECODE)=GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_0")
-	LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_1")
-	LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_2")
-	LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_3")
-	RegLoginInfo LoginUserInfo
-	WebAPI_SyncProfile
 
 	StartGameplay
 

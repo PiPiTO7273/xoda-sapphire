@@ -29,6 +29,7 @@
 			case"high":BGAquality@="hq":swbreak
 			case"mid":BGAquality@="mq":swbreak
 			case"low":BGAquality@="lq":swbreak
+			case"disable":BGAquality@="*":swbreak
 		swend
 
 	return
@@ -39,7 +40,7 @@
 		;ChangeWindowMode TRUE
 		SetGraphMode DispWidth@,DispHeight@,32
 		SetAlwaysRunFlag TRUE
-		SetWaitVSyncFlag TRUE;VsyncFlag@
+		SetWaitVSyncFlag FALSE;VsyncFlag@
 		SetMainWindowText"XODA SAPPHIRE"
 		dxlib_Init
 		if stat==-1 {
