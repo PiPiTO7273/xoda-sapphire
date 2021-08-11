@@ -126,23 +126,25 @@
 	#enum global ID_REC_PACE_BASE64
 	#enum global ID_REC_CLEARTYPE
 	#enum global ID_REC_DATE
+	#enum global ID_REC_AP
 	#deffunc WebAPI_SyncRecord str _uuid,array _struct
 		sdim WebAPI_resraw
 		WebAPI_resraw=WebAPI_PostandGet("http://"+WebAPI_HostAddress+"/API-GetRecord.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetRecord")+"&name="+RegName@portalsync)
-		_struct(ID_REC_UUID)=GetINIvalue(WebAPI_resraw,_uuid,"ID")
-		_struct(ID_REC_PLAYER)=GetINIvalue(WebAPI_resraw,_uuid,"Name")
-		_struct(ID_REC_SCORE)=GetINIvalue(WebAPI_resraw,_uuid,"Score")
-		_struct(ID_REC_EXCELLENT)=GetINIvalue(WebAPI_resraw,_uuid,"NumExcellent")
-		_struct(ID_REC_GREAT)=GetINIvalue(WebAPI_resraw,_uuid,"NumGreat")
-		_struct(ID_REC_GOOD)=GetINIvalue(WebAPI_resraw,_uuid,"NumGood")
-		_struct(ID_REC_BAD)=GetINIvalue(WebAPI_resraw,_uuid,"NumBad")
-		_struct(ID_REC_MISS)=GetINIvalue(WebAPI_resraw,_uuid,"NumMiss")
-		_struct(ID_REC_EARLY)=GetINIvalue(WebAPI_resraw,_uuid,"NumEarly")
-		_struct(ID_REC_LATE)=GetINIvalue(WebAPI_resraw,_uuid,"NumLate")
-		_struct(ID_REC_MAXCOMBO)=GetINIvalue(WebAPI_resraw,_uuid,"MaxCombo")
-		_struct(ID_REC_PACE_BASE64)=GetINIvalue(WebAPI_resraw,_uuid,"Graph")
-		_struct(ID_REC_CLEARTYPE)=GetINIvalue(WebAPI_resraw,_uuid,"Type")
-		_struct(ID_REC_DATE)=GetINIvalue(WebAPI_resraw,_uuid,"Date")
+		_struct(ID_REC_UUID)=GetINIvalue(WebAPI_resraw,_uuid,"ID")				//識別子
+		_struct(ID_REC_PLAYER)=GetINIvalue(WebAPI_resraw,_uuid,"Name")			//プレイヤー名
+		_struct(ID_REC_SCORE)=GetINIvalue(WebAPI_resraw,_uuid,"Score")			//スコア(10000000点満点)
+		_struct(ID_REC_EXCELLENT)=GetINIvalue(WebAPI_resraw,_uuid,"NumExcellent")	//EXCELLENT数
+		_struct(ID_REC_GREAT)=GetINIvalue(WebAPI_resraw,_uuid,"NumGreat")		//GREAT数
+		_struct(ID_REC_GOOD)=GetINIvalue(WebAPI_resraw,_uuid,"NumGood")			//GOOD数
+		_struct(ID_REC_BAD)=GetINIvalue(WebAPI_resraw,_uuid,"NumBad")			//BAD数
+		_struct(ID_REC_MISS)=GetINIvalue(WebAPI_resraw,_uuid,"NumMiss")			//MISS数
+		_struct(ID_REC_EARLY)=GetINIvalue(WebAPI_resraw,_uuid,"NumEarly")		//EARLY判定数
+		_struct(ID_REC_LATE)=GetINIvalue(WebAPI_resraw,_uuid,"NumLate")			//LATE判定数
+		_struct(ID_REC_MAXCOMBO)=GetINIvalue(WebAPI_resraw,_uuid,"MaxCombo")		//最大コンボ数
+		_struct(ID_REC_PACE_BASE64)=GetINIvalue(WebAPI_resraw,_uuid,"Graph")		//グラフ(base64処理済み)
+		_struct(ID_REC_CLEARTYPE)=GetINIvalue(WebAPI_resraw,_uuid,"Type")		//クリアの種類
+		_struct(ID_REC_DATE)=GetINIvalue(WebAPI_resraw,_uuid,"Date")			//日時
+		_struct(ID_REC_AP)=GetINIvalue(WebAPI_resraw,_uuid,"Ability")			//能力値
 	return
 
 #global

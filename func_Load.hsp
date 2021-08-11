@@ -40,7 +40,7 @@
 		;ChangeWindowMode TRUE
 		SetGraphMode DispWidth@,DispHeight@,32
 		SetAlwaysRunFlag TRUE
-		SetWaitVSyncFlag FALSE;VsyncFlag@
+		SetWaitVSyncFlag VsyncFlag@
 		SetMainWindowText"XODA SAPPHIRE"
 		dxlib_Init
 		if stat==-1 {
@@ -50,6 +50,10 @@
 		//変数初期化
 			dim KeyFlag@,256
 			dim bfKeyFlag@,256
+			dim CursorImgCount@
+			dim CursorHideCount@
+			dim bfCursorPosX@:dim bfCursorPosY@
+			dim CursorPosX@:dim CursorPosY@
 	return
 
 	//BASS Audio Libraryを初期化
@@ -63,7 +67,12 @@
 	//グローバル空間のグラフィックを作成
 	#deffunc LoadCoreImages
 		SetUsePremulAlphaConvertLoad TRUE
+		SetDXArchiveExtension"bin"
 		hdximg@(iScene)=MakeScreen(BufWidth@,BufHeight@,TRUE)
+		dim hdximg_arr_cursor@,58
+		repeat 58
+			hdximg_arr_cursor@(cnt)=LoadGraph("Data/res_cursor/"+cnt+".png")
+		loop
 	return
 
 	//グローバル空間の変数を初期化

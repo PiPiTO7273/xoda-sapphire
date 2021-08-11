@@ -3,6 +3,7 @@
 #enum iScene		=	0
 #enum iBlur
 #enum iConsole
+#enum iCursor
 
 //ƒV[ƒ“ID
 #enum ID_BOOT		=	0

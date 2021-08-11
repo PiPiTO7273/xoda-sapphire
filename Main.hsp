@@ -77,11 +77,34 @@
 
 	SetDrawScreen DX_SCREEN_BACK
 	ClearDrawScreen
-	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-	DrawExtendGraph 0,0,DispWidth@,DispHeight@,hdximg(iScene),TRUE
+
+	//シーン
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawExtendGraph 0,0,DispWidth@,DispHeight@,hdximg(iScene),TRUE
+
+	//マウスカーソル
+		cfunc64v GetMousePoint,varptr64(CursorPosX@),varptr64(CursorPosY@)
+		if CursorHideCount@>FPSvalue@*2 {
+			setease 256,0,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(CursorHideCount@-FPSvalue@*2,FPSvalue@/4)
+		} else {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		}
+		DrawGraph CursorPosX@-32,CursorPosY@-32,hdximg_arr_cursor@(CursorImgCount@),TRUE
+
+		if bfCursorPosX@!CursorPosX@|bfCursorPosY@!CursorPosY@ {
+			CursorHideCount@=0
+		}
+		bfCursorPosX@=CursorPosX@:bfCursorPosY@=CursorPosY@
+
+	SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+	DrawString 16,16,"FPS="+double(curFPS@),GetColor(0,255,0)
 
 	FrameCount++
 	repeat 256:bfKeyFlag(cnt)=KeyFlag(cnt):loop
+	CursorImgCount@++
+	CursorHideCount@++
+	if CursorImgCount@>57 :CursorImgCount@=0
 
 	ScreenFlip
 

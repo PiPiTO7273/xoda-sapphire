@@ -380,7 +380,7 @@
 			ddim TotalRagMs,1
 			dim curCount
 			ddim curCount_f,1
-			AutoPlayFlag=0
+			AutoPlayFlag=1
 			burstCount=-1
 			DispOffset=0
 
@@ -412,6 +412,14 @@
 
 	//プレイ画面の毎フレーム処理
 	#deffunc DrawGamePlay int _count
+
+		//垂直同期が無効の場合のFPS補正
+			ddim curFPS@,1
+			curFPS@=double(cfunc64(RET_FLOAT,GetFPS))
+			if VsyncFlag@==FALSE {
+				FPSvalue@=int(curFPS@)
+				if FPSvalue@==0 :FPSvalue@=1000
+			}
 
 		//遅延補正
 			TotalRagMs+double(curCount)-curCount_f
@@ -526,7 +534,7 @@
 
 		//レーン
 			//x4
-				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),780,64,1140,864,780,64,DX_GRAPH_FILTER_GAUSS,32,6400*BGAblurlev@
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),780,64,1140,864,780,64,DX_GRAPH_FILTER_GAUSS,32,6400
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,100
 				DrawBox 780,64,1140,864,GetColor(255,255,255),TRUE
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
@@ -534,13 +542,13 @@
 					DrawBox 780+90*cnt,64,780+90*(cnt+1),864,GetColor(0,0,0),FALSE
 				loop
 			//side(l)
-				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),662,64,772,864,662,64,DX_GRAPH_FILTER_GAUSS,32,6400*BGAblurlev@
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),662,64,772,864,662,64,DX_GRAPH_FILTER_GAUSS,32,6400
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,100
 				DrawBox 662,64,772,864,GetColor(255,255,255),TRUE
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
 				DrawBox 662,64,772,864,GetColor(0,0,0),FALSE
 			//side(r)
-				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),1148,64,1258,864,1148,64,DX_GRAPH_FILTER_GAUSS,32,6400*BGAblurlev@
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),1148,64,1258,864,1148,64,DX_GRAPH_FILTER_GAUSS,32,6400
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,100
 				DrawBox 1148,64,1258,864,GetColor(255,255,255),TRUE
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
@@ -718,14 +726,15 @@
 			//最大コンボ
 				DrawStringToHandle 1596,909,"0000",GetColor(255,255,255),hdxfont(fSQNUM24)
 			//ノーツの速度
-				;DrawStringToHandle 1556,974,"1.00",GetColor(255,255,255),hdxfont(fSQNUM24)
-				ddim curFPS,1
-				curFPS=double(cfunc64(RET_FLOAT,GetFPS))
-				DrawStringToHandle 1556,974,str(curFPS),GetColor(255,255,255),hdxfont(fSQNUM24)
+				DrawStringToHandle 1556,974,"1.00",GetColor(255,255,255),hdxfont(fSQNUM24)
 
 		//左パネル
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 0,380,hdximg(ibg_playerdata),TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			//自己ベストスコア
+				DrawStringToHandle 140,652,strf("%08d",MybestRecordBuf(ID_REC_SCORE)),GetColor(0,0,0),hdxfont(fSQNUM24)
+				DrawStringToHandle 140,686,"S+ , 能力値:"+strf("%.2f",MybestRecordBuf(ID_REC_AP)),GetColor(0,0,0),hdxfont(fNSCJM12)
 
 		//キー
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
