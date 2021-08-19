@@ -29,6 +29,10 @@
 	#enum ieff_particle_6
 	#enum ieff_particle_7
 	#enum ieff_bonus_combo
+	#enum igraph_current
+	#enum igraph_trainer
+	#enum igraph_best
+	#enum igraph_target
 
 	//DXライブラリフォントハンドル(gameplay)
 	#enum fEOEXB16			=	0
@@ -98,6 +102,10 @@
 			hdximg(ieff_particle_0+cnt)=LoadGraph("Data/effect_Particle_"+cnt+".png")
 		loop
 		hdximg(ieff_bonus_combo)=LoadGraph("Data/bonus_Combo.png")
+		hdximg(igraph_current)=LoadGraph("Data/graph_current.png")
+		hdximg(igraph_trainer)=LoadGraph("Data/graph_trainer.png")
+		hdximg(igraph_best)=LoadGraph("Data/graph_best.png")
+		hdximg(igraph_target)=LoadGraph("Data/graph_target.png")
 
 		dim hdximg_arr_bomb,10
 		cfunc64v LoadDivGraph,"Data/effect_bomb.png",10,5,2,192,192,varptr64(hdximg_arr_bomb)
@@ -339,6 +347,24 @@
 		//自己ベストデータを読み込み
 			sdim MybestRecordBuf
 			WebAPI_SyncRecord GetChartInfo(META_UUID),MybestRecordBuf
+
+		//スコアグラフ生成
+			dim graphCurrent_score
+			dim graphTrainer_score
+			dim graphBest_score
+			dim graphTarget_score
+			dim graphCapture_objid
+			sdim graphBest_Decode,4*ObjMax
+			DecodeBase64 graphBest_Decode,MybestRecordBuf(ID_REC_PACE_BASE64)
+			memexpand graphBest_Decode,4*ObjMax
+			//-----debug----
+			graphTrainer_level=0.80	//理論値のn％のスコア
+			graphTarget_level=0.90	//理論値のn％のスコア
+			repeat ObjMax
+				graphTrainer_score(cnt)=int(double(ObjHitScore*cnt)*graphTrainer_level)+BonusScore
+				graphBest_score(cnt)=lpeek(graphBest_Decode,4*cnt)
+				graphTarget_score(cnt)=int(double(ObjHitScore*cnt)*graphTarget_level)+BonusScore
+			loop
 	return
 
 	//譜面ファイルのメタデータを取得
@@ -380,7 +406,7 @@
 			ddim TotalRagMs,1
 			dim curCount
 			ddim curCount_f,1
-			AutoPlayFlag=1
+			AutoPlayFlag=0
 			burstCount=-1
 			DispOffset=0
 
@@ -461,7 +487,6 @@
 					loop
 					//キーサウンドを割り当て
 					KeyAssignID(ProgLaneID)=NearNoteID(ProgLaneID)
-
 					//判定から除外
 					if NearNoteGap(ProgLaneID)>jWid_Miss :NearNoteID(ProgLaneID)=-1
 				loop
@@ -820,6 +845,26 @@
 		//スコアグラフ
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 1500,240,hdximg(ibg_scoregraph),TRUE
+			//現在のスコア
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,50
+			DrawExtendGraph 1553,740-int(double(10000000-(ObjHitScore*graphCapture_objid+BonusScore-curScore))/10000000.0*400.0),1553+80,740,hdximg(igraph_current),FALSE
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawExtendGraph 1553,740-int(double(curScore)/10000000.0*400.0),1553+80,740,hdximg(igraph_current),FALSE
+			//トレーナー
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,50
+			DrawExtendGraph 1666,740-int(double(10000000.0*graphTrainer_level)/10000000.0*400.0),1666+50,740,hdximg(igraph_trainer),FALSE
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawExtendGraph 1666,740-int(double(graphTrainer_score(graphCapture_objid))/10000000.0*400.0),1666+50,740,hdximg(igraph_trainer),FALSE
+			//自己ベスト
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,50
+			DrawExtendGraph 1732,740-int(double(MybestRecordBuf(ID_REC_SCORE))/10000000.0*400.0),1732+50,740,hdximg(igraph_best),FALSE
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawExtendGraph 1732,740-int(double(graphBest_score(graphCapture_objid))/10000000.0*400.0),1732+50,740,hdximg(igraph_best),FALSE
+			//目標スコア
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,50
+			DrawExtendGraph 1798,740-int(double(10000000.0*graphTarget_level)/10000000.0*400.0),1798+50,740,hdximg(igraph_target),FALSE
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawExtendGraph 1798,740-int(double(graphTarget_score(graphCapture_objid))/10000000.0*400.0),1798+50,740,hdximg(igraph_target),FALSE
 
 		//スコア
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
@@ -905,6 +950,11 @@
 					SndPlayFlag(cnt)=1
 				}
 			loop
+
+		//グラフのキャプチャーIDを取得
+		repeat objmax
+			if objtiming(cnt)<curcount :graphcapture_objid=cnt
+		loop
 
 		//カウンタ
 			JudgeAfCnt++

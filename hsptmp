@@ -1,0 +1,15 @@
+newcom objVBsc,"ScriptControl"
+		objVBsc("Language")="VBScript"
+		sdim VBscript_body:sdim VBscript_res
+		VBscript_body={"
+		Function httpget(s):Dim whr:Set whr=CreateObject("WinHttp.WinHttpRequest.5.1"):whr.Open "GET",s,false:whr.Send:httpget=whr.ResponseText:End Function:Function httppost(s,p):Dim whr:Set whr=CreateObject("WinHttp.WinHttpRequest.5.1"):whr.Open "POST",s,false:whr.Send p:httppost=whr.ResponseText:End Function
+		"}
+		objVBsc->"AddCode" VBscript_body
+		comres VBscript_res
+		objVBsc->"Run" "httpget","https://httpbin.org/get?id=1";"http://google.co.jp/search?q=1234";"http://pipitosoftware.ml/API-GetProfile.php?key=AZkVb7yHsZudHyXJNgh68j8GWpQMdaDA&id=devuser&password=password&decode=bqjEPAQh1ZmiQpFbXLbtVBdR8p1z0yF6IkZHJO74UfvfCX2hhoDr8zaAEmvAKb0fls4kcIoqKMwWnUhAqI5EzDpDyvy2PyXCPeaF1N5JlH3AxUXPeHRxeE8j1BNE9mo0"
+		sdim AsciiCode_LF:poke AsciiCode_LF,0,10
+		sdim AsciiCode_CR:poke AsciiCode_CR,0,13
+		strrep VBscript_res,AsciiCode_LF,""
+		strrep VBscript_res,AsciiCode_CR,""
+		strrep VBscript_res,"</br>","\n"
+		dialog vbscript_res

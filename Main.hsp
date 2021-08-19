@@ -8,6 +8,7 @@
 #include"NameSpace.hsp"
 #include"mod_BinPkg.hsp"
 #include"mod_dxlibplus.hsp"
+#include"mod_base64.hsp"
 #include"func_Default.hsp"
 #include"func_Load.hsp"
 #include"func_Sync.hsp"
@@ -41,7 +42,7 @@
 
 	//セーブデータ同期
 		SetDefaultSaveData
-		WebAPI_Init 0
+		WebAPI_Init
 		sdim LoginUserInfo
 		LoginUserInfo(ID_HOST)="pipitosoftware.ml"
 		LoginUserInfo(ID_NAME)=GetINIvalue(coreBuf@_load_,"Auth","Name")

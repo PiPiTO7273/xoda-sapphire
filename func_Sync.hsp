@@ -26,44 +26,36 @@
 	return
 
 	//WebAPIを初期化
-	#deffunc WebAPI_Init int _windowid
-		WebAPIControl_WindowID=_windowid
-		screen _windowid,640,480,2
-		title"Portal WebAPI Control"
-		axobj IEobj,"Shell.Explorer.2"
-		sdim WebAPILogBuf
+	#deffunc WebAPI_Init
+		newcom objVBsc,"ScriptControl"
+		objVBsc("Language")="VBScript"
+		sdim VBscript_body:sdim VBscript_res
+		VBscript_body={"
+			Function httpget(s):Dim whr:Set whr=CreateObject("WinHttp.WinHttpRequest.5.1"):whr.Open "GET",s,false:whr.Send:httpget=whr.ResponseText:End Function:Function httppost(s,p):Dim whr:Set whr=CreateObject("WinHttp.WinHttpRequest.5.1"):whr.Open "POST",s,false:whr.Send p:httppost=whr.ResponseText:End Function
+		"}
+		objVBsc->"AddCode" VBscript_body
+		comres VBscript_res
 	return
 
-	//HTTPリクエストを発行し、結果を取得
-	#defcfunc WebAPI_PostandGet str _url
-		IEobj->"Navigate" _url
-		repeat:wait:if IEobj("Busy")=0 {break}:loop	//待機
-		IEmes=IEobj("Document")
-		IEmes=IEmes("body")
-		IErawdata=IEmes("innerHTML")
-		ConvBR IErawdata
-	return IErawdata
+	//HTTPリクエストを発行し、結果を取得(get)
+	#defcfunc WebAPI_Get str _url
+		objVBsc->"Run" "httpget",_url
+		sdim AsciiCode_LF:poke AsciiCode_LF,0,10
+		sdim AsciiCode_CR:poke AsciiCode_CR,0,13
+		strrep VBscript_res,AsciiCode_LF,""
+		strrep VBscript_res,AsciiCode_CR,""
+		strrep VBscript_res,"</br>","\n"
+	return VBscript_res
 
-	//HTTPリクエストを発行
-	#deffunc WebAPI_Post str _url
-		IEobj->"Navigate" _url
-	return
-
-	//HTTPリクエストの結果を取得
-	#defcfunc WebAPI_Get
-		repeat:wait:if IEobj("Busy")=0 {break}:loop	//待機
-		IEmes=IEobj("Document")
-		IEmes=IEmes("body")
-		IErawdata=IEmes("innerHTML")
-		ConvBR IErawdata
-	return IErawdata
-
-	//HTMLタグの改行を変換
-	#deffunc ConvBR var _raw
-		strrep _raw,"<BR>","\n"
-		strrep _raw,"<br>","\n"
-		strrep _raw,"</br>","\n"
-	return
+	//HTTPリクエストを発行し、結果を取得(post)
+	#defcfunc WebAPI_Post str _url,str _prm
+		objVBsc->"Run" "httppost",_url,_prm
+		sdim AsciiCode_LF:poke AsciiCode_LF,0,10
+		sdim AsciiCode_CR:poke AsciiCode_CR,0,13
+		strrep VBscript_res,AsciiCode_LF,""
+		strrep VBscript_res,AsciiCode_CR,""
+		strrep VBscript_res,"</br>","\n"
+	return VBscript_res
 
 	//ユーザー情報を登録
 	#const global ID_HOST	0
@@ -82,7 +74,7 @@
 	//ユーザープロファイルを取得
 	#defcfunc WebAPI_GetProfile
 		sdim WebAPI_resraw
-		WebAPI_resraw=WebAPI_PostandGet("http://"+WebAPI_HostAddress+"/API-GetProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetProfile")+"&decode="+WebAPI_DecodeKey+"&id="+RegName@portalsync+"&password="+RegAuth@portalsync)
+		WebAPI_resraw=WebAPI_Get("http://"+WebAPI_HostAddress+"/API-GetProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetProfile")+"&decode="+WebAPI_DecodeKey+"&id="+RegName@portalsync+"&password="+RegAuth@portalsync)
 		switch WebAPI_resraw
 			case"ERROR_AUTH_APIKEY"
 			swbreak
@@ -129,7 +121,7 @@
 	#enum global ID_REC_AP
 	#deffunc WebAPI_SyncRecord str _uuid,array _struct
 		sdim WebAPI_resraw
-		WebAPI_resraw=WebAPI_PostandGet("http://"+WebAPI_HostAddress+"/API-GetRecord.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetRecord")+"&name="+RegName@portalsync)
+		WebAPI_resraw=WebAPI_Get("http://"+WebAPI_HostAddress+"/API-GetRecord.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetRecord")+"&name="+RegName@portalsync)
 		_struct(ID_REC_UUID)=GetINIvalue(WebAPI_resraw,_uuid,"ID")				//識別子
 		_struct(ID_REC_PLAYER)=GetINIvalue(WebAPI_resraw,_uuid,"Name")			//プレイヤー名
 		_struct(ID_REC_SCORE)=GetINIvalue(WebAPI_resraw,_uuid,"Score")			//スコア(10000000点満点)
