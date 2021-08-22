@@ -406,7 +406,7 @@
 			ddim TotalRagMs,1
 			dim curCount
 			ddim curCount_f,1
-			AutoPlayFlag=0
+			AutoPlayFlag=1
 			burstCount=-1
 			DispOffset=0
 
