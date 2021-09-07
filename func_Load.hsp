@@ -37,6 +37,7 @@
 	//DXライブラリを初期化
 	#deffunc InitDxlib
 		SetOutApplicationLogValidFlag 0
+		SetUseDirectDrawDeviceIndex 1
 		;ChangeWindowMode TRUE
 		SetGraphMode DispWidth@,DispHeight@,32
 		SetAlwaysRunFlag TRUE

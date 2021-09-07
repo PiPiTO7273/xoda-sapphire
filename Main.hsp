@@ -33,6 +33,10 @@
 	gsel 0,-1
 
 	LoadCoreSettings"core.ini"
+	if GetINIvalue(coreBuf@_load_,"Hash","core")!hash_core {
+		dialog"err"
+		goto*exit
+	}
 	InitDxlib
 	InitBASSlib
 	LoadCoreImages
@@ -71,6 +75,7 @@
 
 	SetDrawScreen hdximg(iScene)
 	ClearDrawScreen
+	SetDrawMode DX_DRAWMODE_BILINEAR
 
 	switch curSceneID
 		case ID_PLAY:DrawGamePlay FrameCount:swbreak
@@ -98,8 +103,10 @@
 		}
 		bfCursorPosX@=CursorPosX@:bfCursorPosY@=CursorPosY@
 
-	SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-	DrawString 16,16,"FPS="+double(curFPS@),GetColor(0,255,0)
+	DrawDebugString 0,0,"XODA Sapphire @debug"
+	DrawDebugString 0,1,"HD "+BufWidth@+"x"+BufHeight@+" -> "+DispWidth@+"x"+DispHeight@
+	DrawDebugString 0,2,"Server : "+LoginUserInfo(ID_HOST)+" @\""+LoginUserInfo(ID_NAME)+"\" & \""+LoginUserInfo(ID_KEY)+"\""
+	DrawDebugString 0,4,"FPS="+double(curFPS@)
 
 	FrameCount++
 	repeat 256:bfKeyFlag(cnt)=KeyFlag(cnt):loop

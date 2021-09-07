@@ -1,0 +1,11 @@
+
+#module _Layer_
+
+	#deffunc DrawDebugString int posx,int posy,str msg
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,200
+		DrawBox LogCharOffsetX+posx*LogChargridWidth,LogCharOffsetY+posy*LogChargridHeight,LogCharOffsetX+posx*LogChargridWidth+strlen(msg)*LogCharbgWidth,LogCharOffsetY+posy*LogChargridHeight+LogCharbgHeight,GetColor(0,0,0),TRUE
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawString LogCharOffsetX+posx*LogChargridWidth,LogCharOffsetY+posy*LogChargridHeight,msg,GetColor(255,255,255)
+	return
+
+#global

@@ -33,6 +33,7 @@
 	#enum igraph_trainer
 	#enum igraph_best
 	#enum igraph_target
+	#enum icursor_Seek
 
 	//DXライブラリフォントハンドル(gameplay)
 	#enum fEOEXB16			=	0
@@ -106,6 +107,7 @@
 		hdximg(igraph_trainer)=LoadGraph("Data/graph_trainer.png")
 		hdximg(igraph_best)=LoadGraph("Data/graph_best.png")
 		hdximg(igraph_target)=LoadGraph("Data/graph_target.png")
+		hdximg(icursor_Seek)=LoadGraph("Data/cursor_Seek.png")
 
 		dim hdximg_arr_bomb,10
 		cfunc64v LoadDivGraph,"Data/effect_bomb.png",10,5,2,192,192,varptr64(hdximg_arr_bomb)
@@ -332,9 +334,12 @@
 
 		//BGM
 			if GetChartInfo(META_BGM)!"" {
+				exist getpath(chartFileName,32)+GetChartInfo(META_BGM)
+				sdim hBGMbuf,strsize
+				bload getpath(chartFileName,32)+GetChartInfo(META_BGM),hBGMbuf
 				dim64 hSndBGM:dim64 hsmpSndBGM
-				hsmpSndBGM=cfunc64(RET_INT64,BASS_SampleLoad,FALSE,getpath(chartFileName,32)+GetChartInfo(META_BGM),0,0,32,0)
-				if hsmpSndBGM==0 :logmes""+SoundDBFileName(hLoadCnt)+"\nError Code : "+BASS_ErrorGetCode()
+				hsmpSndBGM=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(hBGMbuf),0,varsize(hBGMbuf),32,0)
+				;dialog cfunc64(RET_INT64,BASS_ErrorGetCode)
 				hSndBGM=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndBGM,TRUE)
 			}
 
@@ -360,6 +365,7 @@
 			//-----debug----
 			graphTrainer_level=0.80	//理論値のn％のスコア
 			graphTarget_level=0.90	//理論値のn％のスコア
+			graphTarget_Desc="S+ランクのスコア"
 			repeat ObjMax
 				graphTrainer_score(cnt)=int(double(ObjHitScore*cnt)*graphTrainer_level)+BonusScore
 				graphBest_score(cnt)=lpeek(graphBest_Decode,4*cnt)
@@ -406,9 +412,13 @@
 			ddim TotalRagMs,1
 			dim curCount
 			ddim curCount_f,1
-			AutoPlayFlag=1
+			dim avgOffset_time
+			dim avgOffset_prm
+			sdim curScoreRank
+			AutoPlayFlag=0
 			burstCount=-1
 			DispOffset=0
+			JudgeOffset=-20
 
 	//BGAファイルの処理
 		if GetChartInfo(META_BGA)!"" {
@@ -488,7 +498,9 @@
 					//キーサウンドを割り当て
 					KeyAssignID(ProgLaneID)=NearNoteID(ProgLaneID)
 					//判定から除外
-					if NearNoteGap(ProgLaneID)>jWid_Miss :NearNoteID(ProgLaneID)=-1
+					if NearNoteGap(ProgLaneID)>jWid_Miss {
+						NearNoteID(ProgLaneID)=-1
+					}
 				loop
 
 			repeat 6
@@ -546,12 +558,12 @@
 				DrawGraph 0,0,hdximg(ibg_0),FALSE
 			} else {
 				if BGAgenflag==FALSE {
-					if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga,DX_PLAYTYPE_LOOP
+					if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga
 				}
 				DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
 			}
 			if BGAblurlev@!0 {
-				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800*BGAblurlev@
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,100*BGAblurlev@
 			}
 
 		//BGM
@@ -745,13 +757,39 @@
 			DrawGraph 0,874,hdximg(ibg_bottom),TRUE
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 			//平均オフセット
-				DrawStringToHandle 396,909,"+0",GetColor(255,255,255),hdxfont(fSQNUM24)
+				DrawStringToHandle 396,909,str(avgOffset_time/limit(avgOffset_prm,1)),GetColor(255,255,255),hdxfont(fSQNUM24)
 			//スコアランク
-				DrawStringToHandle 436,974,"AAA+",GetColor(255,255,255),hdxfont(fSQNUM24)
+				dim TheoScore:ddim ScoreRate,1
+				TheoScore=ObjHitScore*graphcapture_objid
+				if graphcapture_objid!0 :TheoScore+BonusScore
+				if TheoScore==0 :ScoreRate=100.0:else:ScoreRate=double(curScore)/double(TheoScore)*100.0
+				if ScoreRate>=0.0 :curScoreRank="F"
+				if ScoreRate>5.0 :curScoreRank="F+"
+				if ScoreRate>10.0 :curScoreRank="E"
+				if ScoreRate>15.0 :curScoreRank="E+"
+				if ScoreRate>20.0 :curScoreRank="D"
+				if ScoreRate>25.0 :curScoreRank="D+"
+				if ScoreRate>30.0 :curScoreRank="C"
+				if ScoreRate>35.0 :curScoreRank="C+"
+				if ScoreRate>40.0 :curScoreRank="B"
+				if ScoreRate>45.0 :curScoreRank="B+"
+				if ScoreRate>50.0 :curScoreRank="A"
+				if ScoreRate>55.0 :curScoreRank="A+"
+				if ScoreRate>60.0 :curScoreRank="AA"
+				if ScoreRate>65.0 :curScoreRank="AA+"
+				if ScoreRate>70.0 :curScoreRank="AAA"
+				if ScoreRate>75.0 :curScoreRank="AAA+"
+				if ScoreRate>80.0 :curScoreRank="S"
+				if ScoreRate>83.3 :curScoreRank="SS"
+				if ScoreRate>86.6 :curScoreRank="SSS"
+				if ScoreRate>90.0 :curScoreRank="EX"
+				if ScoreRate>95.0 :curScoreRank="EX+"
+				if ScoreRate==100.0 :curScoreRank="MAX"
+				DrawStringToHandle 436,974,curScoreRank,GetColor(255,255,255),hdxfont(fSQNUM24)
 			//最大コンボ
-				DrawStringToHandle 1596,909,"0000",GetColor(255,255,255),hdxfont(fSQNUM24)
+				DrawStringToHandle 1596,909,strf("%04d",MaxCombo),GetColor(255,255,255),hdxfont(fSQNUM24)
 			//ノーツの速度
-				DrawStringToHandle 1556,974,"1.00",GetColor(255,255,255),hdxfont(fSQNUM24)
+				DrawStringToHandle 1556,974,strf("%.2f",easeAddSpeedRes),GetColor(255,255,255),hdxfont(fSQNUM24)
 
 		//左パネル
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
@@ -760,6 +798,21 @@
 			//自己ベストスコア
 				DrawStringToHandle 140,652,strf("%08d",MybestRecordBuf(ID_REC_SCORE)),GetColor(0,0,0),hdxfont(fSQNUM24)
 				DrawStringToHandle 140,686,"S+ , 能力値:"+strf("%.2f",MybestRecordBuf(ID_REC_AP)),GetColor(0,0,0),hdxfont(fNSCJM12)
+			//目標スコア
+				DrawStringToHandle 140,752,strf("%08d",int(10000000.0*graphTarget_level)),GetColor(0,0,0),hdxfont(fSQNUM24)
+				DrawStringToHandle 140,786,graphTarget_Desc,GetColor(0,0,0),hdxfont(fNSCJM12)
+			//差分表示（自己ベスト）
+				sdim tmpstr
+				if curScore-graphBest_score(graphCapture_objid)>=0 :tmpstr="+":else:tmpstr="-"
+				tmpstr+str(curScore-graphBest_score(graphCapture_objid))
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringXCenterToHandle 376,661,tmpstr,130,GetColor(10,10,10),hdxfont(fPS20)
+			//差分表示（目標スコア）
+				sdim tmpstr
+				if curScore-graphTarget_score(graphCapture_objid)>=0 :tmpstr="+":else:tmpstr="-"
+				tmpstr+str(curScore-graphTarget_score(graphCapture_objid))
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringXCenterToHandle 376,768,tmpstr,130,GetColor(10,10,10),hdxfont(fPS20)
 
 		//キー
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
@@ -790,10 +843,17 @@
 			DrawStringToHandle 40,183,GetChartInfo(META_ARTIST),GetColor(30,30,30),hdxfont(fNSCJM20)
 			DrawStringToHandle 40,222,GetChartInfo(META_SOURCE),GetColor(50,50,50),hdxfont(fNSCJM16)
 			DrawStringToHandle 40,311,GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL),GetColor(240,240,240),hdxfont(fEOEXB20)
+			//位置
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				dim ChartSeekPos
+				ChartSeekPos=limit(int(double(curCount)/double(ObjTiming(ObjMax-1))*400.0),0,400)
+				DrawBox 40,280,40+ChartSeekPos,280+4,$2BB7E4,TRUE
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 40+ChartSeekPos-8,264,hdximg(icursor_Seek),TRUE
 
 		//ステータス
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,GetColor(50,50,50),TRUE
+			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
 			DrawStringToHandle 24,1048,"XODA SAPPHIRE",GetColor(230,230,230),hdxfont(fPS20)
 			DrawStringToHandle 220,1052,"Now playing "+GetChartInfo(META_ARTIST)+" - "+GetChartInfo(META_TITLE)+" ["+GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL)+"]",GetColor(210,210,210),hdxfont(fPS14)
 
@@ -986,6 +1046,8 @@
 					judgeSign=1
 					numLate++
 				}
+				avgOffset_time+((curCount+JudgeOffset)-ObjTiming(NearNoteID(ProgLaneID)))
+				avgOffset_prm++
 			}
 		}
 	
