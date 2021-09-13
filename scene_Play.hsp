@@ -34,6 +34,18 @@
 	#enum igraph_best
 	#enum igraph_target
 	#enum icursor_Seek
+	#enum igauge_assist
+	#enum igauge_assist_clear
+	#enum igauge_normal
+	#enum igauge_normal_clear
+	#enum igauge_expert
+	#enum igauge_madness
+	#enum igauge_empty
+	#enum igauge_value
+	#enum istg_clear
+	#enum istg_fullcombo
+	#enum istg_allex
+	#enum istg_failed
 
 	//DXライブラリフォントハンドル(gameplay)
 	#enum fEOEXB16			=	0
@@ -81,6 +93,7 @@
 
 	//プレイ画面の画像リソースを読み込み
 	#deffunc LoadGamePlayImages
+		SetDXArchiveExtension"bin"
 		dim hdximg
 		hdximg(ibg_0)=LoadGraph("Data/bg_0.png")
 		hdximg(ibg_top)=LoadGraph("Data/bg_Top.png")
@@ -93,14 +106,14 @@
 		hdximg(ichip_key_active)=LoadGraph("Data/chip_key_active.png")
 		hdximg(inote_0)=LoadGraph("Data/note_0.png")
 		hdximg(ihold_org_0)=LoadGraph("Data/note_hold_0.png")
-		hdximg(ijudge_excellent)=LoadGraph("Data/judge_excellent.png")
-		hdximg(ijudge_great)=LoadGraph("Data/judge_great.png")
-		hdximg(ijudge_good)=LoadGraph("Data/judge_good.png")
-		hdximg(ijudge_bad)=LoadGraph("Data/judge_bad.png")
-		hdximg(ijudge_miss)=LoadGraph("Data/judge_miss.png")
+		hdximg(ijudge_excellent)=LoadGraph("Data/res_judge/judge_excellent.png")
+		hdximg(ijudge_great)=LoadGraph("Data/res_judge/judge_great.png")
+		hdximg(ijudge_good)=LoadGraph("Data/res_judge/judge_good.png")
+		hdximg(ijudge_bad)=LoadGraph("Data/res_judge/judge_bad.png")
+		hdximg(ijudge_miss)=LoadGraph("Data/res_judge/judge_miss.png")
 		hdximg(ieff_lane)=LoadGraph("Data/effect_lane.png")
 		repeat 8
-			hdximg(ieff_particle_0+cnt)=LoadGraph("Data/effect_Particle_"+cnt+".png")
+			hdximg(ieff_particle_0+cnt)=LoadGraph("Data/res_effect_particle/effect_Particle_"+cnt+".png")
 		loop
 		hdximg(ieff_bonus_combo)=LoadGraph("Data/bonus_Combo.png")
 		hdximg(igraph_current)=LoadGraph("Data/graph_current.png")
@@ -108,6 +121,18 @@
 		hdximg(igraph_best)=LoadGraph("Data/graph_best.png")
 		hdximg(igraph_target)=LoadGraph("Data/graph_target.png")
 		hdximg(icursor_Seek)=LoadGraph("Data/cursor_Seek.png")
+		hdximg(igauge_assist)=LoadGraph("Data/res_gauge/gauge_assist.png")
+		hdximg(igauge_assist_clear)=LoadGraph("Data/res_gauge/gauge_assist_clear.png")
+		hdximg(igauge_normal)=LoadGraph("Data/res_gauge/gauge_normal.png")
+		hdximg(igauge_normal_clear)=LoadGraph("Data/res_gauge/gauge_normal_clear.png")
+		hdximg(igauge_expert)=LoadGraph("Data/res_gauge/gauge_expert.png")
+		hdximg(igauge_madness)=LoadGraph("Data/res_gauge/gauge_madness.png")
+		hdximg(igauge_empty)=LoadGraph("Data/res_gauge/gauge_empty.png")
+		hdximg(igauge_value)=LoadGraph("Data/res_gauge/gauge_value.png")
+		hdximg(istg_clear)=LoadGraph("Data/res_stg/stg_Clear.ogv")
+		hdximg(istg_fullcombo)=LoadGraph("Data/res_stg/stg_FullCombo.ogv")
+		hdximg(istg_allex)=LoadGraph("Data/res_stg/stg_AllEx.ogv")
+		hdximg(istg_failed)=LoadGraph("Data/res_stg/stg_Failed.ogv")
 
 		dim hdximg_arr_bomb,10
 		cfunc64v LoadDivGraph,"Data/effect_bomb.png",10,5,2,192,192,varptr64(hdximg_arr_bomb)
@@ -339,7 +364,6 @@
 				bload getpath(chartFileName,32)+GetChartInfo(META_BGM),hBGMbuf
 				dim64 hSndBGM:dim64 hsmpSndBGM
 				hsmpSndBGM=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(hBGMbuf),0,varsize(hBGMbuf),32,0)
-				;dialog cfunc64(RET_INT64,BASS_ErrorGetCode)
 				hSndBGM=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndBGM,TRUE)
 			}
 
@@ -348,6 +372,19 @@
 			ObjHitScore=10000000/ObjMax
 			dim BonusScore
 			BonusScore=10000000\ObjMax
+		
+		//ゲージの増加量を計算
+			ddim TotalGauge,1:ddim ObjHitGauge,1
+			if ObjMax<400 {
+				TotalGauge=double(ObjMax)*0.3+80.0
+			}
+			if ObjMax<=400&ObjMax<550 {
+				TotalGauge=double(ObjMax)*0.3+30.0
+			}
+			if ObjMax>=550 {
+				TotalGauge=double(ObjMax)*0.2+100.0
+			}
+			ObjHitGauge=TotalGauge/double(ObjMax)
 
 		//自己ベストデータを読み込み
 			sdim MybestRecordBuf
@@ -370,7 +407,13 @@
 				graphTrainer_score(cnt)=int(double(ObjHitScore*cnt)*graphTrainer_level)+BonusScore
 				graphBest_score(cnt)=lpeek(graphBest_Decode,4*cnt)
 				graphTarget_score(cnt)=int(double(ObjHitScore*cnt)*graphTarget_level)+BonusScore
+				if cnt==0 :graphTrainer_score(cnt)-BonusScore:graphTarget_score(cnt)-BonusScore
 			loop
+
+		//ゲージ記録用のキャプチャー地点
+			dim gaugeCapture_flag,350
+			dim gaugeCapture_value,350
+
 	return
 
 	//譜面ファイルのメタデータを取得
@@ -415,10 +458,15 @@
 			dim avgOffset_time
 			dim avgOffset_prm
 			sdim curScoreRank
-			AutoPlayFlag=0
+			dim FinishFlag
+			dim FinishCount
+			AutoPlayFlag=1
 			burstCount=-1
 			DispOffset=0
 			JudgeOffset=-20
+			GaugeType=GAUGE_EXPERT
+
+			if GaugeType==GAUGE_EXPERT|GaugeType==GAUGE_MADNESS :curGauge=100.0
 
 	//BGAファイルの処理
 		if GetChartInfo(META_BGA)!"" {
@@ -447,15 +495,7 @@
 	return
 
 	//プレイ画面の毎フレーム処理
-	#deffunc DrawGamePlay int _count
-
-		//垂直同期が無効の場合のFPS補正
-			ddim curFPS@,1
-			curFPS@=double(cfunc64(RET_FLOAT,GetFPS))
-			if VsyncFlag@==FALSE {
-				FPSvalue@=int(curFPS@)
-				if FPSvalue@==0 :FPSvalue@=1000
-			}
+	#deffunc DrawGamePlay
 
 		//遅延補正
 			TotalRagMs+double(curCount)-curCount_f
@@ -477,34 +517,36 @@
 			KeybtJudge(0,5)=bfKeyFlag@(KEY_INPUT_L)
 			KeybtJudge(1,5)=KeyFlag@(KEY_INPUT_L)
 
-			//一番近いノーツIDとその時間差を算出
-				repeat 6
-					NearNoteID(cnt)=-1
-					NearNoteGap(cnt)=-1
-					ProgLaneID=cnt
-					repeat ObjMax
-						if ObjJudgeFlag(cnt)==1 :continue
-						if ObjLaneID(cnt)!ProgLaneID :continue
-						if NearNoteGap(ProgLaneID)==-1 {
+		//一番近いノーツIDとその時間差を算出
+			repeat 6
+				NearNoteID(cnt)=-1
+				NearNoteGap(cnt)=-1
+				ProgLaneID=cnt
+				repeat ObjMax
+					if ObjJudgeFlag(cnt)==1 :continue
+					if ObjLaneID(cnt)!ProgLaneID :continue
+					if NearNoteGap(ProgLaneID)==-1 {
+						NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset-ObjTiming(cnt))
+						NearNoteID(ProgLaneID)=cnt
+					} else {
+						if NearNoteGap(ProgLaneID)>abs(curCount+JudgeOffset-ObjTiming(cnt)) {
 							NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset-ObjTiming(cnt))
 							NearNoteID(ProgLaneID)=cnt
-						} else {
-							if NearNoteGap(ProgLaneID)>abs(curCount+JudgeOffset-ObjTiming(cnt)) {
-								NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset-ObjTiming(cnt))
-								NearNoteID(ProgLaneID)=cnt
-							}
 						}
-					loop
-					//キーサウンドを割り当て
-					KeyAssignID(ProgLaneID)=NearNoteID(ProgLaneID)
-					//判定から除外
-					if NearNoteGap(ProgLaneID)>jWid_Miss {
-						NearNoteID(ProgLaneID)=-1
 					}
 				loop
+				//キーサウンドを割り当て
+				KeyAssignID(ProgLaneID)=NearNoteID(ProgLaneID)
+				//判定から除外
+				if NearNoteGap(ProgLaneID)>jWid_Miss {
+					NearNoteID(ProgLaneID)=-1
+				}
+			loop
 
+		//判定処理
 			repeat 6
 				ProgLaneID=cnt
+				if FinishFlag==TRUE :break	//終了済みなら判定をスキップ
 				if KeybtJudge(0,ProgLaneID)==0&KeybtJudge(1,ProgLaneID)==1 {
 					VisualBData(0)++
 					//レーンエフェクトの演出設定をリセット
@@ -614,14 +656,14 @@
 						if cnt==0 :DrawGraph 662,64,hdximg(ieff_lane),TRUE
 						if cnt==5 :DrawGraph 1148,64,hdximg(ieff_lane),TRUE
 					} else {
-						if cnt\2!0&frameCount>40 {
+						if cnt\2!0&FrameCount@>40 {
 							DrawGraph 780+(cnt-1)*90,64,hdximg(ieff_lane),TRUE
 						} else {
 							DrawGraph 780+(cnt-1)*90,64,hdximg(ieff_lane),TRUE
 						}
 					}
 
-				LaneEffCount(cnt)++
+				AddCount LaneEffCount(cnt)
 			loop
 
 		//スクロール速度
@@ -734,7 +776,7 @@
 			if burstCount!-1 {
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				DrawGraph 960-384/2,625-384/2,hdximg_arr_burst(burstCount),TRUE
-				if judgeAfCnt\2==0 :burstCount++
+				if judgeAfCnt\2==0 :AddCount burstCount
 				if burstCount>15 :burstCount=-1
 			}
 
@@ -763,28 +805,7 @@
 				TheoScore=ObjHitScore*graphcapture_objid
 				if graphcapture_objid!0 :TheoScore+BonusScore
 				if TheoScore==0 :ScoreRate=100.0:else:ScoreRate=double(curScore)/double(TheoScore)*100.0
-				if ScoreRate>=0.0 :curScoreRank="F"
-				if ScoreRate>5.0 :curScoreRank="F+"
-				if ScoreRate>10.0 :curScoreRank="E"
-				if ScoreRate>15.0 :curScoreRank="E+"
-				if ScoreRate>20.0 :curScoreRank="D"
-				if ScoreRate>25.0 :curScoreRank="D+"
-				if ScoreRate>30.0 :curScoreRank="C"
-				if ScoreRate>35.0 :curScoreRank="C+"
-				if ScoreRate>40.0 :curScoreRank="B"
-				if ScoreRate>45.0 :curScoreRank="B+"
-				if ScoreRate>50.0 :curScoreRank="A"
-				if ScoreRate>55.0 :curScoreRank="A+"
-				if ScoreRate>60.0 :curScoreRank="AA"
-				if ScoreRate>65.0 :curScoreRank="AA+"
-				if ScoreRate>70.0 :curScoreRank="AAA"
-				if ScoreRate>75.0 :curScoreRank="AAA+"
-				if ScoreRate>80.0 :curScoreRank="S"
-				if ScoreRate>83.3 :curScoreRank="SS"
-				if ScoreRate>86.6 :curScoreRank="SSS"
-				if ScoreRate>90.0 :curScoreRank="EX"
-				if ScoreRate>95.0 :curScoreRank="EX+"
-				if ScoreRate==100.0 :curScoreRank="MAX"
+				curScoreRank=GetScoreRank(ScoreRate)
 				DrawStringToHandle 436,974,curScoreRank,GetColor(255,255,255),hdxfont(fSQNUM24)
 			//最大コンボ
 				DrawStringToHandle 1596,909,strf("%04d",MaxCombo),GetColor(255,255,255),hdxfont(fSQNUM24)
@@ -804,13 +825,13 @@
 			//差分表示（自己ベスト）
 				sdim tmpstr
 				if curScore-graphBest_score(graphCapture_objid)>=0 :tmpstr="+":else:tmpstr="-"
-				tmpstr+str(curScore-graphBest_score(graphCapture_objid))
+				tmpstr+str(abs(curScore-graphBest_score(graphCapture_objid)))
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 				DrawStringXCenterToHandle 376,661,tmpstr,130,GetColor(10,10,10),hdxfont(fPS20)
 			//差分表示（目標スコア）
 				sdim tmpstr
 				if curScore-graphTarget_score(graphCapture_objid)>=0 :tmpstr="+":else:tmpstr="-"
-				tmpstr+str(curScore-graphTarget_score(graphCapture_objid))
+				tmpstr+str(abs(curScore-graphTarget_score(graphCapture_objid)))
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 				DrawStringXCenterToHandle 376,768,tmpstr,130,GetColor(10,10,10),hdxfont(fPS20)
 
@@ -847,6 +868,24 @@
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 				dim ChartSeekPos
 				ChartSeekPos=limit(int(double(curCount)/double(ObjTiming(ObjMax-1))*400.0),0,400)
+
+				//プレイの終了判定
+					if ChartSeekPos==400&FinishFlag==FALSE :FinishFlag=TRUE
+					//終了時のムービー
+						if FinishFlag==TRUE&FinishCount==0 {
+							dim hFinishMovie:hFinishMovie=hdximg(istg_failed)
+							if GaugeType==GAUGE_ASSIST|GaugeType==GAUGE_NORMAL {	//通常ゲージ（加点方式）
+								if curGauge>70.0 :hFinishMovie=hdximg(istg_clear)
+							} else {
+								if curGauge>0.0 :hFinishMovie=hdximg(istg_clear)	//ハードゲージ（減点方式）
+							}
+							if numBad==0&numMiss==0 :hFinishMovie=hdximg(istg_fullcombo)	//フルコンボ
+							if numGreat==0&numGood==0&numBad==0&numMiss==0 :hFinishMovie=hdximg(istg_allex)		//ALL EXCELLENT
+
+							//再生開始
+							PlayMovieToGraph hFinishMovie
+						}
+					if FinishFlag==TRUE :AddCount FinishCount
 				DrawBox 40,280,40+ChartSeekPos,280+4,$2BB7E4,TRUE
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				DrawGraph 40+ChartSeekPos-8,264,hdximg(icursor_Seek),TRUE
@@ -861,6 +900,7 @@
 			repeat 6
 				if LaneBombFlag(cnt)==1 {
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					LaneBombCount(cnt)=limit(LaneBombCount(cnt),0,9)
 					if cnt==0|cnt==5 {
 						if cnt==0 :DrawGraph 662+110/2-192/2,864-192/2,hdximg_arr_bomb(LaneBombCount(cnt)),TRUE
 						if cnt==5 :DrawGraph 1148+110/2-192/2,864-192/2,hdximg_arr_bomb(LaneBombCount(cnt)),TRUE
@@ -868,7 +908,7 @@
 						DrawGraph 780+90*(cnt-1)+90/2-192/2,846-192/2,hdximg_arr_bomb(LaneBombCount(cnt)),TRUE
 					}
 					if LaneBombCount(cnt)>=9 :LaneBombFlag(cnt)=0:LaneBombCount(cnt)=0:else{
-						if judgeAfCnt\2==0:LaneBombCount(cnt)++
+						if judgeAfCnt\2==0:AddCount LaneBombCount(cnt)
 					}
 				}
 				if ParticleEffFlag(cnt)==1 {
@@ -883,7 +923,7 @@
 					if cnt==5 :EasePosX=1148+110/2-EaseWidth/2
 					EasePosY=864-EaseHeight/2
 					DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ieff_particle_0+ParticleEffImg(cnt)),TRUE
-					if ParticleEffCount(cnt)>25 :ParticleEffFlag(cnt)=0:else:ParticleEffCount(cnt)++
+					if ParticleEffCount(cnt)>25 :ParticleEffFlag(cnt)=0:else:AddCount ParticleEffCount(cnt)
 				}
 			loop
 
@@ -898,7 +938,7 @@
 				}
 				setease 32,0,ease_cubic_out
 				DrawGraph 780,450+getease(bonusDispCount,15),bonusDispImg,TRUE
-				bonusDispCount++
+				AddCount bonusDispCount
 				if bonusDispCount>15+FPSvalue@*2+15 :bonusDispCount=-1
 			}
 
@@ -932,7 +972,7 @@
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 			setease easeScoreA,easeScoreB,ease_linear
 			DrawStringToHandle 1580,124,strf("%08d",getease(easeScoreCount,FPSvalue@/2)),GetColor(0,0,0),hdxfont(fSQNUM40)
-			easeScoreCount++
+			AddCount easeScoreCount
 			DrawStringToHandle 1618,182,"00.00",GetColor(30,30,30),hdxfont(fSQNUM16)
 
 		//プロフィール
@@ -952,6 +992,56 @@
 				DrawStringToHandle 182,526,str(CharLev@charicon(RegCharID@portalsync)),GetColor(10,10,10),hdxfont(fNSCJM16)
 			//総合能力値
 				DrawStringToHandle 182,564,strf("%.3f",RegPfPoint@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)
+
+		//ゲージ
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 600,300,hdximg(igauge_empty),TRUE
+			switch GaugeType
+				case GAUGE_ASSIST
+					if curGauge>70.0 {
+						DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_assist_clear),TRUE,FALSE
+					} else {
+						DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_assist),TRUE,FALSE
+					}
+				swbreak
+				case GAUGE_NORMAL
+					if curGauge>70.0 {
+						DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_normal_clear),TRUE,FALSE
+					} else {
+						DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_normal),TRUE,FALSE
+					}
+				swbreak
+				case GAUGE_EXPERT
+					DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_expert),TRUE,FALSE
+				swbreak
+				case GAUGE_MADNESS
+					DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_madness),TRUE,FALSE
+				swbreak
+			swend
+			DrawGraph 528,300+500-int(curGauge)*5-16,hdximg(igauge_value),TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawStringXCenterToHandle 528,300+500-int(curGauge)*5-9,""+str(int(curGauge))+"%",64,GetColor(255,255,255),hdxfont(fPS16)
+
+		//終了時のムービー
+			if FinishFlag==TRUE {
+				setease 0,200,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(FinishCount,10)
+				DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ADD,256
+				DrawGraph BufWidth@/2-1280/2,BufHeight@/2-720/2,hFinishMovie,TRUE
+			}
+
+		//暗転
+			if SceneCount<30+1 {
+				setease 256,0,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,30)
+				DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
+			}
+			if FinishFlag==TRUE {
+				setease 0,256,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(FinishCount-60*3,30)
+				DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
+			}
 
 		//自動判定
 			repeat ObjMax
@@ -1012,12 +1102,21 @@
 			loop
 
 		//グラフのキャプチャーIDを取得
-		repeat objmax
-			if objtiming(cnt)<curcount :graphcapture_objid=cnt
-		loop
+			repeat objmax
+				if objtiming(cnt)<curcount :graphcapture_objid=cnt
+			loop
+
+		//ゲージのキャプチャー
+			repeat 350
+				if curcount>objtiming(ObjMax-1)/350*cnt&gaugeCapture_flag(cnt)==FALSE {
+					gaugeCapture_value(cnt)=int(curGauge)
+					gaugeCapture_flag(cnt)=TRUE
+				}
+			loop
 
 		//カウンタ
-			JudgeAfCnt++
+			AddCount JudgeAfCnt
+			AddCount SceneCount
 	return
 
 	//オブジェクトの判定処理
@@ -1115,6 +1214,7 @@
 		easeScoreCount=0
 		if curGauge>=100.0 :curGauge=100.0
 		if curGauge<0.0 :curGauge=0.0
+		if (GaugeType==GAUGE_EXPERT|GaugeType==GAUGE_MADNESS)&curGauge==0.0 :FinishFlag=TRUE
 
 		//バースト発動条件
 			if curCombo!0 {

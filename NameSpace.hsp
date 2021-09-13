@@ -8,6 +8,7 @@
 //ƒV[ƒ“ID
 #enum ID_BOOT		=	0
 #enum ID_PLAY
+#enum ID_MUSICSELECT
 
 //•ˆ–Êî•ñ‚Ì¯•Êq
 #enum global META_TITLE	=	0

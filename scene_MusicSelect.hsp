@@ -1,0 +1,417 @@
+
+#module _MusicSelect_
+
+	//DXライブラリグラフィック(musicselect)
+	#enum ibg		=	0
+	#enum iwindow_category
+	#enum iwindow_songs
+	#enum ifolder_all
+	#enum ifolder_rank_ex
+	#enum ifolder_rank_s
+	#enum ifolder_rank_aaa
+	#enum ifolder_rank_aa
+	#enum ifolder_rank_a
+	#enum ifolder_rank_b
+	#enum ifolder_rank_c
+	#enum ifolder_allex
+	#enum ifolder_fullcombo
+	#enum ifolder_madness
+	#enum ifolder_expert
+	#enum ifolder_normal
+	#enum ifolder_assist
+	#enum ibg_window
+	#enum inav
+	#enum ibg_item
+	#enum icursor_category
+	#enum icursor_list
+	#enum ibg_meta
+	#enum ibg_detail
+	#enum ilayer_nodata
+
+	//BASS Audio Libraryサンプル、チャンネルハンドル(musicselect)
+	#enum bgmMain	=	0
+
+	//DXライブラリフォントハンドル(musicselect)
+	#enum fEOEXB16			=	0
+	#enum fEOEXB20
+	#enum fFAB50
+	#enum fNSCJM12
+	#enum fNSCJM15
+	#enum fNSCJM16
+	#enum fNSCJM20
+	#enum fNSCJM24
+	#enum fNSCJM32
+	#enum fPS14
+	#enum fPS16
+	#enum fPS18
+	#enum fPS20
+	#enum fSQNUM16
+	#enum fSQNUM24
+	#enum fSQNUM40
+
+	//ホイール対応ウィンドウ
+	#enum ID_CATEGORY	=	0
+	#enum ID_SONGS
+
+	//判定データの識別ID
+	#enum ID_DATA_EXCELLENT	=	0
+	#enum ID_DATA_GREAT
+	#enum ID_DATA_GOOD
+	#enum ID_DATA_BAD
+	#enum ID_DATA_MISS
+	#enum ID_DATA_EARLY
+	#enum ID_DATA_LATE
+	#enum ID_DATA_RATIO
+
+	//個数
+	#const NUM_ITEM_CATEGORY		14
+
+	#deffunc LoadMusicSelectImages
+		dim hdximg
+		SetDXArchiveExtension"bin"
+		hdximg(ibg)=LoadGraph("Data/bg_Main.ogv")
+		hdximg(ifolder_all)=LoadGraph("Data/res_musicselect_item/category_all.png")
+		hdximg(ifolder_rank_ex)=LoadGraph("Data/res_musicselect_item/category_rank_ex.png")
+		hdximg(ifolder_rank_s)=LoadGraph("Data/res_musicselect_item/category_rank_s.png")
+		hdximg(ifolder_rank_aaa)=LoadGraph("Data/res_musicselect_item/category_rank_aaa.png")
+		hdximg(ifolder_rank_aa)=LoadGraph("Data/res_musicselect_item/category_rank_aa.png")
+		hdximg(ifolder_rank_a)=LoadGraph("Data/res_musicselect_item/category_rank_a.png")
+		hdximg(ifolder_rank_b)=LoadGraph("Data/res_musicselect_item/category_rank_b.png")
+		hdximg(ifolder_rank_c)=LoadGraph("Data/res_musicselect_item/category_rank_c.png")
+		hdximg(ifolder_allex)=LoadGraph("Data/res_musicselect_item/category_allex.png")
+		hdximg(ifolder_fullcombo)=LoadGraph("Data/res_musicselect_item/category_fullcombo.png")
+		hdximg(ifolder_madness)=LoadGraph("Data/res_musicselect_item/category_madness.png")
+		hdximg(ifolder_expert)=LoadGraph("Data/res_musicselect_item/category_expert.png")
+		hdximg(ifolder_normal)=LoadGraph("Data/res_musicselect_item/category_normal.png")
+		hdximg(ifolder_assist)=LoadGraph("Data/res_musicselect_item/category_assist.png")
+		hdximg(ibg_window)=LoadGraph("Data/bg_musicselect_window.png")
+		hdximg(inav)=LoadGraph("Data/Nav_MusicSelect.png")
+		hdximg(ibg_item)=LoadGraph("Data/res_musicselect_item/bg_item.png")
+		hdximg(icursor_category)=LoadGraph("Data/cursor_musicselect_category.png")
+		hdximg(icursor_list)=LoadGraph("Data/cursor_musicselect_list.png")
+		hdximg(ibg_meta)=LoadGraph("Data/bg_musicselect_metadata.png")
+		hdximg(ibg_detail)=LoadGraph("Data/bg_musicselect_detail.png")
+		hdximg(ilayer_nodata)=LoadGraph("Data/layer_musicselect_nodata.png")
+
+		hdximg(iwindow_category)=MakeScreen(450,811,TRUE)
+		hdximg(iwindow_songs)=MakeScreen(700,811,TRUE)
+	return
+
+	#deffunc LoadMusicSelectSounds
+		dim64 hbasssample:dim64 hbasschannel
+		exist"Data/bgm_MusicSelect.ogg"
+		sdim hbassbin,strsize
+		bload"Data/bgm_MusicSelect.ogg",hbassbin
+		hbasssample(bgmMain)=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(hbassbin),0,varsize(hbassbin),32,0)
+		hbasschannel(bgmMain)=cfunc64(RET_INT64,BASS_SampleGetChannel,hbasssample(bgmMain),BASS_SAMPLE_LOOP)
+	return
+
+	//曲選択画面で使用するフォントの初期化
+	#deffunc InitMusicSelectFonts
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
+		hdxfont(fEOEXB20)=LoadFontDataToHandle("Data/eoexb20.bin")
+		hdxfont(fFAB50)=LoadFontDataToHandle("Data/fab50.bin")
+		hdxfont(fNSCJM12)=LoadFontDataToHandle("Data/nscjm12.bin")
+		hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
+		hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
+		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		hdxfont(fNSCJM24)=LoadFontDataToHandle("Data/nscjm24.bin")
+		hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
+		hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
+		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
+		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
+		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
+		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
+	return
+
+	//ライブラリをスキャン
+	#deffunc ScanAllPlaylist
+		dim numitem:sdim itemuuid
+
+		numitem=int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))	//項目数
+
+		//変数初期化
+		sdim plitem_Title,64,numitem,3
+		sdim plitem_Artist,64,numitem,3
+		sdim plitem_Source,64,numitem,3
+		sdim plitem_UUID,32,numitem,3
+		sdim plitem_Path,64,numitem,3
+		dim plitem_mybest_score,numitem,3
+		sdim plitem_mybest_rank,4,numitem,3
+		sdim plitem_mybest_rate,5,numitem,3
+		sdim plitem_mybest_cleartype,16,numitem,3
+		dim plitem_mybest_judge,numitem,3,7
+		sdim plitem_mybest_ratio,8,numitem,3
+		sdim plitem_mybest_gauge,350,numitem,3
+
+		//解析
+		repeat numitem
+			sdim tmpstr:tmpstr=GetINIvalue(coreBuf@_load_,"Playlist","ID."+cnt)
+			split tmpstr,",",plitem_UUID(cnt,0),plitem_UUID(cnt,1),plitem_UUID(cnt,2)
+			dim plitemid:plitemid=cnt
+			repeat 3
+				plitem_Path(plitemid,cnt)="Data/"+plitem_UUID(plitemid,cnt)+"/"+cnt+".bin"
+				//譜面ファイルの存在を確認
+				exist plitem_Path(plitemid,cnt)
+				if strsize!-1 {
+					//メタデータ取得
+					sdim tmpstr,strsize:bload plitem_Path(plitemid,cnt),tmpstr
+					plitem_Title(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Title")
+					plitem_Artist(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Artist")
+					plitem_Source(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Source")
+
+					//IR取得
+					sdim IRsyncstruct
+					WebAPI_SyncRecord plitem_UUID(plitemid,cnt),IRsyncstruct
+					plitem_mybest_score(plitemid,cnt)=int(IRsyncstruct(ID_REC_SCORE))
+					plitem_mybest_rank(plitemid,cnt)=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
+					plitem_mybest_rate(plitemid,cnt)=strf("%.1f",double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)+"%"
+					plitem_mybest_cleartype(plitemid,cnt)=IRsyncstruct(ID_REC_CLEARTYPE)
+					plitem_mybest_judge(plitemid,cnt,ID_DATA_EXCELLENT)=int(IRsyncstruct(ID_REC_EXCELLENT))
+					plitem_mybest_judge(plitemid,cnt,ID_DATA_GREAT)=int(IRsyncstruct(ID_REC_GREAT))
+					plitem_mybest_judge(plitemid,cnt,ID_DATA_GOOD)=int(IRsyncstruct(ID_REC_GOOD))
+					plitem_mybest_judge(plitemid,cnt,ID_DATA_BAD)=int(IRsyncstruct(ID_REC_BAD))
+					plitem_mybest_judge(plitemid,cnt,ID_DATA_MISS)=int(IRsyncstruct(ID_REC_MISS))
+					plitem_mybest_judge(plitemid,cnt,ID_DATA_EARLY)=int(IRsyncstruct(ID_REC_EARLY))
+					plitem_mybest_judge(plitemid,cnt,ID_DATA_LATE)=int(IRsyncstruct(ID_REC_LATE))
+					dim tmpint:tmpint=limit(int(IRsyncstruct(ID_REC_EARLY))+int(IRsyncstruct(ID_REC_LATE)),1)
+					plitem_mybest_ratio(plitemid,cnt)=strf("%.1f",double(IRsyncstruct(ID_REC_EARLY))/double(tmpint))+"% / "
+					plitem_mybest_ratio(plitemid,cnt)+strf("%.1f",double(IRsyncstruct(ID_REC_LATE))/double(tmpint))+"%"
+					if IRsyncstruct(ID_REC_PACE_BASE64)=="" {
+						poke plitem_mybest_gauge(plitemid,cnt),0,255
+					} else {
+						DecodeBase64 plitem_mybest_gauge(plitemid,cnt),IRsyncstruct(ID_REC_PACE_BASE64)
+					}
+				}
+			loop
+		loop
+	return
+
+	#deffunc StartMusicSelect
+		//BGM再生
+			cfunc64v BASS_ChannelSetAttribute,hbasschannel(bgmMain),BASS_ATTRIB_VOL,d2f(0.7)
+			cfunc64v BASS_ChannelSetPosition,hbasschannel(bgmMain),0,0,0
+			cfunc64v BASS_ChannelPlay,hbasschannel(bgmMain)
+
+		//背景動画再生
+			PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+
+		//変数初期化
+			dim RawWheelVal
+			dim WheelVal,2
+			dim ScrollEaseA,2
+			dim ScrollEaseB,2
+			dim OnScrollCount,2
+			dim RawWheelVal
+			dim bfRawWheelVal
+			dim RawWheelMove
+			dim bfHoverColumnID,2
+			dim bfActiveColumnID,2
+			dim HoverColumnID,2
+			dim ActiveColumnID,2
+			dim bfMouseInput
+			dim CurSelLev
+	return
+
+	#deffunc DrawMusicSelect
+
+		//カーソル位置補正
+			dim CursorPosX:dim CursorPosY
+			CursorPosX=int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@)))
+			CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
+			RawWheelVal=GetMouseWheelRotVol()
+			RawWheelMove=0
+			if RawWheelVal<0&bfRawWheelVal<0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+			if RawWheelVal>0&bfRawWheelVal>0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+			if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
+			bfRawWheelVal=RawWheelVal
+
+		//カーソル位置から項目IDを取得
+			HoverColumnID(ID_CATEGORY)=-1
+			if CursorPosX>0&CursorPosY>229&CursorPosX<450&CursorPosY<229+811 {
+				//カテゴリー選択
+				repeat NUM_ITEM_CATEGORY
+					dim SenseColumnPos
+					SenseColumnPos=229+10+cnt*(50+8)+ScrollEaseB(ID_CATEGORY)
+					if CursorPosX>25&CursorPosY>SenseColumnPos&CursorPosX<25+640&CursorPosY<SenseColumnPos+50 {
+						HoverColumnID(ID_CATEGORY)=cnt
+						break
+					}
+				loop
+				bfHoverColumnID(ID_CATEGORY)=HoverColumnID(ID_CATEGORY)
+				if ((GetMouseInput()&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&HoverColumnID(ID_CATEGORY)!-1 {
+					ActiveColumnID(ID_CATEGORY)=HoverColumnID(ID_CATEGORY)
+				}
+			}
+			HoverColumnID(ID_SONGS)=-1
+			if CursorPosX>450&CursorPosY>229&CursorPosX<450+700&CursorPosY<229+811 {
+				//曲選択
+				repeat numitem
+					dim SenseColumnPos
+					SenseColumnPos=229+10+cnt*(50+8)+ScrollEaseB(ID_SONGS)
+					if CursorPosX>450&CursorPosY>SenseColumnPos&CursorPosX<450+700&CursorPosY<SenseColumnPos+50 {
+						HoverColumnID(ID_SONGS)=cnt
+						break
+					}
+				loop
+				bfHoverColumnID(ID_SONGS)=HoverColumnID(ID_SONGS)
+				if ((GetMouseInput()&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&HoverColumnID(ID_SONGS)!-1 {
+					ActiveColumnID(ID_SONGS)=HoverColumnID(ID_SONGS)
+				}
+			}
+			bfMouseInput=GetMouseInput()
+
+		//背景動画
+			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+			DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+			GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+
+		//ナビゲーション
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 48,32,hdximg(inav),TRUE
+
+		//ウィンドウの背景
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,165,hdximg(ibg_window),TRUE
+
+		//カテゴリー選択ウィンドウ
+			SetDrawScreen hdximg(iwindow_category)
+			ClearDrawScreen
+				if CursorPosX>0&CursorPosX<450&CursorPosY>229&CursorPosY<229+811 {
+					WheelVal(ID_CATEGORY)=RawWheelMove
+					RawWheelMove=0
+				}
+				if WheelVal(ID_CATEGORY)>0 { //＋
+					ScrollEaseA(ID_CATEGORY)=ScrollEaseB(ID_CATEGORY)
+					ScrollEaseB(ID_CATEGORY)+80
+					OnScrollCount(ID_CATEGORY)=0
+				}
+				if WheelVal(ID_CATEGORY)<0 { //ー
+					ScrollEaseA(ID_CATEGORY)=ScrollEaseB(ID_CATEGORY)
+					ScrollEaseB(ID_CATEGORY)-80
+					OnScrollCount(ID_CATEGORY)=0
+				}
+				if ScrollEaseB(ID_CATEGORY)>0 :ScrollEaseB(ID_CATEGORY)=0
+				if (10*2+(8+50)*NUM_ITEM_CATEGORY)-811>0 {
+					if ScrollEaseB(ID_CATEGORY)<-((10*2+(8+50)*NUM_ITEM_CATEGORY)-811) :ScrollEaseB(ID_CATEGORY)=-((10*2+(8+50)*14)-811)
+				}
+				AddCount OnScrollCount(ID_CATEGORY)
+				//アイテム描画
+				repeat NUM_ITEM_CATEGORY
+					setease ScrollEaseA(ID_CATEGORY),ScrollEaseB(ID_CATEGORY),ease_cubic_out
+					dim itemposy:itemposy=10+cnt*(50+8)+getease(OnScrollCount(ID_CATEGORY),10)
+					//項目
+						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+						DrawGraph 25,itemposy,hdximg(ifolder_all+cnt),TRUE
+					//ホバーエフェクト
+						if HoverColumnID(ID_CATEGORY)==cnt {
+							setease 0,100,ease_linear+ease_loop
+							SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,20)
+							DrawGraph 21,itemposy-4,hdximg(icursor_category),TRUE
+						}
+					//アクティブエフェクト
+						if ActiveColumnID(ID_CATEGORY)==cnt {
+							SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+							DrawGraph 21,itemposy-4,hdximg(icursor_category),TRUE
+						}
+				loop
+			SetDrawScreen hdximg@(iScene)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,229,hdximg(iwindow_category),TRUE
+
+		//曲選択ウィンドウ
+			SetDrawScreen hdximg(iwindow_songs)
+			ClearDrawScreen
+				if CursorPosX>450&CursorPosX<450+700&CursorPosY>229&CursorPosY<229+811 {
+					WheelVal(ID_SONGS)=RawWheelMove
+					RawWheelMove=0
+				}
+				if WheelVal(ID_SONGS)>0 { //＋
+					ScrollEaseA(ID_SONGS)=ScrollEaseB(ID_SONGS)
+					ScrollEaseB(ID_SONGS)+80
+					OnScrollCount(ID_SONGS)=0
+				}
+				if WheelVal(ID_SONGS)<0 { //ー
+					ScrollEaseA(ID_SONGS)=ScrollEaseB(ID_SONGS)
+					ScrollEaseB(ID_SONGS)-80
+					OnScrollCount(ID_SONGS)=0
+				}
+				if ScrollEaseB(ID_SONGS)>0 :ScrollEaseB(ID_SONGS)=0
+				if (10*2+(8+50)*numitem)-811>0 {
+					if ScrollEaseB(ID_SONGS)<-((10*2+(8+50)*numitem)-811) :ScrollEaseB(ID_SONGS)=-((10*2+(8+50)*numitem)-811)
+				}
+				AddCount OnScrollCount(ID_SONGS)
+				//アイテム描画
+				repeat numitem
+					setease ScrollEaseA(ID_SONGS),ScrollEaseB(ID_SONGS),ease_cubic_out
+					dim itemposy:itemposy=10+cnt*(50+8)+getease(OnScrollCount(ID_SONGS),10)
+					//項目
+						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+						DrawGraph 15,itemposy,hdximg(ibg_item),TRUE
+						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+						DrawStringToHandle 47,itemposy+11,plitem_Title(cnt,0),GetColor(10,10,10),hdxfont(fNSCJM24)
+
+					//ホバーエフェクト
+						if HoverColumnID(ID_SONGS)==cnt {
+							setease 0,100,ease_linear+ease_loop
+							SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,20)
+							DrawGraph 11,itemposy-4,hdximg(icursor_list),TRUE
+						}
+					//アクティブエフェクト
+						if ActiveColumnID(ID_SONGS)==cnt {
+							SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+							DrawGraph 11,itemposy-4,hdximg(icursor_list),TRUE
+						}
+				loop
+			SetDrawScreen hdximg@(iScene)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 450,229,hdximg(iwindow_songs),TRUE
+
+		//メタデータ
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1170,189,hdximg(ibg_meta),TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			//曲名
+			DrawStringToHandle 1492,231,plitem_Title(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(10,10,10),hdxfont(fNSCJM24)
+			//アーティスト名
+			DrawStringToHandle 1492,283,plitem_Artist(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(30,30,30),hdxfont(fNSCJM20)
+			//アルバム
+			DrawStringToHandle 1492,333,plitem_Source(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(50,50,50),hdxfont(fNSCJM16)
+
+		//詳細
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1150,425,hdximg(ibg_detail),TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawStringToHandle 1173,536,strf("%08d",plitem_mybest_score(ActiveColumnID(ID_SONGS),CurSelLev)),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1273,536,plitem_mybest_rank(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1333,536,plitem_mybest_rate(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1398,536,plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1269,585,strf("%04d",plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_EXCELLENT)),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1269,604,strf("%04d",plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_GREAT)),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1269,623,strf("%04d",plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_GOOD)),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1269,642,strf("%04d",plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_BAD)),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1269,661,strf("%04d",plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_MISS)),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1398,585,strf("%04d",plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_EARLY)),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1398,604,strf("%04d",plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_LATE)),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1398,625,plitem_mybest_ratio(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(255,255,255),hdxfont(fPS16)
+			if peek(plitem_mybest_gauge(ActiveColumnID(ID_SONGS),CurSelLev),0)==255 {
+				setease 100,256,ease_linear+ease_loop
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,60)
+				DrawGraph 1170,706,hdximg(ilayer_nodata),TRUE
+			} else {
+			}
+
+		//ステータス
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+			DrawStringToHandle 24,1048,"XODA SAPPHIRE",GetColor(230,230,230),hdxfont(fPS20)
+			DrawStringToHandle 220,1052,"Music Select",GetColor(210,210,210),hdxfont(fPS14)
+
+		AddCount SceneCount
+
+	return
+#global

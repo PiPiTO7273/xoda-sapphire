@@ -13,6 +13,7 @@
 	#cfunc global BASS_ChannelSetFX "BASS_ChannelSetFX" int, int, int
 	#func global BASS_FXReset "BASS_FXReset" int
 	#func global BASS_ChannelRemoveFX "BASS_ChannelRemoveFX" int,int
+	#func global BASS_SetConfig "BASS_SetConfig" sptr,sptr
 
 	#cfunc global BASS_ErrorGetCode "BASS_ErrorGetCode"
 

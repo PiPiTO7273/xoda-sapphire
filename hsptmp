@@ -1,15 +1,82 @@
-newcom objVBsc,"ScriptControl"
-		objVBsc("Language")="VBScript"
-		sdim VBscript_body:sdim VBscript_res
-		VBscript_body={"
-		Function httpget(s):Dim whr:Set whr=CreateObject("WinHttp.WinHttpRequest.5.1"):whr.Open "GET",s,false:whr.Send:httpget=whr.ResponseText:End Function:Function httppost(s,p):Dim whr:Set whr=CreateObject("WinHttp.WinHttpRequest.5.1"):whr.Open "POST",s,false:whr.Send p:httppost=whr.ResponseText:End Function
-		"}
-		objVBsc->"AddCode" VBscript_body
-		comres VBscript_res
-		objVBsc->"Run" "httpget","https://httpbin.org/get?id=1";"http://google.co.jp/search?q=1234";"http://pipitosoftware.ml/API-GetProfile.php?key=AZkVb7yHsZudHyXJNgh68j8GWpQMdaDA&id=devuser&password=password&decode=bqjEPAQh1ZmiQpFbXLbtVBdR8p1z0yF6IkZHJO74UfvfCX2hhoDr8zaAEmvAKb0fls4kcIoqKMwWnUhAqI5EzDpDyvy2PyXCPeaF1N5JlH3AxUXPeHRxeE8j1BNE9mo0"
-		sdim AsciiCode_LF:poke AsciiCode_LF,0,10
-		sdim AsciiCode_CR:poke AsciiCode_CR,0,13
-		strrep VBscript_res,AsciiCode_LF,""
-		strrep VBscript_res,AsciiCode_CR,""
-		strrep VBscript_res,"</br>","\n"
-		dialog vbscript_res
+
+#module
+	#deffunc __initBase64
+		if fInitBase64:return
+		encodeTable="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+		dim decodeTable,256/4 : memset decodeTable,128,256
+		repeat 26:poke decodeTable,'A'+cnt,cnt:loop
+		repeat 26:poke decodeTable,'a'+cnt,cnt+26:loop
+		repeat 10:poke decodeTable,'0'+cnt,cnt+52:loop
+		poke decodeTable,'+',62
+		poke decodeTable,'/',63
+		poke decodeTable,13,129
+		poke decodeTable,10,129
+		poke decodeTable,'=',254
+		poke decodeTable,0,255
+		fInitBase64=1
+		return
+	#deffunc EncodeBase64 var dest,var src,int srclen
+		__InitBase64
+		dest="":memexpand dest,(srclen+2)/3*4+(srclen+2)/3*4/76*2+1
+		srcIndex=0 : destIndex=0
+		repeat srclen/3
+			rdata=peek(src,srcIndex)<<16 | peek(src,srcIndex+1)<<8 | peek(src,srcIndex+2)
+			poke dest,destIndex,peek(encodeTable,rdata>>18)
+			poke dest,destIndex+1,peek(encodeTable,rdata>>12&63)
+			poke dest,destIndex+2,peek(encodeTable,rdata>>6&63)
+			poke dest,destIndex+3,peek(encodeTable,rdata&63)
+			srcIndex+=3 : destIndex+=4
+			if destIndex\78==76: poke dest,destIndex,"\n" : destIndex+=2
+		loop
+		if srclen\3>0{
+			rdata=peek(src,srcIndex)
+			poke dest,destIndex,peek(encodeTable,rdata>>2)
+			if srclen\3==1{
+				poke dest,destIndex+1,peek(encodeTable,rdata<<4&63)
+				wpoke dest,destIndex+2,0x3d3d ;'=='
+			}else{
+				rdata=(rdata&3)<<8 | peek(src,srcIndex+1)
+				poke dest,destIndex+1,peek(encodeTable,rdata>>4)
+				poke dest,destIndex+2,peek(encodeTable,rdata<<2&63)
+				poke dest,destIndex+3,'='
+			}
+			destIndex+=4
+			if destIndex\78==76: poke dest,destIndex,"\n" : destIndex+=2
+		}
+		poke dest,destIndex,0
+		return destIndex
+	#deffunc DecodeBase64 var dest,var src
+		__InitBase64
+		sdim dest,1,((strlen(src)+3)/4*3+3)/4
+		mref _stat,64
+		srcIndex=0 : destIndex=0 :fStat=0
+		repeat
+			rdata=0
+			repeat 4
+				srcChar=peek(decodeTable,peek(src,srcIndex)) : 	srcIndex++
+				if srcChar>=254: rIndex=cnt:break
+				if srcChar>63: fStat|=(srcChar==128):continue cnt
+				rdata=rdata<<6 | srcChar
+			loop
+			if srcChar>63:break
+			poke dest,destIndex,rdata>>16
+			poke dest,destIndex+1,rdata>>8&255
+			poke dest,destIndex+2,rdata&255
+			destIndex+=3
+		loop
+		if rIndex{
+			rdata<<=(4-rIndex)*6
+			poke dest,destIndex,rdata>>16 : destIndex++
+			if rIndex==3: poke dest,destIndex,rdata>>8&255 :destIndex++
+			if srcChar!=254{
+				fStat|=2
+			}else{
+				fStat|=(rIndex==1 | (rIndex==2 & peek(decodeTable,peek(src,srcIndex))!=254))*2
+			}
+		}else{
+			fStat|=(srcChar!=255)*2
+		}
+		_stat=destIndex
+		return double(fStat)
+#global
+__initBase64

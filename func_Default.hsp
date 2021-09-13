@@ -26,13 +26,52 @@
 
 		noteunsel
 
-		repeat varsize(resValue)
-			if peek(resValue,cnt)==10 :poke resValue,cnt,0
-			if peek(resValue,cnt)==13 :poke resValue,cnt,0
-		loop
+		;repeat varsize(resValue)
+		;	if peek(resValue,cnt)==10 :poke resValue,cnt,0
+		;	if peek(resValue,cnt)==13 :poke resValue,cnt,0
+		;loop
 		return resValue
 
 	#defcfunc ConvStrToBool str _in
 		if _in=="TRUE" :return 1
 		return 0
+	#deffunc AddCount var _counter
+		if CounterLev@==0 {		//自動判定
+			if curFPS@<120 {
+				_counter++
+			} else {
+				repeat 10
+					if curFPS@>60*(cnt+2)&curFPS@<60*(cnt+3) :if coreCount@\(cnt+2)==0 :_counter++
+				loop
+			}
+		} else {
+			if coreCount@\CounterLev@==0 :_counter++
+		}
+		return
+
+	#defcfunc GetScoreRank double _rate
+		if _rate>=100.0 :return"MAX"
+		if _rate>95.0 :return"EX+"
+		if _rate>90.0 :return"EX"
+		if _rate>86.6 :return"SSS"
+		if _rate>83.3 :return"SS"
+		if _rate>80.0 :return"S"
+		if _rate>75.0 :return"AAA+"
+		if _rate>70.0 :return"AAA"
+		if _rate>65.0 :return"AA+"
+		if _rate>60.0 :return"AA"
+		if _rate>55.0 :return"A+"
+		if _rate>50.0 :return"A"
+		if _rate>45.0 :return"B+"
+		if _rate>40.0 :return"B"
+		if _rate>35.0 :return"C+"
+		if _rate>30.0 :return"C"
+		if _rate>25.0 :return"D+"
+		if _rate>20.0 :return"D"
+		if _rate>15.0 :return"E+"
+		if _rate>10.0 :return"E"
+		if _rate>5.0 :return"F+"
+		if _rate>0.0 :return"F"
+		if _rate<=0.0 :return"---"
+		return"-"
 #global

@@ -31,6 +31,8 @@
 			case"low":BGAquality@="lq":swbreak
 			case"disable":BGAquality@="*":swbreak
 		swend
+		dim CounterLev@
+		CounterLev@=int(GetINIvalue(coreBuf,"Graphics","Counter.Level"))
 
 	return
 
@@ -63,6 +65,14 @@
 		if stat==0 {
 			dialog"オーディオ機能の初期化に失敗しました。"
 		}
+		BASS_SetConfig BASS_CONFIG_BUFFER,32
+		if stat==0 {
+			dialog"オーディオバッファの設定に失敗しました。"
+		}
+		BASS_SetConfig BASS_CONFIG_DEV_BUFFER,16
+		if stat==0 {
+			dialog"オーディオバッファの設定に失敗しました。"
+		}
 	return
 
 	//グローバル空間のグラフィックを作成
@@ -79,6 +89,11 @@
 	//グローバル空間の変数を初期化
 	#deffunc InitCoreSceneMan
 		dim FrameCount@
+		dim coreCount@
+		dim bfWheelVal@
+		dim WheelVal@
+		dim TotalScrollVal@
+		dim FPSawaitLoop@
 	return
 
 	//シーンを初期化

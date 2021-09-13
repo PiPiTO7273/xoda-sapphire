@@ -79,3 +79,4 @@
 		_stat=destIndex
 		return double(fStat)
 #global
+__initBase64

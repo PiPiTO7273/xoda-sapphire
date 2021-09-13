@@ -9,6 +9,7 @@ Data/10e5966a-d94b-1468-4fd2-2113166c8135/
 Data/2598af90-4d0b-24e4-63fd-afc3ddc6038f/
 Data/cff82d02-eedd-d061-7a52-0d4f818f7e1b/
 Data/fe0eef59-87fc-8afd-6eea-b9d55be41cdd/
+Data/4c84d670-a0e6-ceb3-c31b-7485afea5265/
 Data/general-movie-0.ogv
 Data/general-movie-1.ogv
 Data/general-movie-2.ogv
@@ -21,4 +22,9 @@ Data/bg_Main.ogv
 Data/bg_Result.ogv
 Data/#movie/
 Data/#partner/
+Data/#effect_particle/
+Data/#gauge/
+Data/#judge/
+Data/#stg/
+Data/#item/
 Data/res_movie_p.bin
