@@ -1,7 +1,7 @@
 
 #module _Load_
 
-	//èµ·å‹•è¨­å®šã‚’èª­ã¿è¾¼ã¿
+	//‹N“®İ’è‚ğ“Ç‚İ‚İ
 	#deffunc LoadCoreSettings str _filename
 		exist _filename
 		if strsize==-1 :return -1
@@ -36,7 +36,7 @@
 
 	return
 
-	//DXãƒ©ã‚¤ãƒ–ãƒ©ãƒªã‚’åˆæœŸåŒ–
+	//DXƒ‰ƒCƒuƒ‰ƒŠ‚ğ‰Šú‰»
 	#deffunc InitDxlib
 		SetOutApplicationLogValidFlag 0
 		SetUseDirectDrawDeviceIndex 1
@@ -47,10 +47,10 @@
 		SetMainWindowText"XODA SAPPHIRE"
 		dxlib_Init
 		if stat==-1 {
-			dialog"ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯æ©Ÿèƒ½ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚"
+			dialog"ƒOƒ‰ƒtƒBƒbƒN‹@”\‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B"
 		}
 
-		//å¤‰æ•°åˆæœŸåŒ–
+		//•Ï”‰Šú‰»
 			dim KeyFlag@,256
 			dim bfKeyFlag@,256
 			dim CursorImgCount@
@@ -59,23 +59,23 @@
 			dim CursorPosX@:dim CursorPosY@
 	return
 
-	//BASS Audio Libraryã‚’åˆæœŸåŒ–
+	//BASS Audio Library‚ğ‰Šú‰»
 	#deffunc InitBASSlib
 		BASS_Init -1,44100,0,hwnd,0
 		if stat==0 {
-			dialog"ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªæ©Ÿèƒ½ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚"
+			dialog"ƒI[ƒfƒBƒI‹@”\‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B"
 		}
 		BASS_SetConfig BASS_CONFIG_BUFFER,32
 		if stat==0 {
-			dialog"ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªãƒãƒƒãƒ•ã‚¡ã®è¨­å®šã«å¤±æ•—ã—ã¾ã—ãŸã€‚"
+			dialog"ƒI[ƒfƒBƒIƒoƒbƒtƒ@‚Ìİ’è‚É¸”s‚µ‚Ü‚µ‚½B"
 		}
 		BASS_SetConfig BASS_CONFIG_DEV_BUFFER,16
 		if stat==0 {
-			dialog"ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªãƒãƒƒãƒ•ã‚¡ã®è¨­å®šã«å¤±æ•—ã—ã¾ã—ãŸã€‚"
+			dialog"ƒI[ƒfƒBƒIƒoƒbƒtƒ@‚Ìİ’è‚É¸”s‚µ‚Ü‚µ‚½B"
 		}
 	return
 
-	//ã‚°ãƒ­ãƒ¼ãƒãƒ«ç©ºé–“ã®ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ã‚’ä½œæˆ
+	//ƒOƒ[ƒoƒ‹‹óŠÔ‚ÌƒOƒ‰ƒtƒBƒbƒN‚ğì¬
 	#deffunc LoadCoreImages
 		SetUsePremulAlphaConvertLoad TRUE
 		SetDXArchiveExtension"bin"
@@ -84,9 +84,14 @@
 		repeat 58
 			hdximg_arr_cursor@(cnt)=LoadGraph("Data/res_cursor/"+cnt+".png")
 		loop
+		hdximg@(ibg_load)=LoadGraph("Data/bg_Load.ogv")
+		hdximg@(ibg_load_pic)=LoadGraph("Data/bg_Load.png")
+		hdximg@(iprogbar)=LoadGraph("Data/progbar_load.png")
+		hdximg@(ibg_tips)=LoadGraph("Data/bg_Tips.png")
+		PlayMovieToGraph hdximg@(ibg_load),DX_PLAYTYPE_LOOP
 	return
 
-	//ã‚°ãƒ­ãƒ¼ãƒãƒ«ç©ºé–“ã®å¤‰æ•°ã‚’åˆæœŸåŒ–
+	//ƒOƒ[ƒoƒ‹‹óŠÔ‚Ì•Ï”‚ğ‰Šú‰»
 	#deffunc InitCoreSceneMan
 		dim FrameCount@
 		dim coreCount@
@@ -96,7 +101,7 @@
 		dim FPSawaitLoop@
 	return
 
-	//ã‚·ãƒ¼ãƒ³ã‚’åˆæœŸåŒ–
+	//ƒV[ƒ“‚ğ‰Šú‰»
 	#deffunc InitScene int _sceneid
 		dim SceneCount@
 		dim SceneHalfCount@
@@ -104,7 +109,7 @@
 		curSceneID@=_sceneid
 	return
 
-	//ãƒ ãƒ¼ãƒ“ãƒ¼ã®ã‚¨ã‚¤ãƒªã‚¢ã‚¹ã‹ã‚‰IDã‚’ç”Ÿæˆ
+	//ƒ€[ƒr[‚ÌƒGƒCƒŠƒAƒX‚©‚çID‚ğ¶¬
 	#defcfunc GetMovieAlias str _alias
 		sdim tmpalias_lib:dim resid
 		tmpalias_lib(0)="hexa","wave","ring","sq3d","cub0","li3d","cve0","tri0","cyb0","cir0","synp","wav1","city","dna*","cyb1","wav2"
@@ -116,7 +121,7 @@
 		loop
 	return resid
 
-	//ãƒ‘ãƒ¼ãƒˆãƒŠãƒ¼ã®ã‚¢ã‚¤ã‚³ãƒ³ã‚’èª­ã¿è¾¼ã¿
+	//ƒp[ƒgƒi[‚ÌƒAƒCƒRƒ“‚ğ“Ç‚İ‚İ
 	#deffunc LoadPartnerIcon
 		exist"Data/res_char.bin"
 		if strsize==-1 {
@@ -138,12 +143,73 @@
 			CharName@charicon(cnt*2)=GetINIvalue(coreBuf,"Partner","Char."+cnt+".Name")
 			CharDesc@charicon(cnt*2)=GetINIvalue(coreBuf,"Partner","Char."+cnt+".Desc")
 			CharSkill@charicon(cnt*2)=GetINIvalue(coreBuf,"Partner","Char."+cnt+".Skill")
+			CharLev@charicon(cnt*2)=1
 			CharImgPath@charicon(cnt*2+1)=GetINIvalue(coreBuf,"Partner","Char."+cnt+"a.Path")
 			hCharImg@charicon(cnt*2+1)=LoadGraph("Data/"+CharImgPath@charicon(cnt*2+1))
 			CharName@charicon(cnt*2+1)=GetINIvalue(coreBuf,"Partner","Char."+cnt+"a.Name")
 			CharDesc@charicon(cnt*2+1)=GetINIvalue(coreBuf,"Partner","Char."+cnt+"a.Desc")
 			CharSkill@charicon(cnt*2+1)=GetINIvalue(coreBuf,"Partner","Char."+cnt+"a.Skill")
+			CharLev@charicon(cnt*2+1)=1
 		loop
 	return
+
+	#define global DrawLoadScreen(%1="",%2=0,%3=256,%4=0) _DrawLoadScreen %1,%2,%3,%4
+	#deffunc _DrawLoadScreen str _msg,int _progval,int _alpha,int _color
+
+		sdim tipstxt,10
+		tipstxt(0)="ƒJƒ‹ƒfƒB‚Ìƒhƒ‰ƒCƒ}ƒ“ƒS[‚Íƒ}ƒW‚Å”ü–¡‚µ‚¢‚©‚çB\n‚İ‚ñ‚È”ƒ‚Á‚½‚Ù‚¤‚ª‚¢‚¢‚æB"
+		tipstxt(1)="ƒ}ƒbƒN‚ÌŠúŠÔŒÀ’è‚Æ‚©‚¢‚ë‚¢‚ë‚ ‚é‚¯‚ÇA\nŒ‹‹Ç‚Íƒ\[ƒZ[ƒWƒ}ƒtƒBƒ“‚ªˆê”ÔˆÀ‚¢‚µ”ü–¡‚¢B"
+		tipstxt(2)="ƒ_ƒCƒGƒbƒg’†‚È‚Ì‚É—×‚Å–éHH‚¤‚â‚Â‚Á‚Ä‚³\nƒ}ƒW‚Å• —§‚Â‚æ‚Ë"
+		tipstxt(3)="ƒ[ƒh‰æ–Ê‚Á‚Ä‰É‚æ‚È"
+		tipstxt(4)="‰G—´’ƒˆù‚ñ‚¾‚ç‰–b‚Ì‹zû‚ª—}‚¦‚ç‚ê‚é‚Æ‚©•·‚­‚¯‚Ç\nÀÛ‚Ì‚Æ‚±‚ë‚Ç‚¤‚È‚ñ‚¾‚ë‚¤‚Ë"
+		tipstxt(5)="˜a®‚ÌƒgƒCƒŒŒ™‚¢"
+		tipstxt(6)="‚±‚ÌTips‚Á‚ÄˆÓ–¡‚ ‚éH"
+		tipstxt(7)="ƒyƒbƒgƒ{ƒgƒ‹‚Ìˆù‚İ•¨‚Á‚Ä’†“r”¼’[‚Éc‚Á‚¿‚á‚¤‚æ‚Ë"
+		tipstxt(8)="ƒZƒuƒ“‚ÌƒTƒ‰ƒ_ƒ`ƒLƒ“‚Íƒ}ƒW‚Å”ü–¡‚¢B\n‰´“I‚É‚Íƒn[ƒu‚ª‚¨‚·‚·‚ß"
+		tipstxt(9)="”¯L‚Ñ‚Ä‚«‚½‚ç×–‚‚æ‚È"
+
+		ProcessMessage
+
+		SetDrawScreen hdximg@(iScene)
+		ClearDrawScreen
+		SetDrawMode DX_DRAWMODE_BILINEAR
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg@(ibg_load),FALSE
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 0,0,hdximg@(ibg_load_pic),TRUE
+		DrawExtendGraph 80,968,80+_progval,968+8,hdximg@(iprogbar),FALSE
+		DrawGraph -16,413,hdximg@(ibg_tips),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		ChangeFont"Meiryo":ChangeFontType DX_FONTTYPE_ANTIALIASING_4X4
+		SetFontSize 16
+		DrawString 80,928,_msg,GetColor(255,255,255)
+		SetFontSize 24
+		DrawString 214,495,tipstxt((gettime(6)/10)\10),GetColor(10,10,10)
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256-_alpha
+		DrawBox 0,0,BufWidth@,BufHeight@,_color,TRUE
+
+		SetDrawScreen DX_SCREEN_BACK
+		ClearDrawScreen
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND
+		DrawExtendGraph 0,0,DispWidth@,DispHeight@,hdximg@(iScene),TRUE
+
+		ScreenFlip
+		return
+
+	#deffunc DrawLoadTransition int _color,int _time,int _flag
+		repeat _time+1
+			if _flag==0 {
+				setease 0,256,ease_linear
+				DrawLoadScreen"‚µ‚Î‚ç‚­‚¨‘Ò‚¿‰º‚³‚¢",0,getease(cnt,_time),_color
+			} else {
+				setease 256,0,ease_linear
+				DrawLoadScreen"‚µ‚Î‚ç‚­‚¨‘Ò‚¿‰º‚³‚¢",500,getease(cnt,_time),_color
+			}
+		loop
+		return
 
 #global

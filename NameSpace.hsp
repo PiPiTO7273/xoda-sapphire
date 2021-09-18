@@ -1,14 +1,18 @@
 
 //DXライブラリグラフィック(global)
-#enum iScene		=	0
-#enum iBlur
-#enum iConsole
-#enum iCursor
+#enum global iScene		=	0
+#enum global iBlur
+#enum global iConsole
+#enum global iCursor
+#enum global ibg_load
+#enum global ibg_load_pic
+#enum global iprogbar
+#enum global ibg_tips
 
 //シーンID
-#enum ID_BOOT		=	0
-#enum ID_PLAY
-#enum ID_MUSICSELECT
+#enum global ID_BOOT		=	0
+#enum global ID_PLAY
+#enum global ID_MUSICSELECT
 
 //譜面情報の識別子
 #enum global META_TITLE	=	0
@@ -34,3 +38,5 @@
 #define global LogChargridHeight 18
 
 #define global hash_core "fef896dab0abadaf7ebea29860f3957fe253d200322039fcfb42358b578ce944"
+
+#define global TransitionFrame 10

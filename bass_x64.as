@@ -8,6 +8,7 @@
 	#func global  BASS_Free onexit "BASS_Free"
 	#cfunc global BASS_StreamCreateFile "BASS_StreamCreateFile" int, sptr, int,int, int,int, int
 	#func global  BASS_StreamFree "BASS_StreamFree" int
+	#func global BASS_ChannelFree "BASS_ChannelFree" int
 	#func global  BASS_ChannelPlay "BASS_ChannelPlay" int, int
 	#func global  BASS_FXSetParameters "BASS_FXSetParameters" int, var
 	#cfunc global BASS_ChannelSetFX "BASS_ChannelSetFX" int, int, int

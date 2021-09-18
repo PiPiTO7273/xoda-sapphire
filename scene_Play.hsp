@@ -93,6 +93,7 @@
 
 	//プレイ画面の画像リソースを読み込み
 	#deffunc LoadGamePlayImages
+		DrawLoadScreen"しばらくお待ち下さい",50
 		SetDXArchiveExtension"bin"
 		dim hdximg
 		hdximg(ibg_0)=LoadGraph("Data/bg_0.png")
@@ -150,6 +151,7 @@
 
 	//プレイ画面で使用するフォントの初期化
 	#deffunc InitGamePlayFonts
+		DrawLoadScreen"しばらくお待ち下さい",80
 		InitFontToHandle
 		dim hdxfont
 		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
@@ -171,6 +173,7 @@
 
 	//譜面ファイルを開く
 	#deffunc OpenChartFile str _filename
+		DrawLoadScreen"しばらくお待ち下さい",100
 		sdim chartFileName
 		chartFileName=_filename
 		exist chartFileName
@@ -352,8 +355,10 @@
 					hsmpSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(keysndBuf),0,binpkg_GetFileLength(keysndIndexID(hLoadCnt)),32,0)
 					if hsmpSndDB(hLoadCnt)==0 :logmes""+SoundDBFileName(hLoadCnt)+"\nError Code : "+BASS_ErrorGetCode()
 					hSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndDB(hLoadCnt),TRUE)
+					cfunc64v BASS_ChannelSetAttribute,hSndDB(hLoadCnt),BASS_ATTRIB_VOL,d2f(0.7)
 					hLoadCnt++
 				}
+				if cnt\100==0 :DrawLoadScreen"しばらくお待ち下さい",200+int(double(cnt)/double(SoundDBMax)*100.0*3.0)
 			loop
 			binpkg_Free
 
@@ -388,7 +393,7 @@
 
 		//自己ベストデータを読み込み
 			sdim MybestRecordBuf
-			WebAPI_SyncRecord GetChartInfo(META_UUID),MybestRecordBuf
+			WebAPI_SyncRecord WebAPI_GetRecord(),GetChartInfo(META_UUID),MybestRecordBuf
 
 		//スコアグラフ生成
 			dim graphCurrent_score
@@ -396,8 +401,8 @@
 			dim graphBest_score
 			dim graphTarget_score
 			dim graphCapture_objid
-			sdim graphBest_Decode,4*ObjMax
-			DecodeBase64 graphBest_Decode,MybestRecordBuf(ID_REC_PACE_BASE64)
+			sdim graphBest_Decode,4*objmax
+			ConvHEXdec graphBest_Decode,MybestRecordBuf(ID_REC_SCORE_4BINHEX)
 			memexpand graphBest_Decode,4*ObjMax
 			//-----debug----
 			graphTrainer_level=0.80	//理論値のn％のスコア
@@ -413,6 +418,8 @@
 		//ゲージ記録用のキャプチャー地点
 			dim gaugeCapture_flag,350
 			dim gaugeCapture_value,350
+			dim scoreCapture_flag,objmax
+			dim scoreCapture_value,objmax
 
 	return
 
@@ -460,6 +467,9 @@
 			sdim curScoreRank
 			dim FinishFlag
 			dim FinishCount
+			dim SceneCount
+			dim JudgeAfCnt
+			dim ResJudge
 			AutoPlayFlag=1
 			burstCount=-1
 			DispOffset=0
@@ -1032,15 +1042,31 @@
 			}
 
 		//暗転
-			if SceneCount<30+1 {
+			if SceneCount<TransitionFrame+1 {
 				setease 256,0,ease_linear
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,30)
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,TransitionFrame)
 				DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
 			}
 			if FinishFlag==TRUE {
 				setease 0,256,ease_linear
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(FinishCount-60*3,30)
 				DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
+				if FinishCount>60*4 {
+					SendRecordData
+					repeat SoundDBMax
+						cfunc64v BASS_ChannelStop,hSndDB(cnt)
+					loop
+					cfunc64v BASS_ChannelStop,hSndBGM(cnt)
+					DrawLoadTransition 0,TransitionFrame,0
+					InitScene ID_MUSICSELECT
+					LoadMusicSelectImages
+					LoadMusicSelectSounds
+					InitMusicSelectFonts
+					ScanAllPlaylist
+					DrawLoadTransition 0,TransitionFrame,1
+					wait 50
+					StartMusicSelect
+				}
 			}
 
 		//自動判定
@@ -1091,7 +1117,7 @@
 			dim LastPlaySndID
 			LastPlaySndID=-1
 			repeat SndEventMax
-				if SndPlayFlag(cnt)==0&curCount>SndEventTime(cnt)+PreTime+int(GetChartInfo(META_EVOFFSET))&SndEventID(cnt)!-1 {
+				if SndPlayFlag(cnt)==0&curCount>SndEventTime(cnt)+PreTime+int(GetChartInfo(META_EVOFFSET))&SndEventID(cnt)!-1&length(hSndDB)>SndEventID(cnt) {
 					cfunc64v BASS_ChannelSetAttribute,hSndDB(SndEventID(cnt)),BASS_ATTRIB_VOL,d2f(SndEventVol(cnt))
 					cfunc64v BASS_ChannelSetPosition,hSndDB(SndEventID(cnt)),0,0,0
 					cfunc64v BASS_ChannelPlay,hSndDB(SndEventID(cnt))
@@ -1111,6 +1137,14 @@
 				if curcount>objtiming(ObjMax-1)/350*cnt&gaugeCapture_flag(cnt)==FALSE {
 					gaugeCapture_value(cnt)=int(curGauge)
 					gaugeCapture_flag(cnt)=TRUE
+				}
+			loop
+
+		//スコアのキャプチャー
+			repeat ObjMax
+				if curcount>objtiming(cnt)&scoreCapture_flag(cnt)==FALSE {
+					scoreCapture_value(cnt)=curScore
+					scoreCapture_flag(cnt)=TRUE
 				}
 			loop
 
@@ -1221,6 +1255,59 @@
 				;if curCombo==50 :burstCount=0:bonusDispImg=hdximg(ieff_bonus_combo):bonusDispCount=0
 				if curCombo\100==0 :burstCount=0:bonusDispImg=hdximg(ieff_bonus_combo):bonusDispCount=0
 			}
+	return
+
+	#deffunc InitGamePlayResources
+		repeat SoundDBMax
+			cfunc64v BASS_SampleFree,hsmpSndDB(cnt)
+			cfunc64v BASS_ChannelFree,hSndDB(cnt)
+		loop
+		cfunc64v BASS_SampleFree,hsmpSndBGM
+		cfunc64v BASS_ChannelFree,hSndBGM
+		DeleteGraph hdximg_gameplaybga
+	return
+
+	#deffunc SendRecordData
+		sdim HTTPpostdata
+		HTTPpostdata+"key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendNewRecord")+"&"
+		HTTPpostdata+"id="+GetChartInfo(META_UUID)+"&"
+		HTTPpostdata+"name="+LoginUserInfo@(ID_NAME@)+"&"
+		HTTPpostdata+"score="+curScore+"&"
+		HTTPpostdata+"j_ex="+numExcellent+"&"
+		HTTPpostdata+"j_gr="+numGreat+"&"
+		HTTPpostdata+"j_go="+numGood+"&"
+		HTTPpostdata+"j_ba="+numBad+"&"
+		HTTPpostdata+"j_mi="+numMiss+"&"
+		HTTPpostdata+"j_ea="+numEarly+"&"
+		HTTPpostdata+"j_la="+numLate+"&"
+		HTTPpostdata+"maxcombo="+MaxCombo+"&"
+
+		sdim tmpstr
+		tmpstr="FAILED"
+		if GaugeType==GAUGE_ASSIST&curGauge>70.0 :tmpstr="ASSIST-CLEAR"
+		if GaugeType==GAUGE_NORMAL&curGauge>70.0 :tmpstr="CLEAR"
+		if GaugeType==GAUGE_EXPERT&curGauge>0.0 :tmpstr="EXPERT-CLEAR"
+		if GaugeType==GAUGE_MADNESS&curGauge>0.0 :tmpstr="MADNESS-CLEAR"
+		if numBad==0&numMiss==0 :tmpstr="FULLCOMBO"
+		if numGreat==0&numGood==0&numBad==0&numMiss==0 :tmpstr="ALL-EXCELLENT"
+			HTTPpostdata+"type="+tmpstr+"&"
+
+		sdim src4BINHEX,350:sdim dest4BINHEX
+		repeat 350
+			poke src4BINHEX,cnt,gaugeCapture_value(cnt)
+		loop
+		ConvHEXenc dest4BINHEX,src4BINHEX,350
+			HTTPpostdata+"g64="+dest4BINHEX+"&"
+
+		sdim src4BINHEX,4*objmax:sdim dest4BINHEX
+		repeat objmax
+			lpoke src4BINHEX,cnt*4,scoreCapture_value(cnt)
+		loop
+		ConvHEXenc dest4BINHEX,src4BINHEX,4*objmax
+			HTTPpostdata+"s64="+dest4BINHEX+"&"
+
+		if curScore>=MybestRecordBuf(ID_REC_SCORE) :WebAPI_SendNewRecord HTTPpostdata
+		sdim HTTPpostdata
 	return
 
 #global

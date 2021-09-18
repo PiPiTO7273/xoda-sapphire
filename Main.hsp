@@ -8,7 +8,7 @@
 #include"NameSpace.hsp"
 #include"mod_BinPkg.hsp"
 #include"mod_dxlibplus.hsp"
-#include"mod_base64.hsp"
+#include"mod_4bithex.hsp"
 #include"func_Default.hsp"
 #include"func_Load.hsp"
 #include"func_Sync.hsp"
@@ -46,11 +46,15 @@
 	;InitScene ID_PLAY
 	randomize
 
+	DrawLoadTransition 0,TransitionFrame,0
+	DrawLoadScreen"起動中",0
+	DrawLoadScreen"Portalにサインインしています。しばらくお待ち下さい。",50
+
 	//セーブデータ同期
 		SetDefaultSaveData
 		WebAPI_Init
 		sdim LoginUserInfo
-		LoginUserInfo(ID_HOST)="pipitosoftware.ml"
+		LoginUserInfo(ID_HOST)="puoro.ml/apiv2"
 		LoginUserInfo(ID_NAME)=GetINIvalue(coreBuf@_load_,"Auth","Name")
 		LoginUserInfo(ID_KEY)=GetINIvalue(coreBuf@_load_,"Auth","Password")
 		LoginUserInfo(ID_DECODE)=GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_0")
@@ -60,6 +64,8 @@
 		RegLoginInfo LoginUserInfo
 		WebAPI_SyncProfile
 
+	DrawLoadScreen"シーンを準備中",300
+
 /*
 	LoadGamePlayImages
 	InitGamePlayFonts
@@ -68,11 +74,15 @@
 
 	StartGameplay
 */
+
 	InitScene ID_MUSICSELECT
 	LoadMusicSelectImages
 	LoadMusicSelectSounds
 	InitMusicSelectFonts
 	ScanAllPlaylist
+
+	DrawLoadTransition 0,TransitionFrame,1
+	wait 50
 	StartMusicSelect
 
 *MainLoop
@@ -92,7 +102,7 @@
 	//キー判定
 	repeat 256:KeyFlag(cnt)=CheckHitKey(cnt):loop
 
-	SetDrawScreen hdximg(iScene)
+	SetDrawScreen hdximg@(iScene)
 	ClearDrawScreen
 	SetDrawMode DX_DRAWMODE_BILINEAR
 
@@ -106,7 +116,7 @@
 
 	//シーン
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-		DrawExtendGraph 0,0,DispWidth@,DispHeight@,hdximg(iScene),TRUE
+		DrawExtendGraph 0,0,DispWidth@,DispHeight@,hdximg@(iScene),TRUE
 
 	//マウスカーソル
 		cfunc64v GetMousePoint,varptr64(CursorPosX@),varptr64(CursorPosY@)
@@ -125,6 +135,8 @@
 
 	//デバッグ文字列
 	/*
+		ChangeFont"MS GOTHIC":SetFontSize 16
+		ChangeFontType DX_FONTTYPE_NORMAL
 		DrawDebugString 0,0,"XODA Sapphire @debug"
 		DrawDebugString 0,1,"HD "+BufWidth@+"x"+BufHeight@+" -> "+DispWidth@+"x"+DispHeight@
 		DrawDebugString 0,2,"Server : "+LoginUserInfo(ID_HOST)+" @\""+LoginUserInfo(ID_NAME)+"\" & \""+LoginUserInfo(ID_KEY)+"\""

@@ -1,8 +1,9 @@
 
 #module _MusicSelect_
 
-	//DX„É©„Ç§„Éñ„É©„É™„Ç∞„É©„Éï„Ç£„ÉÉ„ÇØ(musicselect)
-	#enum ibg		=	0
+	//DXÉâÉCÉuÉâÉäÉOÉâÉtÉBÉbÉN(musicselect)
+	#enum ilayer_all	=	0
+	#enum ibg
 	#enum iwindow_category
 	#enum iwindow_songs
 	#enum ifolder_all
@@ -27,11 +28,30 @@
 	#enum ibg_meta
 	#enum ibg_detail
 	#enum ilayer_nodata
+	#enum ibutton_start_0
+	#enum ibutton_start_1
+	#enum ibutton_start_2
+	#enum ibutton_normal_0
+	#enum ibutton_normal_1
+	#enum ibutton_normal_2
+	#enum ibutton_hard_0
+	#enum ibutton_hard_1
+	#enum ibutton_hard_2
+	#enum ibutton_chaos_0
+	#enum ibutton_chaos_1
+	#enum ibutton_chaos_2
 
-	//BASS Audio Library„Çµ„É≥„Éó„É´„ÄÅ„ÉÅ„É£„É≥„Éç„É´„Éè„É≥„Éâ„É´(musicselect)
+	//BASS Audio LibraryÉTÉìÉvÉãÅAÉ`ÉÉÉìÉlÉãÉnÉìÉhÉã(musicselect)
 	#enum bgmMain	=	0
+	#enum sndCancel
+	#enum sndChange_0
+	#enum sndCursor
+	#enum sndDecide
+	#enum sndError
+	#enum sndNotification
+	#enum sndText
 
-	//DX„É©„Ç§„Éñ„É©„É™„Éï„Ç©„É≥„Éà„Éè„É≥„Éâ„É´(musicselect)
+	//DXÉâÉCÉuÉâÉäÉtÉHÉìÉgÉnÉìÉhÉã(musicselect)
 	#enum fEOEXB16			=	0
 	#enum fEOEXB20
 	#enum fFAB50
@@ -49,11 +69,11 @@
 	#enum fSQNUM24
 	#enum fSQNUM40
 
-	//„Éõ„Ç§„Éº„É´ÂØæÂøú„Ç¶„Ç£„É≥„Éâ„Ç¶
+	//ÉzÉCÅ[ÉãëŒâûÉEÉBÉìÉhÉE
 	#enum ID_CATEGORY	=	0
 	#enum ID_SONGS
 
-	//Âà§ÂÆö„Éá„Éº„Çø„ÅÆË≠òÂà•ID
+	//îªíËÉfÅ[É^ÇÃéØï ID
 	#enum ID_DATA_EXCELLENT	=	0
 	#enum ID_DATA_GREAT
 	#enum ID_DATA_GOOD
@@ -63,12 +83,14 @@
 	#enum ID_DATA_LATE
 	#enum ID_DATA_RATIO
 
-	//ÂÄãÊï∞
+	//å¬êî
 	#const NUM_ITEM_CATEGORY		14
 
 	#deffunc LoadMusicSelectImages
+		DrawLoadScreen"ÇµÇŒÇÁÇ≠Ç®ë“Çøâ∫Ç≥Ç¢",130
 		dim hdximg
 		SetDXArchiveExtension"bin"
+		hdximg(ilayer_all)=MakeScreen(BufWidth@,BufHeight@,TRUE)
 		hdximg(ibg)=LoadGraph("Data/bg_Main.ogv")
 		hdximg(ifolder_all)=LoadGraph("Data/res_musicselect_item/category_all.png")
 		hdximg(ifolder_rank_ex)=LoadGraph("Data/res_musicselect_item/category_rank_ex.png")
@@ -92,22 +114,39 @@
 		hdximg(ibg_meta)=LoadGraph("Data/bg_musicselect_metadata.png")
 		hdximg(ibg_detail)=LoadGraph("Data/bg_musicselect_detail.png")
 		hdximg(ilayer_nodata)=LoadGraph("Data/layer_musicselect_nodata.png")
+		hdximg(ibutton_start_0)=LoadGraph("Data/res_musicselect_button_start/0.png")
+		hdximg(ibutton_start_1)=LoadGraph("Data/res_musicselect_button_start/1.png")
+		hdximg(ibutton_start_2)=LoadGraph("Data/res_musicselect_button_start/2.png")
+		hdximg(ibutton_normal_0)=LoadGraph("Data/res_musicselect_button_difficulty/normal_0.png")
+		hdximg(ibutton_normal_1)=LoadGraph("Data/res_musicselect_button_difficulty/normal_1.png")
+		hdximg(ibutton_normal_2)=LoadGraph("Data/res_musicselect_button_difficulty/normal_2.png")
+		hdximg(ibutton_hard_0)=LoadGraph("Data/res_musicselect_button_difficulty/hard_0.png")
+		hdximg(ibutton_hard_1)=LoadGraph("Data/res_musicselect_button_difficulty/hard_1.png")
+		hdximg(ibutton_hard_2)=LoadGraph("Data/res_musicselect_button_difficulty/hard_2.png")
+		hdximg(ibutton_chaos_0)=LoadGraph("Data/res_musicselect_button_difficulty/chaos_0.png")
+		hdximg(ibutton_chaos_1)=LoadGraph("Data/res_musicselect_button_difficulty/chaos_1.png")
+		hdximg(ibutton_chaos_2)=LoadGraph("Data/res_musicselect_button_difficulty/chaos_2.png")
 
 		hdximg(iwindow_category)=MakeScreen(450,811,TRUE)
 		hdximg(iwindow_songs)=MakeScreen(700,811,TRUE)
 	return
 
 	#deffunc LoadMusicSelectSounds
-		dim64 hbasssample:dim64 hbasschannel
-		exist"Data/bgm_MusicSelect.ogg"
-		sdim hbassbin,strsize
-		bload"Data/bgm_MusicSelect.ogg",hbassbin
-		hbasssample(bgmMain)=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(hbassbin),0,varsize(hbassbin),32,0)
-		hbasschannel(bgmMain)=cfunc64(RET_INT64,BASS_SampleGetChannel,hbasssample(bgmMain),BASS_SAMPLE_LOOP)
+		DrawLoadScreen"ÇµÇŒÇÁÇ≠Ç®ë“Çøâ∫Ç≥Ç¢",250
+		dim64 hbasschannel:dim64 hbasssample
+		LoadBASSsample"Data/bgm_MusicSelect.ogg",hbasschannel(bgmMain),hbasssample(bgmMain),BASS_SAMPLE_LOOP
+		LoadBASSsample"Data/snd_cancel.wav",hbasschannel(sndCancel),hbasssample(sndCancel),NULL
+		LoadBASSsample"Data/snd_change_0.wav",hbasschannel(sndChange_0),hbasssample(sndChange_0),NULL
+		LoadBASSsample"Data/snd_cursor.wav",hbasschannel(sndCursor),hbasssample(sndCursor),NULL
+		LoadBASSsample"Data/snd_decide.wav",hbasschannel(sndDecide),hbasssample(sndDecide),NULL
+		LoadBASSsample"Data/snd_error.wav",hbasschannel(sndError),hbasssample(sndError),NULL
+		LoadBASSsample"Data/snd_notification.wav",hbasschannel(sndNotification),hbasssample(sndNotification),NULL
+		LoadBASSsample"Data/snd_text.wav",hbasschannel(sndText),hbasssample(sndText),NULL
 	return
 
-	//Êõ≤ÈÅ∏ÊäûÁîªÈù¢„Åß‰ΩøÁî®„Åô„Çã„Éï„Ç©„É≥„Éà„ÅÆÂàùÊúüÂåñ
+	//ã»ëIëâÊñ Ç≈égópÇ∑ÇÈÉtÉHÉìÉgÇÃèâä˙âª
 	#deffunc InitMusicSelectFonts
+		DrawLoadScreen"ÇµÇŒÇÁÇ≠Ç®ë“Çøâ∫Ç≥Ç¢",300
 		InitFontToHandle
 		dim hdxfont
 		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
@@ -128,13 +167,14 @@
 		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
 	return
 
-	//„É©„Ç§„Éñ„É©„É™„Çí„Çπ„Ç≠„É£„É≥
+	//ÉâÉCÉuÉâÉäÇÉXÉLÉÉÉì
 	#deffunc ScanAllPlaylist
+		DrawLoadScreen"ÇµÇŒÇÁÇ≠Ç®ë“Çøâ∫Ç≥Ç¢",400
 		dim numitem:sdim itemuuid
 
-		numitem=int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))	//È†ÖÁõÆÊï∞
+		numitem=int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))	//çÄñ⁄êî
 
-		//Â§âÊï∞ÂàùÊúüÂåñ
+		//ïœêîèâä˙âª
 		sdim plitem_Title,64,numitem,3
 		sdim plitem_Artist,64,numitem,3
 		sdim plitem_Source,64,numitem,3
@@ -147,26 +187,28 @@
 		dim plitem_mybest_judge,numitem,3,7
 		sdim plitem_mybest_ratio,8,numitem,3
 		sdim plitem_mybest_gauge,350,numitem,3
+		sdim IRsyncbuf
+		IRsyncbuf=WebAPI_GetRecord()
 
-		//Ëß£Êûê
+		//âêÕ
 		repeat numitem
 			sdim tmpstr:tmpstr=GetINIvalue(coreBuf@_load_,"Playlist","ID."+cnt)
 			split tmpstr,",",plitem_UUID(cnt,0),plitem_UUID(cnt,1),plitem_UUID(cnt,2)
 			dim plitemid:plitemid=cnt
 			repeat 3
 				plitem_Path(plitemid,cnt)="Data/"+plitem_UUID(plitemid,cnt)+"/"+cnt+".bin"
-				//Ë≠úÈù¢„Éï„Ç°„Ç§„É´„ÅÆÂ≠òÂú®„ÇíÁ¢∫Ë™ç
+				//ïàñ ÉtÉ@ÉCÉãÇÃë∂ç›ÇämîF
 				exist plitem_Path(plitemid,cnt)
 				if strsize!-1 {
-					//„É°„Çø„Éá„Éº„ÇøÂèñÂæó
+					//ÉÅÉ^ÉfÅ[É^éÊìæ
 					sdim tmpstr,strsize:bload plitem_Path(plitemid,cnt),tmpstr
 					plitem_Title(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Title")
 					plitem_Artist(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Artist")
 					plitem_Source(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Source")
 
-					//IRÂèñÂæó
+					//IRéÊìæ
 					sdim IRsyncstruct
-					WebAPI_SyncRecord plitem_UUID(plitemid,cnt),IRsyncstruct
+					WebAPI_SyncRecord IRsyncbuf,plitem_UUID(plitemid,cnt),IRsyncstruct
 					plitem_mybest_score(plitemid,cnt)=int(IRsyncstruct(ID_REC_SCORE))
 					plitem_mybest_rank(plitemid,cnt)=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
 					plitem_mybest_rate(plitemid,cnt)=strf("%.1f",double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)+"%"
@@ -181,26 +223,24 @@
 					dim tmpint:tmpint=limit(int(IRsyncstruct(ID_REC_EARLY))+int(IRsyncstruct(ID_REC_LATE)),1)
 					plitem_mybest_ratio(plitemid,cnt)=strf("%.1f",double(IRsyncstruct(ID_REC_EARLY))/double(tmpint))+"% / "
 					plitem_mybest_ratio(plitemid,cnt)+strf("%.1f",double(IRsyncstruct(ID_REC_LATE))/double(tmpint))+"%"
-					if IRsyncstruct(ID_REC_PACE_BASE64)=="" {
+					;if IRsyncstruct(ID_REC_PACE_BASE64)=="" {
 						poke plitem_mybest_gauge(plitemid,cnt),0,255
-					} else {
-						DecodeBase64 plitem_mybest_gauge(plitemid,cnt),IRsyncstruct(ID_REC_PACE_BASE64)
-					}
+					;} else {
+					;	DecodeBase64 plitem_mybest_gauge(plitemid,cnt),IRsyncstruct(ID_REC_PACE_BASE64)
+					;}
 				}
 			loop
 		loop
 	return
 
 	#deffunc StartMusicSelect
-		//BGMÂÜçÁîü
-			cfunc64v BASS_ChannelSetAttribute,hbasschannel(bgmMain),BASS_ATTRIB_VOL,d2f(0.7)
-			cfunc64v BASS_ChannelSetPosition,hbasschannel(bgmMain),0,0,0
-			cfunc64v BASS_ChannelPlay,hbasschannel(bgmMain)
+		//BGMçƒê∂
+			PlaySE int(hbasschannel(bgmMain)),0.7
 
-		//ËÉåÊôØÂãïÁîªÂÜçÁîü
+		//îwåiìÆâÊçƒê∂
 			PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
 
-		//Â§âÊï∞ÂàùÊúüÂåñ
+		//ïœêîèâä˙âª
 			dim RawWheelVal
 			dim WheelVal,2
 			dim ScrollEaseA,2
@@ -215,11 +255,15 @@
 			dim ActiveColumnID,2
 			dim bfMouseInput
 			dim CurSelLev
+			dim PushButtonFlag
+			dim DecideCount
+			dim SceneCount
+			DecideCount=-1
 	return
 
 	#deffunc DrawMusicSelect
 
-		//„Ç´„Éº„ÇΩ„É´‰ΩçÁΩÆË£úÊ≠£
+		//ÉJÅ[É\Éãà íuï‚ê≥
 			dim CursorPosX:dim CursorPosY
 			CursorPosX=int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@)))
 			CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
@@ -229,15 +273,16 @@
 			if RawWheelVal>0&bfRawWheelVal>0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
 			if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
 			bfRawWheelVal=RawWheelVal
+			PushButtonFlag=FALSE
 
-		//„Ç´„Éº„ÇΩ„É´‰ΩçÁΩÆ„Åã„ÇâÈ†ÖÁõÆID„ÇíÂèñÂæó
+		//ÉJÅ[É\Éãà íuÇ©ÇÁçÄñ⁄IDÇéÊìæ
 			HoverColumnID(ID_CATEGORY)=-1
-			if CursorPosX>0&CursorPosY>229&CursorPosX<450&CursorPosY<229+811 {
-				//„Ç´„ÉÜ„Ç¥„É™„ÉºÈÅ∏Êäû
+			if insquare(CursorPosX,CursorPosY,0,229,450,229+811) {
+				//ÉJÉeÉSÉäÅ[ëIë
 				repeat NUM_ITEM_CATEGORY
 					dim SenseColumnPos
 					SenseColumnPos=229+10+cnt*(50+8)+ScrollEaseB(ID_CATEGORY)
-					if CursorPosX>25&CursorPosY>SenseColumnPos&CursorPosX<25+640&CursorPosY<SenseColumnPos+50 {
+					if insquare(CursorPosX,CursorPosY,25,SenseColumnPos,25+640,SenseColumnPos+50) {
 						HoverColumnID(ID_CATEGORY)=cnt
 						break
 					}
@@ -245,15 +290,16 @@
 				bfHoverColumnID(ID_CATEGORY)=HoverColumnID(ID_CATEGORY)
 				if ((GetMouseInput()&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&HoverColumnID(ID_CATEGORY)!-1 {
 					ActiveColumnID(ID_CATEGORY)=HoverColumnID(ID_CATEGORY)
+					PushButtonFlag=TRUE
 				}
 			}
 			HoverColumnID(ID_SONGS)=-1
-			if CursorPosX>450&CursorPosY>229&CursorPosX<450+700&CursorPosY<229+811 {
-				//Êõ≤ÈÅ∏Êäû
+			if insquare(CursorPosX,CursorPosY,450,229,450+700,229+811) {
+				//ã»ëIë
 				repeat numitem
 					dim SenseColumnPos
 					SenseColumnPos=229+10+cnt*(50+8)+ScrollEaseB(ID_SONGS)
-					if CursorPosX>450&CursorPosY>SenseColumnPos&CursorPosX<450+700&CursorPosY<SenseColumnPos+50 {
+					if insquare(CursorPosX,CursorPosY,450,SenseColumnPos,450+700,SenseColumnPos+50) {
 						HoverColumnID(ID_SONGS)=cnt
 						break
 					}
@@ -261,36 +307,40 @@
 				bfHoverColumnID(ID_SONGS)=HoverColumnID(ID_SONGS)
 				if ((GetMouseInput()&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&HoverColumnID(ID_SONGS)!-1 {
 					ActiveColumnID(ID_SONGS)=HoverColumnID(ID_SONGS)
+					PushButtonFlag=TRUE
 				}
 			}
-			bfMouseInput=GetMouseInput()
 
-		//ËÉåÊôØÂãïÁîª
+		//îwåiìÆâÊ
 			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
 			DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
 			GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
 
-		//„Éä„Éì„Ç≤„Éº„Ç∑„Éß„É≥
+		//----à»â∫ÅAÉVÅ[Éìï ÉåÉCÉÑÅ[-----
+		SetDrawScreen hdximg(ilayer_all)
+		ClearDrawScreen
+
+		//ÉiÉrÉQÅ[ÉVÉáÉì
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 48,32,hdximg(inav),TRUE
 
-		//„Ç¶„Ç£„É≥„Éâ„Ç¶„ÅÆËÉåÊôØ
+		//ÉEÉBÉìÉhÉEÇÃîwåi
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 0,165,hdximg(ibg_window),TRUE
 
-		//„Ç´„ÉÜ„Ç¥„É™„ÉºÈÅ∏Êäû„Ç¶„Ç£„É≥„Éâ„Ç¶
+		//ÉJÉeÉSÉäÅ[ëIëÉEÉBÉìÉhÉE
 			SetDrawScreen hdximg(iwindow_category)
 			ClearDrawScreen
-				if CursorPosX>0&CursorPosX<450&CursorPosY>229&CursorPosY<229+811 {
+				if insquare(CursorPosX,CursorPosY,0,229,450,229+811) {
 					WheelVal(ID_CATEGORY)=RawWheelMove
 					RawWheelMove=0
 				}
-				if WheelVal(ID_CATEGORY)>0 { //Ôºã
+				if WheelVal(ID_CATEGORY)>0 { //Å{
 					ScrollEaseA(ID_CATEGORY)=ScrollEaseB(ID_CATEGORY)
 					ScrollEaseB(ID_CATEGORY)+80
 					OnScrollCount(ID_CATEGORY)=0
 				}
-				if WheelVal(ID_CATEGORY)<0 { //„Éº
+				if WheelVal(ID_CATEGORY)<0 { //Å[
 					ScrollEaseA(ID_CATEGORY)=ScrollEaseB(ID_CATEGORY)
 					ScrollEaseB(ID_CATEGORY)-80
 					OnScrollCount(ID_CATEGORY)=0
@@ -300,42 +350,42 @@
 					if ScrollEaseB(ID_CATEGORY)<-((10*2+(8+50)*NUM_ITEM_CATEGORY)-811) :ScrollEaseB(ID_CATEGORY)=-((10*2+(8+50)*14)-811)
 				}
 				AddCount OnScrollCount(ID_CATEGORY)
-				//„Ç¢„Ç§„ÉÜ„É†ÊèèÁîª
+				//ÉAÉCÉeÉÄï`âÊ
 				repeat NUM_ITEM_CATEGORY
 					setease ScrollEaseA(ID_CATEGORY),ScrollEaseB(ID_CATEGORY),ease_cubic_out
 					dim itemposy:itemposy=10+cnt*(50+8)+getease(OnScrollCount(ID_CATEGORY),10)
-					//È†ÖÁõÆ
+					//çÄñ⁄
 						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 						DrawGraph 25,itemposy,hdximg(ifolder_all+cnt),TRUE
-					//„Éõ„Éê„Éº„Ç®„Éï„Çß„ÇØ„Éà
+					//ÉzÉoÅ[ÉGÉtÉFÉNÉg
 						if HoverColumnID(ID_CATEGORY)==cnt {
 							setease 0,100,ease_linear+ease_loop
 							SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,20)
 							DrawGraph 21,itemposy-4,hdximg(icursor_category),TRUE
 						}
-					//„Ç¢„ÇØ„ÉÜ„Ç£„Éñ„Ç®„Éï„Çß„ÇØ„Éà
+					//ÉAÉNÉeÉBÉuÉGÉtÉFÉNÉg
 						if ActiveColumnID(ID_CATEGORY)==cnt {
 							SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 							DrawGraph 21,itemposy-4,hdximg(icursor_category),TRUE
 						}
 				loop
-			SetDrawScreen hdximg@(iScene)
+			SetDrawScreen hdximg(ilayer_all)
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 0,229,hdximg(iwindow_category),TRUE
 
-		//Êõ≤ÈÅ∏Êäû„Ç¶„Ç£„É≥„Éâ„Ç¶
+		//ã»ëIëÉEÉBÉìÉhÉE
 			SetDrawScreen hdximg(iwindow_songs)
 			ClearDrawScreen
-				if CursorPosX>450&CursorPosX<450+700&CursorPosY>229&CursorPosY<229+811 {
+				if insquare(CursorPosX,CursorPosY,450,229,450+700,229+811) {
 					WheelVal(ID_SONGS)=RawWheelMove
 					RawWheelMove=0
 				}
-				if WheelVal(ID_SONGS)>0 { //Ôºã
+				if WheelVal(ID_SONGS)>0 { //Å{
 					ScrollEaseA(ID_SONGS)=ScrollEaseB(ID_SONGS)
 					ScrollEaseB(ID_SONGS)+80
 					OnScrollCount(ID_SONGS)=0
 				}
-				if WheelVal(ID_SONGS)<0 { //„Éº
+				if WheelVal(ID_SONGS)<0 { //Å[
 					ScrollEaseA(ID_SONGS)=ScrollEaseB(ID_SONGS)
 					ScrollEaseB(ID_SONGS)-80
 					OnScrollCount(ID_SONGS)=0
@@ -343,46 +393,48 @@
 				if ScrollEaseB(ID_SONGS)>0 :ScrollEaseB(ID_SONGS)=0
 				if (10*2+(8+50)*numitem)-811>0 {
 					if ScrollEaseB(ID_SONGS)<-((10*2+(8+50)*numitem)-811) :ScrollEaseB(ID_SONGS)=-((10*2+(8+50)*numitem)-811)
-				}
+				} else :ScrollEaseB(ID_SONGS)=0
 				AddCount OnScrollCount(ID_SONGS)
-				//„Ç¢„Ç§„ÉÜ„É†ÊèèÁîª
+				//ÉAÉCÉeÉÄï`âÊ
 				repeat numitem
 					setease ScrollEaseA(ID_SONGS),ScrollEaseB(ID_SONGS),ease_cubic_out
 					dim itemposy:itemposy=10+cnt*(50+8)+getease(OnScrollCount(ID_SONGS),10)
-					//È†ÖÁõÆ
+					if itemposy<-50 :continue
+					if itemposy>BufHeight@:continue
+					//çÄñ⁄
 						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 						DrawGraph 15,itemposy,hdximg(ibg_item),TRUE
 						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 						DrawStringToHandle 47,itemposy+11,plitem_Title(cnt,0),GetColor(10,10,10),hdxfont(fNSCJM24)
 
-					//„Éõ„Éê„Éº„Ç®„Éï„Çß„ÇØ„Éà
+					//ÉzÉoÅ[ÉGÉtÉFÉNÉg
 						if HoverColumnID(ID_SONGS)==cnt {
 							setease 0,100,ease_linear+ease_loop
 							SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,20)
 							DrawGraph 11,itemposy-4,hdximg(icursor_list),TRUE
 						}
-					//„Ç¢„ÇØ„ÉÜ„Ç£„Éñ„Ç®„Éï„Çß„ÇØ„Éà
+					//ÉAÉNÉeÉBÉuÉGÉtÉFÉNÉg
 						if ActiveColumnID(ID_SONGS)==cnt {
 							SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 							DrawGraph 11,itemposy-4,hdximg(icursor_list),TRUE
 						}
 				loop
-			SetDrawScreen hdximg@(iScene)
+			SetDrawScreen hdximg(ilayer_all)
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 450,229,hdximg(iwindow_songs),TRUE
 
-		//„É°„Çø„Éá„Éº„Çø
+		//ÉÅÉ^ÉfÅ[É^
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 1170,189,hdximg(ibg_meta),TRUE
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-			//Êõ≤Âêç
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			//ã»ñº
 			DrawStringToHandle 1492,231,plitem_Title(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(10,10,10),hdxfont(fNSCJM24)
-			//„Ç¢„Éº„ÉÜ„Ç£„Çπ„ÉàÂêç
+			//ÉAÅ[ÉeÉBÉXÉgñº
 			DrawStringToHandle 1492,283,plitem_Artist(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(30,30,30),hdxfont(fNSCJM20)
-			//„Ç¢„É´„Éê„É†
+			//ÉAÉãÉoÉÄ
 			DrawStringToHandle 1492,333,plitem_Source(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(50,50,50),hdxfont(fNSCJM16)
 
-		//Ë©≥Á¥∞
+		//è⁄ç◊
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 1150,425,hdximg(ibg_detail),TRUE
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
@@ -405,13 +457,107 @@
 			} else {
 			}
 
-		//„Çπ„ÉÜ„Éº„Çø„Çπ
+		//ÉvÉåÉCäJénÉ{É^Éì
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			if insquare(CursorPosX,CursorPosY,1620,960,1620+280,960+64) {
+				if (GetMouseInput()&MOUSE_INPUT_LEFT)&DecideCount==-1 {
+					DrawGraph 1620,960,hdximg(ibutton_start_2),TRUE
+					PushButtonFlag=TRUE
+					PlaySE int(hbasschannel(sndDecide)),1.0
+					DecideCount=0
+				} else {
+					DrawGraph 1620,960,hdximg(ibutton_start_1),TRUE
+				}
+			} else {
+				DrawGraph 1620,960,hdximg(ibutton_start_0),TRUE
+			}
+
+		//ìÔà’ìxïœçXÉ{É^Éì
+			if plitem_UUID(ActiveColumnID(ID_SONGS),0)!"*" {
+				if CurSelLev==0 {	//normal
+					DrawGraph 1254,826,hdximg(ibutton_normal_2),TRUE
+				} else {
+					if insquare(CursorPosX,CursorPosY,1254,826,1254+150,826+32) {
+						if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=0:PushButtonFlag=TRUE
+						DrawGraph 1254,826,hdximg(ibutton_normal_1),TRUE
+					} else {
+						DrawGraph 1254,826,hdximg(ibutton_normal_0),TRUE
+					}
+				}
+			}
+			if plitem_UUID(ActiveColumnID(ID_SONGS),1)!"*" {
+				if CurSelLev==1 {	//hard
+					DrawGraph 1254,866,hdximg(ibutton_hard_2),TRUE
+				} else {
+					if insquare(CursorPosX,CursorPosY,1254,866,1254+150,866+32) {
+						if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=1:PushButtonFlag=TRUE
+						DrawGraph 1254,866,hdximg(ibutton_hard_1),TRUE
+					} else {
+						DrawGraph 1254,866,hdximg(ibutton_hard_0),TRUE
+					}
+				}
+			}
+			if plitem_UUID(ActiveColumnID(ID_SONGS),2)!"*" {
+				if CurSelLev==2 {	//chaos
+					DrawGraph 1254,906,hdximg(ibutton_chaos_2),TRUE
+				} else {
+					if insquare(CursorPosX,CursorPosY,1254,906,1254+150,906+32) {
+						if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=2:PushButtonFlag=TRUE
+						DrawGraph 1254,906,hdximg(ibutton_chaos_1),TRUE
+					} else {
+						DrawGraph 1254,906,hdximg(ibutton_chaos_0),TRUE
+					}
+				}
+			}
+
+		//ÉXÉeÅ[É^ÉX
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
 			DrawStringToHandle 24,1048,"XODA SAPPHIRE",GetColor(230,230,230),hdxfont(fPS20)
 			DrawStringToHandle 220,1052,"Music Select",GetColor(210,210,210),hdxfont(fPS14)
 
+		if PushButtonFlag==TRUE&(GetMouseInput()&MOUSE_INPUT_LEFT)==TRUE&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+			PlaySE int(hbasschannel(sndCursor)),1.0
+		}
+
+		//-----à»â∫ÅAã§óLÉåÉCÉÑÅ[-----
+		SetDrawScreen hdximg@(iScene)
+		setease 1,1.2,ease_cubic_out
+		dim EasePosX:dim EasePosY:dim EaseWidth:dim EaseHeight
+		EaseWidth=int(double(BufWidth@)*geteasef(DecideCount+1,20))
+		EaseHeight=int(double(BufHeight@)*geteasef(DecideCount+1,20))
+		EasePosX=BufWidth@/2-EaseWidth/2:EasePosY=BufHeight@/2-EaseHeight/2
+		setease 256,0,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount+1,20)
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ilayer_all),TRUE
+
+		setease 0,256,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(DecideCount-25,TransitionFrame)
+		DrawBox 0,0,BufWidth@,BufHeight@,GetColor(255,255,255),TRUE
+
+		setease 256,0,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,TransitionFrame)
+		DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
+
+		if DecideCount>25+TransitionFrame {
+			//---debug---
+			DrawLoadTransition $FFFFFF,TransitionFrame,0
+			InitScene ID_PLAY
+			LoadGamePlayImages
+			InitGamePlayFonts
+			LoadPartnerIcon
+			OpenChartFile"Data/"+plitem_UUID(ActiveColumnID(ID_SONGS),CurSelLev)+"/"+CurSelLev+".bin"
+			cfunc64v BASS_ChannelStop,hbasschannel(bgmMain)
+			DrawLoadTransition 0,10,1
+			SetDrawScreen hdximg@(iScene)
+			ClearDrawScreen
+			wait 50
+			StartGameplay
+		}
+
 		AddCount SceneCount
+		bfMouseInput=GetMouseInput()
+		if DecideCount!-1 :AddCount DecideCount
 
 	return
 #global
