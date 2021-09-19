@@ -24,14 +24,6 @@
 
 #packopt hide 1
 
-/*
-	sdim dir_def
-	dir_def=dir_cur
-	dialog"xct;*.bin",16,"XODA-sapphire,Dropbeat譜面ファイル"
-	tmpfilename=refstr
-	chdir dir_def
-
-*/
 	gsel 0,-1
 
 	LoadCoreSettings"core.ini"
@@ -66,19 +58,11 @@
 
 	DrawLoadScreen"シーンを準備中",300
 
-/*
-	LoadGamePlayImages
-	InitGamePlayFonts
-	LoadPartnerIcon
-	OpenChartFile tmpfilename
-
-	StartGameplay
-*/
-
 	InitScene ID_MUSICSELECT
 	LoadMusicSelectImages
 	LoadMusicSelectSounds
 	InitMusicSelectFonts
+	IRsync
 	ScanAllPlaylist
 
 	DrawLoadTransition 0,TransitionFrame,1

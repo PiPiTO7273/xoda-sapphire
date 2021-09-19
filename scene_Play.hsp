@@ -470,7 +470,7 @@
 			dim SceneCount
 			dim JudgeAfCnt
 			dim ResJudge
-			AutoPlayFlag=1
+			AutoPlayFlag=0
 			burstCount=-1
 			DispOffset=0
 			JudgeOffset=-20

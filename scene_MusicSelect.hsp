@@ -83,6 +83,22 @@
 	#enum ID_DATA_LATE
 	#enum ID_DATA_RATIO
 
+	//譜面フィルター
+	#enum ID_CAT_ALL		=	0
+	#enum ID_CAT_RANK_EX
+	#enum ID_CAT_RANK_S
+	#enum ID_CAT_RANK_AAA
+	#enum ID_CAT_RANK_AA
+	#enum ID_CAT_RANK_A
+	#enum ID_CAT_RANK_B
+	#enum ID_CAT_RANK_C
+	#enum ID_CAT_TYPE_ALLEX
+	#enum ID_CAT_TYPE_FC
+	#enum ID_CAT_TYPE_MADNESS
+	#enum ID_CAT_TYPE_EXPERT
+	#enum ID_CAT_TYPE_CLEAR
+	#enum ID_CAT_TYPE_ASSIST
+
 	//個数
 	#const NUM_ITEM_CATEGORY		14
 
@@ -167,70 +183,201 @@
 		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
 	return
 
-	//ライブラリをスキャン
-	#deffunc ScanAllPlaylist
+	//IRを同期
+	#deffunc IRsync
 		DrawLoadScreen"しばらくお待ち下さい",400
-		dim numitem:sdim itemuuid
-
-		numitem=int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))	//項目数
-
-		//変数初期化
-		sdim plitem_Title,64,numitem,3
-		sdim plitem_Artist,64,numitem,3
-		sdim plitem_Source,64,numitem,3
-		sdim plitem_UUID,32,numitem,3
-		sdim plitem_Path,64,numitem,3
-		dim plitem_mybest_score,numitem,3
-		sdim plitem_mybest_rank,4,numitem,3
-		sdim plitem_mybest_rate,5,numitem,3
-		sdim plitem_mybest_cleartype,16,numitem,3
-		dim plitem_mybest_judge,numitem,3,7
-		sdim plitem_mybest_ratio,8,numitem,3
-		sdim plitem_mybest_gauge,350,numitem,3
 		sdim IRsyncbuf
 		IRsyncbuf=WebAPI_GetRecord()
+		return
 
-		//解析
-		repeat numitem
-			sdim tmpstr:tmpstr=GetINIvalue(coreBuf@_load_,"Playlist","ID."+cnt)
-			split tmpstr,",",plitem_UUID(cnt,0),plitem_UUID(cnt,1),plitem_UUID(cnt,2)
-			dim plitemid:plitemid=cnt
-			repeat 3
-				plitem_Path(plitemid,cnt)="Data/"+plitem_UUID(plitemid,cnt)+"/"+cnt+".bin"
-				//譜面ファイルの存在を確認
-				exist plitem_Path(plitemid,cnt)
-				if strsize!-1 {
-					//メタデータ取得
-					sdim tmpstr,strsize:bload plitem_Path(plitemid,cnt),tmpstr
-					plitem_Title(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Title")
-					plitem_Artist(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Artist")
-					plitem_Source(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Source")
+	//ライブラリをスキャン
+	#define global ScanAllPlaylist(%1=0) _ScanAllPlaylist %1
+	#deffunc _ScanAllPlaylist int _filter
 
-					//IR取得
-					sdim IRsyncstruct
-					WebAPI_SyncRecord IRsyncbuf,plitem_UUID(plitemid,cnt),IRsyncstruct
-					plitem_mybest_score(plitemid,cnt)=int(IRsyncstruct(ID_REC_SCORE))
-					plitem_mybest_rank(plitemid,cnt)=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
-					plitem_mybest_rate(plitemid,cnt)=strf("%.1f",double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)+"%"
-					plitem_mybest_cleartype(plitemid,cnt)=IRsyncstruct(ID_REC_CLEARTYPE)
-					plitem_mybest_judge(plitemid,cnt,ID_DATA_EXCELLENT)=int(IRsyncstruct(ID_REC_EXCELLENT))
-					plitem_mybest_judge(plitemid,cnt,ID_DATA_GREAT)=int(IRsyncstruct(ID_REC_GREAT))
-					plitem_mybest_judge(plitemid,cnt,ID_DATA_GOOD)=int(IRsyncstruct(ID_REC_GOOD))
-					plitem_mybest_judge(plitemid,cnt,ID_DATA_BAD)=int(IRsyncstruct(ID_REC_BAD))
-					plitem_mybest_judge(plitemid,cnt,ID_DATA_MISS)=int(IRsyncstruct(ID_REC_MISS))
-					plitem_mybest_judge(plitemid,cnt,ID_DATA_EARLY)=int(IRsyncstruct(ID_REC_EARLY))
-					plitem_mybest_judge(plitemid,cnt,ID_DATA_LATE)=int(IRsyncstruct(ID_REC_LATE))
-					dim tmpint:tmpint=limit(int(IRsyncstruct(ID_REC_EARLY))+int(IRsyncstruct(ID_REC_LATE)),1)
-					plitem_mybest_ratio(plitemid,cnt)=strf("%.1f",double(IRsyncstruct(ID_REC_EARLY))/double(tmpint))+"% / "
-					plitem_mybest_ratio(plitemid,cnt)+strf("%.1f",double(IRsyncstruct(ID_REC_LATE))/double(tmpint))+"%"
-					;if IRsyncstruct(ID_REC_PACE_BASE64)=="" {
-						poke plitem_mybest_gauge(plitemid,cnt),0,255
-					;} else {
-					;	DecodeBase64 plitem_mybest_gauge(plitemid,cnt),IRsyncstruct(ID_REC_PACE_BASE64)
-					;}
-				}
+		//一度全ての項目をスキャン
+		if _filter!ID_CAT_ALL {
+			ScanAllPlaylist ID_CAT_ALL
+
+			dim numcatitem:dim catobjid:dim catlevid
+			repeat numitem
+				plitemid=cnt
+				repeat 3
+					switch _filter
+						case ID_CAT_RANK_EX
+							sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
+							if tmpstr=="EX"|tmpstr=="EX+" {
+								catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
+								numcatitem++
+							}
+						swbreak
+						case ID_CAT_RANK_S
+							sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
+							if tmpstr=="SSS"|tmpstr=="SS"|tmpstr=="S" {
+								catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
+								numcatitem++
+							}
+						swbreak
+						case ID_CAT_RANK_AAA
+							sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
+							if tmpstr=="AAA"|tmpstr=="AAA+" {
+								catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
+								numcatitem++
+							}
+						swbreak
+						case ID_CAT_RANK_AA
+							sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
+							if tmpstr=="AA"|tmpstr=="AA+" {
+								catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
+								numcatitem++
+							}
+						swbreak
+						case ID_CAT_RANK_A
+							sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
+							if tmpstr=="A"|tmpstr=="A+" {
+								catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
+								numcatitem++
+							}
+						swbreak
+					swend
+				loop
 			loop
-		loop
+
+			sdim plitem_Title@_org_,64,numitem,3
+			sdim plitem_Artist@_org_,64,numitem,3
+			sdim plitem_Source@_org_,64,numitem,3
+			sdim plitem_UUID@_org_,32,numitem,3
+			sdim plitem_Path@_org_,64,numitem,3
+			dim plitem_mybest_score@_org_,numitem,3
+			sdim plitem_mybest_rank@_org_,4,numitem,3
+			sdim plitem_mybest_rate@_org_,5,numitem,3
+			sdim plitem_mybest_cleartype@_org_,16,numitem,3
+			dim plitem_mybest_judge@_org_,numitem,3,7
+			sdim plitem_mybest_ratio@_org_,8,numitem,3
+			sdim plitem_mybest_gauge@_org_,350,numitem,3
+			repeat numitem
+				plitemid=cnt
+				repeat 3
+					plitem_Title@_org_(plitemid,cnt)=plitem_Title(plitemid,cnt)
+					plitem_Artist@_org_(plitemid,cnt)=plitem_Artist(plitemid,cnt)
+					plitem_Source@_org_(plitemid,cnt)=plitem_Source(plitemid,cnt)
+					plitem_UUID@_org_(plitemid,cnt)=plitem_UUID(plitemid,cnt)
+					plitem_Path@_org_(plitemid,cnt)=plitem_Path(plitemid,cnt)
+					plitem_mybest_score@_org_(plitemid,cnt)=plitem_mybest_score(plitemid,cnt)
+					plitem_mybest_rank@_org_(plitemid,cnt)=plitem_mybest_rank(plitemid,cnt)
+					plitem_mybest_rate@_org_(plitemid,cnt)=plitem_mybest_rate(plitemid,cnt)
+					plitem_mybest_cleartype@_org_(plitemid,cnt)=plitem_mybest_cleartype(plitemid,cnt)
+					plitem_mybest_judge@_org_(plitemid,cnt,ID_DATA_EXCELLENT)=plitem_mybest_judge(plitemid,cnt,ID_DATA_EXCELLENT)
+					plitem_mybest_judge@_org_(plitemid,cnt,ID_DATA_GREAT)=plitem_mybest_judge(plitemid,cnt,ID_DATA_GREAT)
+					plitem_mybest_judge@_org_(plitemid,cnt,ID_DATA_GOOD)=plitem_mybest_judge(plitemid,cnt,ID_DATA_GOOD)
+					plitem_mybest_judge@_org_(plitemid,cnt,ID_DATA_BAD)=plitem_mybest_judge(plitemid,cnt,ID_DATA_BAD)
+					plitem_mybest_judge@_org_(plitemid,cnt,ID_DATA_MISS)=plitem_mybest_judge(plitemid,cnt,ID_DATA_MISS)
+					plitem_mybest_judge@_org_(plitemid,cnt,ID_DATA_EARLY)=plitem_mybest_judge(plitemid,cnt,ID_DATA_EARLY)
+					plitem_mybest_judge@_org_(plitemid,cnt,ID_DATA_LATE)=plitem_mybest_judge(plitemid,cnt,ID_DATA_LATE)
+					plitem_mybest_ratio@_org_(plitemid,cnt)=plitem_mybest_ratio(plitemid,cnt)
+					plitem_mybest_gauge@_org_(plitemid,cnt)=plitem_mybest_gauge(plitemid,cnt)
+				loop
+			loop
+
+			sdim plitem_Title,64,numcatitem,1
+			sdim plitem_Artist,64,numcatitem,1
+			sdim plitem_Source,64,numcatitem,1
+			sdim plitem_UUID,32,numcatitem,1
+			sdim plitem_Path,64,numcatitem,1
+			dim plitem_mybest_score,numcatitem,1
+			sdim plitem_mybest_rank,4,numcatitem,1
+			sdim plitem_mybest_rate,5,numcatitem,1
+			sdim plitem_mybest_cleartype,16,numcatitem,1
+			dim plitem_mybest_judge,numcatitem,1,7
+			sdim plitem_mybest_ratio,8,numcatitem,1
+			sdim plitem_mybest_gauge,350,numcatitem,1
+
+			repeat numcatitem
+				plitem_Title(cnt,0)=plitem_Title@_org_(catobjid(cnt),catlevid(cnt))
+				plitem_Artist(cnt,0)=plitem_Artist@_org_(catobjid(cnt),catlevid(cnt))
+				plitem_Source(cnt,0)=plitem_Source@_org_(catobjid(cnt),catlevid(cnt))
+				plitem_UUID(cnt,0)=plitem_UUID@_org_(catobjid(cnt),catlevid(cnt))
+				plitem_Path(cnt,0)=plitem_Path@_org_(catobjid(cnt),catlevid(cnt))
+				plitem_mybest_score(cnt,0)=plitem_mybest_score@_org_(catobjid(cnt),catlevid(cnt))
+				plitem_mybest_rank(cnt,0)=plitem_mybest_rank@_org_(catobjid(cnt),catlevid(cnt))
+				plitem_mybest_rate(cnt,0)=plitem_mybest_rate@_org_(catobjid(cnt),catlevid(cnt))
+				plitem_mybest_cleartype(cnt,0)=plitem_mybest_cleartype@_org_(catobjid(cnt),catlevid(cnt))
+				plitem_mybest_judge(cnt,0,ID_DATA_EXCELLENT)=plitem_mybest_judge@_org_(catobjid(cnt),catlevid(cnt),ID_DATA_EXCELLENT)
+				plitem_mybest_judge(cnt,0,ID_DATA_GREAT)=plitem_mybest_judge@_org_(catobjid(cnt),catlevid(cnt),ID_DATA_GREAT)
+				plitem_mybest_judge(cnt,0,ID_DATA_GOOD)=plitem_mybest_judge@_org_(catobjid(cnt),catlevid(cnt),ID_DATA_GOOD)
+				plitem_mybest_judge(cnt,0,ID_DATA_BAD)=plitem_mybest_judge@_org_(catobjid(cnt),catlevid(cnt),ID_DATA_BAD)
+				plitem_mybest_judge(cnt,0,ID_DATA_MISS)=plitem_mybest_judge@_org_(catobjid(cnt),catlevid(cnt),ID_DATA_MISS)
+				plitem_mybest_judge(cnt,0,ID_DATA_EARLY)=plitem_mybest_judge@_org_(catobjid(cnt),catlevid(cnt),ID_DATA_EARLY)
+				plitem_mybest_judge(cnt,0,ID_DATA_LATE)=plitem_mybest_judge@_org_(catobjid(cnt),catlevid(cnt),ID_DATA_LATE)
+				plitem_mybest_ratio(cnt,0)=plitem_mybest_ratio@_org_(catobjid(cnt),catlevid(cnt))
+				plitem_mybest_gauge(cnt,0)=plitem_mybest_gauge@_org_(catobjid(cnt),catlevid(cnt))
+			loop
+			numitem=numcatitem
+		} else {
+			dim numitem:sdim itemuuid
+
+			numitem=int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))	//項目数
+
+			//変数初期化
+			sdim plitem_Title,64,numitem,3
+			sdim plitem_Artist,64,numitem,3
+			sdim plitem_Source,64,numitem,3
+			sdim plitem_UUID,32,numitem,3
+			sdim plitem_Path,64,numitem,3
+			dim plitem_mybest_score,numitem,3
+			sdim plitem_mybest_rank,4,numitem,3
+			sdim plitem_mybest_rate,5,numitem,3
+			sdim plitem_mybest_cleartype,16,numitem,3
+			dim plitem_mybest_judge,numitem,3,7
+			sdim plitem_mybest_ratio,8,numitem,3
+			sdim plitem_mybest_gauge,350,numitem,3
+
+			//解析
+			repeat numitem
+				sdim tmpstr:tmpstr=GetINIvalue(coreBuf@_load_,"Playlist","ID."+cnt)
+				split tmpstr,",",plitem_UUID(cnt,0),plitem_UUID(cnt,1),plitem_UUID(cnt,2)
+				dim plitemid:plitemid=cnt
+				repeat 3
+					plitem_Path(plitemid,cnt)="Data/"+plitem_UUID(plitemid,cnt)+"/"+cnt+".bin"
+					//譜面ファイルの存在を確認
+					exist plitem_Path(plitemid,cnt)
+					if strsize!-1 {
+						//メタデータ取得
+						sdim tmpstr,strsize:bload plitem_Path(plitemid,cnt),tmpstr
+						plitem_Title(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Title")
+						plitem_Artist(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Artist")
+						plitem_Source(plitemid,cnt)=GetINIvalue(tmpstr,"Metadata","Source")
+
+						//IR取得
+						sdim IRsyncstruct
+						WebAPI_SyncRecord IRsyncbuf,plitem_UUID(plitemid,cnt),IRsyncstruct
+						plitem_mybest_score(plitemid,cnt)=int(IRsyncstruct(ID_REC_SCORE))
+						plitem_mybest_rank(plitemid,cnt)=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
+						plitem_mybest_rate(plitemid,cnt)=strf("%.1f",double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)+"%"
+						plitem_mybest_cleartype(plitemid,cnt)=IRsyncstruct(ID_REC_CLEARTYPE)
+						plitem_mybest_judge(plitemid,cnt,ID_DATA_EXCELLENT)=int(IRsyncstruct(ID_REC_EXCELLENT))
+						plitem_mybest_judge(plitemid,cnt,ID_DATA_GREAT)=int(IRsyncstruct(ID_REC_GREAT))
+						plitem_mybest_judge(plitemid,cnt,ID_DATA_GOOD)=int(IRsyncstruct(ID_REC_GOOD))
+						plitem_mybest_judge(plitemid,cnt,ID_DATA_BAD)=int(IRsyncstruct(ID_REC_BAD))
+						plitem_mybest_judge(plitemid,cnt,ID_DATA_MISS)=int(IRsyncstruct(ID_REC_MISS))
+						plitem_mybest_judge(plitemid,cnt,ID_DATA_EARLY)=int(IRsyncstruct(ID_REC_EARLY))
+						plitem_mybest_judge(plitemid,cnt,ID_DATA_LATE)=int(IRsyncstruct(ID_REC_LATE))
+						dim tmpint:tmpint=limit(int(IRsyncstruct(ID_REC_EARLY))+int(IRsyncstruct(ID_REC_LATE)),1)
+						plitem_mybest_ratio(plitemid,cnt)=strf("%.1f",double(IRsyncstruct(ID_REC_EARLY))/double(tmpint))+"% / "
+						plitem_mybest_ratio(plitemid,cnt)+strf("%.1f",double(IRsyncstruct(ID_REC_LATE))/double(tmpint))+"%"
+						if IRsyncstruct(ID_REC_PACE_4BINHEX)=="" {
+							poke plitem_mybest_gauge(plitemid,cnt),0,255
+						} else {
+							sdim HEXdecbin
+							ConvHEXdec HEXdecbin,IRsyncstruct(ID_REC_PACE_4BINHEX)
+							plitem_mybest_gauge(plitemid,cnt)=HEXdecbin
+						}
+					}
+				loop
+			loop
+		}
+
+		ActiveColumnID(ID_SONGS)=0
+		bfActiveColumnID(ID_SONGS)=0
 	return
 
 	#deffunc StartMusicSelect
@@ -290,6 +437,7 @@
 				bfHoverColumnID(ID_CATEGORY)=HoverColumnID(ID_CATEGORY)
 				if ((GetMouseInput()&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&HoverColumnID(ID_CATEGORY)!-1 {
 					ActiveColumnID(ID_CATEGORY)=HoverColumnID(ID_CATEGORY)
+					ScanAllPlaylist ActiveColumnID(ID_CATEGORY)
 					PushButtonFlag=TRUE
 				}
 			}
@@ -450,11 +598,25 @@
 			DrawStringToHandle 1398,585,strf("%04d",plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_EARLY)),GetColor(255,255,255),hdxfont(fPS16)
 			DrawStringToHandle 1398,604,strf("%04d",plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_LATE)),GetColor(255,255,255),hdxfont(fPS16)
 			DrawStringToHandle 1398,625,plitem_mybest_ratio(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(255,255,255),hdxfont(fPS16)
-			if peek(plitem_mybest_gauge(ActiveColumnID(ID_SONGS),CurSelLev),0)==255 {
+			if peek(plitem_mybest_gauge(ActiveColumnID(ID_SONGS),CurSelLev),0)==255 {		//ゲージ記録なし
 				setease 100,256,ease_linear+ease_loop
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,60)
 				DrawGraph 1170,706,hdximg(ilayer_nodata),TRUE
 			} else {
+				repeat 350-1		//グラフ描画
+					dim GraphColorCode:dim GraphDrawValue
+					GraphDrawValue(0)=int(double(peek(plitem_mybest_gauge(ActiveColumnID(ID_SONGS),CurSelLev),cnt))*0.8)
+					GraphDrawValue(1)=int(double(peek(plitem_mybest_gauge(ActiveColumnID(ID_SONGS),CurSelLev),cnt+1))*0.8)
+
+					GraphColorCode=GetColor(255,255,255)
+					if plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev)=="ASSIST-CLEAR"|plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev)=="CLEAR" {		//加点式
+						if GraphDrawValue(0)>70.0 :GraphColorCode=GetColor(100,255,100):else:GraphColorCode=GetColor(255,50,50)
+					}
+					if plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev)=="EXPERT-CLEAR" :GraphColorCode=GetColor(255,50,80)	//EXPERTゲージ
+					if plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev)=="MADNESS-CLEAR" :GraphColorCode=GetColor(132,60,160) //MADNESSゲージ
+
+					DrawLine 1170+cnt,706+80-GraphDrawValue(0),1170+1+cnt,706+80-GraphDrawValue(1),GraphColorCode,2
+				loop
 			}
 
 		//プレイ開始ボタン
@@ -473,39 +635,41 @@
 			}
 
 		//難易度変更ボタン
-			if plitem_UUID(ActiveColumnID(ID_SONGS),0)!"*" {
-				if CurSelLev==0 {	//normal
-					DrawGraph 1254,826,hdximg(ibutton_normal_2),TRUE
-				} else {
-					if insquare(CursorPosX,CursorPosY,1254,826,1254+150,826+32) {
-						if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=0:PushButtonFlag=TRUE
-						DrawGraph 1254,826,hdximg(ibutton_normal_1),TRUE
+			if ActiveColumnID(ID_CATEGORY)==0 {	//すべての楽曲のときのみ
+				if plitem_UUID(ActiveColumnID(ID_SONGS),0)!"*" {
+					if CurSelLev==0 {	//normal
+						DrawGraph 1254,826,hdximg(ibutton_normal_2),TRUE
 					} else {
-						DrawGraph 1254,826,hdximg(ibutton_normal_0),TRUE
+						if insquare(CursorPosX,CursorPosY,1254,826,1254+150,826+32) {
+							if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=0:PushButtonFlag=TRUE
+							DrawGraph 1254,826,hdximg(ibutton_normal_1),TRUE
+						} else {
+							DrawGraph 1254,826,hdximg(ibutton_normal_0),TRUE
+						}
 					}
 				}
-			}
-			if plitem_UUID(ActiveColumnID(ID_SONGS),1)!"*" {
-				if CurSelLev==1 {	//hard
-					DrawGraph 1254,866,hdximg(ibutton_hard_2),TRUE
-				} else {
-					if insquare(CursorPosX,CursorPosY,1254,866,1254+150,866+32) {
-						if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=1:PushButtonFlag=TRUE
-						DrawGraph 1254,866,hdximg(ibutton_hard_1),TRUE
+				if plitem_UUID(ActiveColumnID(ID_SONGS),1)!"*" {
+					if CurSelLev==1 {	//hard
+						DrawGraph 1254,866,hdximg(ibutton_hard_2),TRUE
 					} else {
-						DrawGraph 1254,866,hdximg(ibutton_hard_0),TRUE
+						if insquare(CursorPosX,CursorPosY,1254,866,1254+150,866+32) {
+							if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=1:PushButtonFlag=TRUE
+							DrawGraph 1254,866,hdximg(ibutton_hard_1),TRUE
+						} else {
+							DrawGraph 1254,866,hdximg(ibutton_hard_0),TRUE
+						}
 					}
 				}
-			}
-			if plitem_UUID(ActiveColumnID(ID_SONGS),2)!"*" {
-				if CurSelLev==2 {	//chaos
-					DrawGraph 1254,906,hdximg(ibutton_chaos_2),TRUE
-				} else {
-					if insquare(CursorPosX,CursorPosY,1254,906,1254+150,906+32) {
-						if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=2:PushButtonFlag=TRUE
-						DrawGraph 1254,906,hdximg(ibutton_chaos_1),TRUE
+				if plitem_UUID(ActiveColumnID(ID_SONGS),2)!"*" {
+					if CurSelLev==2 {	//chaos
+						DrawGraph 1254,906,hdximg(ibutton_chaos_2),TRUE
 					} else {
-						DrawGraph 1254,906,hdximg(ibutton_chaos_0),TRUE
+						if insquare(CursorPosX,CursorPosY,1254,906,1254+150,906+32) {
+							if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=2:PushButtonFlag=TRUE
+							DrawGraph 1254,906,hdximg(ibutton_chaos_1),TRUE
+						} else {
+							DrawGraph 1254,906,hdximg(ibutton_chaos_0),TRUE
+						}
 					}
 				}
 			}
