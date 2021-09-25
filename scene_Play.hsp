@@ -623,22 +623,22 @@
 
 		//レーン
 			//x4
-				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),780,64,1140,864,780,64,DX_GRAPH_FILTER_GAUSS,32,6400
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,100
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,150
+				if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),780,64,1140,864,780,64,DX_GRAPH_FILTER_GAUSS,32,6400:SetDrawBlendMode DX_BLENDMODE_ALPHA,100
 				DrawBox 780,64,1140,864,GetColor(255,255,255),TRUE
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
 				repeat 4
 					DrawBox 780+90*cnt,64,780+90*(cnt+1),864,GetColor(0,0,0),FALSE
 				loop
 			//side(l)
-				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),662,64,772,864,662,64,DX_GRAPH_FILTER_GAUSS,32,6400
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,100
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,150
+				if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),662,64,772,864,662,64,DX_GRAPH_FILTER_GAUSS,32,6400:SetDrawBlendMode DX_BLENDMODE_ALPHA,100
 				DrawBox 662,64,772,864,GetColor(255,255,255),TRUE
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
 				DrawBox 662,64,772,864,GetColor(0,0,0),FALSE
 			//side(r)
-				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),1148,64,1258,864,1148,64,DX_GRAPH_FILTER_GAUSS,32,6400
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,100
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,150
+				if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),1148,64,1258,864,1148,64,DX_GRAPH_FILTER_GAUSS,32,6400:SetDrawBlendMode DX_BLENDMODE_ALPHA,100
 				DrawBox 1148,64,1258,864,GetColor(255,255,255),TRUE
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
 				DrawBox 1148,64,1258,864,GetColor(0,0,0),FALSE
@@ -921,7 +921,7 @@
 						if judgeAfCnt\2==0:AddCount LaneBombCount(cnt)
 					}
 				}
-				if ParticleEffFlag(cnt)==1 {
+				if ParticleEffFlag(cnt)==1&LowQuaFlag@==FALSE {
 					dim EaseWidth:dim EaseHeight:dim EasePosX:dim EasePosY
 					setease 0.4,1,ease_cubic_out
 					EaseWidth=int(geteasef(ParticleEffCount(cnt),25)*640)
@@ -986,6 +986,7 @@
 			DrawStringToHandle 1618,182,"00.00",GetColor(30,30,30),hdxfont(fSQNUM16)
 
 		//プロフィール
+		/*
 			//アイコン
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				DrawGraph 20,390,hCharImg@charicon(RegCharID@portalsync),TRUE
@@ -1001,7 +1002,7 @@
 			//パートナーレベル
 				DrawStringToHandle 182,526,str(CharLev@charicon(RegCharID@portalsync)),GetColor(10,10,10),hdxfont(fNSCJM16)
 			//総合能力値
-				DrawStringToHandle 182,564,strf("%.3f",RegPfPoint@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)
+				DrawStringToHandle 182,564,strf("%.3f",RegPfPoint@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)*/
 
 		//ゲージ
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
@@ -1062,6 +1063,7 @@
 					LoadMusicSelectImages
 					LoadMusicSelectSounds
 					InitMusicSelectFonts
+					IRsync
 					ScanAllPlaylist
 					DrawLoadTransition 0,TransitionFrame,1
 					wait 50
@@ -1308,6 +1310,8 @@
 
 		if curScore>=MybestRecordBuf(ID_REC_SCORE) :WebAPI_SendNewRecord HTTPpostdata
 		sdim HTTPpostdata
+
+		WebAPI_SendGlobalRanking GetChartInfo(META_UUID),curScore
 	return
 
 #global

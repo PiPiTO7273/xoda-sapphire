@@ -20,6 +20,8 @@
 		FPSvalue@=int(GetINIvalue(coreBuf,"Graphics","Refresh"))
 		dim VsyncFlag@
 		VsyncFlag@=ConvStrToBool(GetINIvalue(coreBuf,"Graphics","Vsync"))
+		dim FullScreenFlag@
+		FullScreenFlag@=ConvStrToBool(GetINIvalue(coreBuf,"Graphics","FullScreen"))
 		dim BGAblurlev@
 		sdim tmpstr:tmpstr=GetINIvalue(coreBuf,"Graphics","Movie.Blur")
 		strrep tmpstr,"x",""
@@ -31,6 +33,8 @@
 			case"low":BGAquality@="lq":swbreak
 			case"disable":BGAquality@="*":swbreak
 		swend
+		dim LowQuaFlag@
+		LowQuaFlag@=ConvStrToBool(GetINIvalue(coreBuf,"Graphics","Low.Quality"))
 		dim CounterLev@
 		CounterLev@=int(GetINIvalue(coreBuf,"Graphics","Counter.Level"))
 
@@ -39,8 +43,10 @@
 	//DXÉâÉCÉuÉâÉäÇèâä˙âª
 	#deffunc InitDxlib
 		SetOutApplicationLogValidFlag 0
-		SetUseDirectDrawDeviceIndex 1
-		;ChangeWindowMode TRUE
+		;SetUseDirectDrawDeviceIndex 0
+		ChangeWindowMode FullScreenFlag@!1
+		SetWindowStyleMode 7
+		SetWindowSizeChangeEnableFlag TRUE,TRUE
 		SetGraphMode DispWidth@,DispHeight@,32
 		SetAlwaysRunFlag TRUE
 		SetWaitVSyncFlag VsyncFlag@
@@ -201,6 +207,7 @@
 		return
 
 	#deffunc DrawLoadTransition int _color,int _time,int _flag
+		if LowQuaFlag@==TRUE :return
 		repeat _time+1
 			if _flag==0 {
 				setease 0,256,ease_linear

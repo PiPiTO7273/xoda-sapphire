@@ -1,0 +1,446 @@
+/*
+	HSP連想配列ライブラリ ver1.00 for HSP3.31
+								作成者 しますず
+								作成日 2014/01/30
+								更新日 2014/01/31
+
+	キーとして使用できるデータ形式
+		str int double の3種
+
+	データとして使用できるデータ形式
+		str int double label com module ほかバイナリデータ
+
+
+	// インスタンス形式 命令、関数
+	stdmap_create map, [name=""]
+	stdmap_set    map, key, data
+	stdmap_set2   map, key, data, [datasize=0]
+	stdmap_get    map, key, [data], [datasize]
+	stdmap_del    map, key
+	stdmap_exist  map, key
+
+	stdmap_member_num_get(map)
+	stdmap_name_set map, name
+	stdmap_name_get(map)
+
+	stdmap_index_key_get  map, index, key
+	stdmap_index_data_get map, index, [data], [datasize]
+	stdmap_map_del map
+
+
+	// コンテキスト形式 命令、関数
+	gstdmap_sel   [name="default"]
+	gstdmap_set   key, data
+	gstdmap_set2  key, data, [datasize=0]
+	gstdmap_get   key, data, [datasize]
+	gstdmap_del   key
+	gstdmap_exist key
+
+	gstdmap_member_num_get()
+	gstdmap_name_get()
+
+	gstdmap_index_key_get index, key
+	gstdmap_index_data_get index, [data], [datasize]
+
+	gstdmap_map_num_get()
+	gstdmap_map_del
+	gstdmap_map_index_name_get index, name
+
+
+	接頭辞について
+		stdmap -> standard map
+		gstdmap -> global standard map
+
+		C++ STL の std::map を志向したもので
+		map_xxx の命名はゲーム作成に多用されると考えたため
+		stdmap としています
+		global は影響範囲を示したものです
+
+	特徴
+		同一の stdmap に対して
+			キーとして複数のデータ形式を使用できます
+			データとして複数のデータ形式を使用できます
+		例として
+			gstdmap_set "apple", "red"
+			gstdmap_set 123, "120+3"
+			gstdmap_set "pi", 3.14159
+		のように同時に複数のデータ形式が使用でき、データ形式は保存されます
+		キーとしての "1" と 1 と 1.0 は別々のものとして扱われます
+
+		配列を扱うよりもかなり遅い関数ですので、使い分けて下さい
+
+
+	利用範囲
+		ソースコードの再配布は無償での再配布に限り無制限ですが作成者を偽るのはご遠慮下さい
+		得られたバイナリについては営利利用でも非営利利用でも無制限で利用可能です
+		クレジット表記も必要ありませんがどこかに書いてくれると喜びます
+		書いてくれる場合記法は特にありませんが考えるのが面倒なときは
+		「HSP連想配列ライブラリ by しますず」
+		としてください
+		改変したものを再配布する場合は改変したことを分かるように記述して下さい
+*/
+#ifndef INCLUDE_STDMAP_HSP
+#define INCLUDE_STDMAP_HSP
+
+
+/*============================================================
+	データメンバ（内部だけで使用される）
+============================================================*/
+#module stdmap_member_mod m_id, m_key, m_data, m_datasize
+
+#defcfunc stdmap_member_unitsize_get var data, local temp
+	if vartype(data)=vartype("str") : return 1
+	dimtype temp, vartype(data), 2
+	return varptr(temp(1))-varptr(temp(0))
+
+
+#modinit var key, var data, int datasize, \
+	local id
+
+	mref id, 2
+	m_id=id
+	m_key=key
+	stdmap_member_data_set thismod, data, datasize
+	return m_id
+
+
+#modcfunc stdmap_member_id_get
+	return m_id
+
+
+#modfunc stdmap_member_data_set var data, int datasize
+	if datasize<=0 {
+		m_datasize=0
+		m_data=data
+	} else {
+		m_datasize=datasize
+		dimtype m_data, vartype(data), m_datasize
+		memcpy m_data, data, stdmap_member_unitsize_get(data)*m_datasize
+	}
+	return
+
+
+#modfunc stdmap_member_data_get var data
+	if m_datasize<=0 {
+		data=m_data
+	} else {
+		dimtype data, vartype(m_data), m_datasize
+		memcpy data, m_data, stdmap_member_unitsize_get(m_data)*m_datasize
+	}
+	return m_datasize
+
+
+#modfunc stdmap_member_key_get var key
+	key=m_key
+	return
+
+#global
+
+
+
+/*============================================================
+	インスタンス形式
+============================================================*/
+#module stdmap_mod m_id, m_name, m_member, m_member_num, m_table
+
+#define global stdmap_create(%1,%2="") newmod %1,stdmap_mod,str(%2)
+#define global stdmap_map_del(%1)      delmod %1
+
+// cmpopt varinit 1 対策
+#deffunc local stdmap_avoid_varinit
+	dim s_var
+	dim s_var2
+	dim s_var3
+	return
+
+
+#defcfunc stdmap_strcmp var a, var b, \
+	local ca, local cb
+
+	repeat
+		ca=peek(a, cnt)
+		cb=peek(b, cnt)
+		if ca=0 or ca!cb : break
+	loop
+	if ca<cb : return -1
+	return ca>cb
+
+
+#defcfunc stdmap_key_compare var key1, var key2
+	if vartype(key1)!vartype(key2) {
+		return (vartype(key1)>vartype(key2))*2-1
+	}
+
+	if vartype(key1)=vartype("str") {
+		return stdmap_strcmp(key1, key2)
+	}
+	if key1<key2 : return -1
+	return key1>key2
+
+
+#deffunc stdmap_table_expand var x
+	return
+
+
+#modinit str name, \
+	local id
+
+	mref id, 2
+	m_id=id
+	stdmap_name_set thismod, name
+	stdmap_clear thismod
+	return m_id
+
+
+#modcfunc stdmap_id_get
+	return m_id
+
+
+#modfunc stdmap_clear
+	dimtype m_member, 5
+	dim m_table
+	m_member_num=0
+	return
+
+
+#modfunc stdmap_name_set str name
+	m_name=name
+	return
+
+
+#modcfunc stdmap_name_get
+	return m_name
+
+
+#modfunc stdmap_search var key, var index, \
+	local s, local e, local c, local k, local cmp, local ret
+
+	s=0
+	e=m_member_num-1
+	repeat
+		if s>e : break
+		c=(s+e)/2
+		stdmap_member_key_get m_member(m_table(c)), k
+		cmp=stdmap_key_compare(k, key)
+		if cmp=0 : index=c : ret=1 : break
+
+		if cmp>0 {
+			e=c-1
+			index=c
+		} else {
+			s=c+1
+			index=c+1
+		}
+	loop
+	return ret
+
+
+#define global stdmap_set(%1,%2,%3) s_var@stdmap_mod=%2 : s_var2@stdmap_mod=%3 : stdmap_set_ %1,s_var@stdmap_mod,s_var2@stdmap_mod,0
+#define global stdmap_set2(%1,%2,%3,%4=0) s_var@stdmap_mod=%2 : stdmap_set_ %1,s_var@stdmap_mod,%3,%4
+#modfunc stdmap_set_ var key, var data, int datasize, \
+	local index, local id
+
+	stdmap_search thismod, key, index
+	if stat {
+		stdmap_member_data_set m_member(m_table(index)), data, datasize
+		return 2
+	}
+
+	newmod m_member, stdmap_member_mod, key, data, datasize
+	id=stat
+
+	stdmap_table_expand m_table(m_member_num)
+
+	memcpy m_table, m_table, 4*(m_member_num-index), 4*(index+1), 4*index
+	m_member_num++
+
+	m_table(index)=id
+
+	return 1
+
+
+#define global stdmap_get(%1,%2,%3=s_var2@stdmap_mod,%4=s_var3@stdmap_mod) s_var@stdmap_mod=%2 : stdmap_get_ %1,s_var@stdmap_mod,%3,%4
+#modfunc stdmap_get_ var key, var data, var datasize, \
+	local index
+
+	stdmap_search thismod, key, index
+	if stat=0 : return 0
+
+	stdmap_member_data_get m_member(m_table(index)), data
+	datasize=stat
+	return 1
+
+
+#define global stdmap_del(%1,%2) s_var@stdmap_mod=%2 : stdmap_del_ %1,s_var@stdmap_mod
+#modfunc stdmap_del_ var key, \
+	local index, local id
+
+	stdmap_search thismod, key, index
+	if stat=0 : return 0
+
+	id=m_table(index)
+	delmod m_member(id)
+
+	m_member_num--
+	memcpy m_table, m_table, 4*(m_member_num-index), 4*index, 4*(index+1)
+
+	return 1
+
+
+#define global stdmap_exist(%1,%2) s_var@stdmap_mod=%2 : stdmap_exist_ %1,s_var@stdmap_mod
+#modfunc stdmap_exist_ var key, \
+	local index
+
+	stdmap_search thismod, key, index
+	return stat
+
+
+#modcfunc stdmap_member_num_get
+	return m_member_num
+
+
+#modfunc stdmap_index_key_get int index, var key
+	if index<0 or m_member_num<=index : return 0
+	stdmap_member_key_get m_member(m_table(index)), key
+	return 1
+
+
+#define global stdmap_index_data_get(%1,%2=0,%3=s_var@stdmap_mod,%4=s_var2@stdmap_mod) stdmap_index_data_get_ %1,%2,%3,%4
+#modfunc stdmap_index_data_get_ int index, var data, var datasize
+	if index<0 or m_member_num<=index : return 0
+	stdmap_member_data_get m_member(m_table(index)), data
+	datasize=stat
+	return 1
+
+#global
+
+
+
+/*============================================================
+	コンテキスト形式
+============================================================*/
+#module gstdmap_mod
+
+#define global gstdmap_sel(%1="default") gstdmap_sel_ str(%1)
+
+// cmpopt varinit 1 対策
+#deffunc local gstdmap_avoid_varinit
+	dim s_is_initialized
+	dim s_var
+	dim s_var2
+	dim s_var3
+	return
+
+
+// 自動で呼ばれるため、明示的に呼び出す必要は無い
+#deffunc gstdmap_init
+	if s_is_initialized : return
+	s_is_initialized=1
+	dim s_mapmap
+	dim s_map
+	dim s_map_cur
+	stdmap_create s_mapmap
+	gstdmap_sel
+	return
+
+
+#deffunc gstdmap_sel_ str name, \
+	local id
+
+	gstdmap_init
+	stdmap_get s_mapmap, name, s_map_cur
+	if stat : return 2
+
+	stdmap_create s_map, name
+	id=stat
+	stdmap_set s_mapmap, name, s_map(id)
+	s_map_cur=s_map(id)
+	return 1
+
+
+#define global gstdmap_set(%1,%2=0) s_var@gstdmap_mod=%1 : s_var2@gstdmap_mod=%2 : gstdmap_set_ s_var@gstdmap_mod,s_var2@gstdmap_mod,0
+#define global gstdmap_set2(%1,%2,%3=0) s_var@gstdmap_mod=%1 : gstdmap_set_ s_var@gstdmap_mod,%2,%3
+#deffunc gstdmap_set_ var key, var data, int datasize
+	gstdmap_init
+	stdmap_set_ s_map_cur, key, data, datasize
+	return
+
+
+#define global gstdmap_get(%1,%2=s_var2@gstdmap_mod,%3=s_var3@gstdmap_mod) s_var@gstdmap_mod=%1 : gstdmap_get_ s_var@gstdmap_mod,%2,%3
+#deffunc gstdmap_get_ var key, var data, var datasize
+	gstdmap_init
+	stdmap_get_ s_map_cur, key, data, datasize
+	return
+
+
+#define global gstdmap_del(%1) s_var@gstdmap_mod=%1 : gstdmap_del_ s_var@gstdmap_mod
+#deffunc gstdmap_del_ var key
+	gstdmap_init
+	stdmap_del_ s_map_cur, key
+	return
+
+
+#define global gstdmap_exist(%1) s_var@gstdmap_mod=%1 : gstdmap_exist_ s_var@gstdmap_mod
+#deffunc gstdmap_exist_ var key
+	gstdmap_init
+	stdmap_exist_ s_map_cur, key
+	return stat
+
+
+#defcfunc gstdmap_member_num_get
+	gstdmap_init
+	return stdmap_member_num_get(s_map_cur)
+
+
+#deffunc gstdmap_clear
+	gstdmap_init
+	stdmap_clear s_map_cur
+	return
+
+
+#deffunc gstdmap_index_key_get int index, var key
+	gstdmap_init
+	stdmap_index_key_get s_map_cur, index, key
+	return
+
+
+#define global gstdmap_index_data_get(%1,%2=s_var@gstdmap_mod,%3=s_var2@gstdmap_mod) gstdmap_index_data_get_ %1,%2,%3
+#deffunc gstdmap_index_data_get_ int index, var data, var datasize
+	gstdmap_init
+	stdmap_index_data_get s_map_cur, index, data, datasize
+	return
+
+
+#deffunc gstdmap_map_del \
+	local map_id, local map_name
+
+	gstdmap_init
+
+	map_id=stdmap_id_get(s_map_cur)
+	map_name=stdmap_name_get(s_map_cur)
+	stdmap_del s_mapmap, map_name
+	delmod s_map(map_id)
+
+	gstdmap_sel
+	return
+
+
+#defcfunc gstdmap_map_num_get
+	gstdmap_init
+	return stdmap_member_num_get(s_mapmap)
+
+
+#deffunc gstdmap_map_index_name_get int index, var name
+	gstdmap_init
+	stdmap_index_key_get s_mapmap, index, name
+	return stat
+
+
+#defcfunc gstdmap_name_get
+	gstdmap_init
+	return stdmap_name_get(s_map_cur)
+
+#global
+
+
+#endif

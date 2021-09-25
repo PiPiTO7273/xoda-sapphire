@@ -118,7 +118,7 @@
 		bfCursorPosX@=CursorPosX@:bfCursorPosY@=CursorPosY@
 
 	//デバッグ文字列
-	/*
+
 		ChangeFont"MS GOTHIC":SetFontSize 16
 		ChangeFontType DX_FONTTYPE_NORMAL
 		DrawDebugString 0,0,"XODA Sapphire @debug"
@@ -127,7 +127,7 @@
 		DrawDebugString 0,4,"FPS="+double(curFPS@)
 		DrawDebugString 0,6,"C="+coreCount+" F="+FrameCount+" S="+SceneCount+" ,Level="+CounterLev@
 		DrawDebugString 0,7,"Cursor ("+CursorPosX+","+CursorPosY+") "+GetMouseWheelRotVol()
-*/
+
 	coreCount++
 	AddCount FrameCount@
 	AddCount SceneCount@
@@ -140,6 +140,9 @@
 
 	goto*MainLoop
 
-*Exit
+*ExitProg
 	dxlib_End
+	return
+*Exit
+	gosub*ExitProg
 	end

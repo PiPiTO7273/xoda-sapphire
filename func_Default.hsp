@@ -92,4 +92,51 @@
 		cfunc64v BASS_ChannelSetPosition,_hwnd,0,0,0
 		cfunc64v BASS_ChannelPlay,_hwnd
 		return
+
+	#deffunc InitIntArray
+		sdim i_keylist:dim i_vallist
+	return
+	#deffunc InitStrArray
+		sdim s_keylist:dim s_vallist
+	return
+	#deffunc RegIntArray str _key,int _value
+		if vartype(i_keylist)==4 :InitIntArray
+		dim mode:mode=0
+		repeat length(i_keylist)
+			if _key==i_keylist(cnt) {
+				vallist(cnt)=_value
+				mode=1
+			}
+		loop
+		if mode==0 {
+			i_keylist(length(i_keylist))=_key
+			vallist(length(vallist))=_value
+		}
+	return
+	#defcfunc GetIntArray str _key
+		dim res
+		repeat length(i_keylist)
+			if _key==i_keylist(cnt) :res=vallist(cnt)
+		loop
+	return res
+	#deffunc RegStrArray str _key,str _value
+		if vartype(s_keylist)==4 :InitStrArray
+		dim mode:mode=0
+		repeat length(s_keylist)
+			if _key==s_keylist(cnt) {
+				vallist(cnt)=_value
+				mode=1
+			}
+		loop
+		if mode==0 {
+			s_keylist(length(s_keylist))=_key
+			vallist(length(vallist))=_value
+		}
+	return
+	#defcfunc GetStrArray str _key
+		dim res
+		repeat length(s_keylist)
+			if _key==s_keylist(cnt) :res=vallist(cnt)
+		loop
+	return res
 #global

@@ -37,6 +37,8 @@
 #define global LogChargridWidth 9
 #define global LogChargridHeight 18
 
+#define global OfflinePass 1
+
 #define global hash_core "fef896dab0abadaf7ebea29860f3957fe253d200322039fcfb42358b578ce944"
 
 #define global TransitionFrame 10
