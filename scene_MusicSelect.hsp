@@ -250,7 +250,7 @@
 						switch _filter
 							case ID_CAT_RANK_EX
 								sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
-								if tmpstr=="EX"|tmpstr=="EX+" {
+								if tmpstr=="EX"|tmpstr=="EX+"|tmpstr="MAX" {
 									catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
 									numcatitem++
 								}
@@ -292,6 +292,7 @@
 				sdim plitem_Artist@_org_,64,numitem,3
 				sdim plitem_Source@_org_,64,numitem,3
 				sdim plitem_UUID@_org_,32,numitem,3
+				sdim plitem_resID@_org_,32,numitem,3
 				sdim plitem_Path@_org_,64,numitem,3
 				dim plitem_Level@_org_,numitem,3
 				dim plitem_mybest_score@_org_,numitem,3
@@ -315,6 +316,7 @@
 						plitem_Artist@_org_(plitemid,pllevid)=plitem_Artist(plitemid,pllevid)
 						plitem_Source@_org_(plitemid,pllevid)=plitem_Source(plitemid,pllevid)
 						plitem_UUID@_org_(plitemid,pllevid)=plitem_UUID(plitemid,pllevid)
+						plitem_resID@_org_(plitemid,pllevid)=plitem_resID(plitemid,pllevid)
 						plitem_Path@_org_(plitemid,pllevid)=plitem_Path(plitemid,pllevid)
 						plitem_Level@_org_(plitemid,pllevid)=plitem_Level(plitemid,pllevid)
 						plitem_mybest_score@_org_(plitemid,pllevid)=plitem_mybest_score(plitemid,pllevid)
@@ -345,6 +347,7 @@
 				sdim plitem_Artist,64,numcatitem,1
 				sdim plitem_Source,64,numcatitem,1
 				sdim plitem_UUID,32,numcatitem,1
+				sdim plitem_resID,32,numcatitem,1
 				sdim plitem_Path,64,numcatitem,1
 				dim plitem_Level,numcatitem,1
 				dim plitem_mybest_score,numcatitem,1
@@ -365,6 +368,7 @@
 					plitem_Artist(plitemid,0)=plitem_Artist@_org_(catobjid(plitemid),catlevid(plitemid))
 					plitem_Source(plitemid,0)=plitem_Source@_org_(catobjid(plitemid),catlevid(plitemid))
 					plitem_UUID(plitemid,0)=plitem_UUID@_org_(catobjid(plitemid),catlevid(plitemid))
+					plitem_resID(plitemid,0)=plitem_resID@_org_(catobjid(plitemid),catlevid(plitemid))
 					plitem_Path(plitemid,0)=plitem_Path@_org_(catobjid(plitemid),catlevid(plitemid))
 					plitem_Level(plitemid,0)=plitem_Level@_org_(catobjid(plitemid),catlevid(plitemid))
 					plitem_artwork(plitemid,0)=GetIntArray("mapimg."+plitem_UUID(plitemid,0))
@@ -399,6 +403,7 @@
 			sdim plitem_Artist,64,numitem,3
 			sdim plitem_Source,64,numitem,3
 			sdim plitem_UUID,32,numitem,3
+			sdim plitem_resID,32,numitem,3
 			sdim plitem_Path,64,numitem,3
 			dim plitem_Level,numitem,3
 			dim plitem_artwork,numitem,3
@@ -421,7 +426,7 @@
 				dim plitemid:plitemid=cnt
 				repeat 3
 					dim pllevid:pllevid=cnt
-					plitem_Path(plitemid,pllevid)="Data/"+plitem_UUID(plitemid,pllevid)+"/"+pllevid+".bin"
+					plitem_Path(plitemid,pllevid)="Data/map-"+plitem_UUID(plitemid,pllevid)+".bin"
 					//譜面ファイルの存在を確認
 					exist plitem_Path(plitemid,pllevid)
 					if strsize!-1 {
@@ -431,6 +436,7 @@
 						plitem_Artist(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Artist")
 						plitem_Source(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Source")
 						plitem_Level(plitemid,pllevid)=int(GetINIvalue(tmpstr,"Metadata","Level"))
+						plitem_resID(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Resource")
 						if FirstLoadFlag==FALSE {
 							dim tmpint:tmpint=LoadGraph("Data/"+plitem_UUID(plitemid,pllevid)+"/"+GetINIvalue(tmpstr,"Metadata","Artwork"))
 							if tmpint<=0 :tmpint=hdximg(iIcon_Artwork_Dummy)
@@ -460,7 +466,7 @@
 						} else {
 							sdim HEXdecbin
 							ConvHEXdec HEXdecbin,IRsyncstruct(ID_REC_PACE_4BINHEX)
-							plitem_mybest_gauge(plitemid,pllevid)=HEXdecbin
+							memcpy plitem_mybest_gauge(plitemid,pllevid),HEXdecbin,350
 						}
 						//世界ランキング
 						repeat 100
@@ -517,13 +523,18 @@
 			dim SceneCount
 			dim SongChangeCount
 			dim CatChangeCount
+			dim LClickKeepCount
+			dim JumpSceneFlag
+			dim JumpSceneCount
+			dim JumpSceneID
 			DecideCount=-1
 	return
 
 	#deffunc DrawMusicSelect
 
 		//カーソル位置補正
-			dim CursorPosX:dim CursorPosY
+			dim CursorPosX:dim CursorPosY:dim MouseInput
+			MouseInput=GetMouseInput()
 			CursorPosX=int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@)))
 			CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
 			RawWheelVal=GetMouseWheelRotVol()
@@ -549,7 +560,7 @@
 					loop
 					bfHoverColumnID(ID_CATEGORY)=HoverColumnID(ID_CATEGORY)
 					//ボタンが押された
-					if ((GetMouseInput()&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&HoverColumnID(ID_CATEGORY)!-1 {
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&HoverColumnID(ID_CATEGORY)!-1 {
 						ActiveColumnID(ID_CATEGORY)=HoverColumnID(ID_CATEGORY)
 						ScanAllPlaylist ActiveColumnID(ID_CATEGORY)
 						SongChangeCount=0:CatChangeCount=0
@@ -569,13 +580,22 @@
 					loop
 					bfHoverColumnID(ID_SONGS)=HoverColumnID(ID_SONGS)
 					//ボタンが押された
-					if ((GetMouseInput()&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&HoverColumnID(ID_SONGS)!-1 {
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&HoverColumnID(ID_SONGS)!-1 {
 						ActiveColumnID(ID_SONGS)=HoverColumnID(ID_SONGS)
 						SongChangeCount=0
 						PushButtonFlag=TRUE
 					}
 				}
 			}
+			repeat 3
+				if plitem_UUID(ActiveColumnID(ID_SONGS),CurSelLev)=="*" {
+					switch CurSelLev
+						case 0:CurSelLev=2:swbreak
+						case 1:CurSelLev=0:swbreak
+						case 2:CurSelLev=1:swbreak
+					swend
+				} else:break
+			loop
 
 		//背景動画
 			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
@@ -854,7 +874,7 @@
 			//プレイ開始ボタン
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				if insquare(CursorPosX,CursorPosY,1620,960,1620+280,960+64) {
-					if (GetMouseInput()&MOUSE_INPUT_LEFT)&DecideCount==-1 {
+					if (MouseInput&MOUSE_INPUT_LEFT)&DecideCount==-1 {
 						DrawGraph 1620,960,hdximg(ibutton_start_2),TRUE
 						PushButtonFlag=TRUE
 						PlaySE int(hbasschannel(sndDecide)),1.0
@@ -869,7 +889,7 @@
 			//オプション
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				if insquare(CursorPosX,CursorPosY,1720,850,1720+180,850+40) {
-					if (GetMouseInput()&MOUSE_INPUT_LEFT)&DecideCount==-1 {
+					if (MouseInput&MOUSE_INPUT_LEFT)&DecideCount==-1 {
 						DrawGraph 1720,850,hdximg(ibutton_option_2),TRUE
 						PushButtonFlag=TRUE
 						PlaySE int(hbasschannel(sndDecide)),1.0
@@ -888,7 +908,7 @@
 							DrawGraph 1254,826,hdximg(ibutton_normal_2),TRUE
 						} else {
 							if insquare(CursorPosX,CursorPosY,1254,826,1254+150,826+32) {
-								if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=0:PushButtonFlag=TRUE
+								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=0:PushButtonFlag=TRUE
 								DrawGraph 1254,826,hdximg(ibutton_normal_1),TRUE
 							} else {
 								DrawGraph 1254,826,hdximg(ibutton_normal_0),TRUE
@@ -900,7 +920,7 @@
 							DrawGraph 1254,866,hdximg(ibutton_hard_2),TRUE
 						} else {
 							if insquare(CursorPosX,CursorPosY,1254,866,1254+150,866+32) {
-								if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=1:PushButtonFlag=TRUE
+								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=1:PushButtonFlag=TRUE
 								DrawGraph 1254,866,hdximg(ibutton_hard_1),TRUE
 							} else {
 								DrawGraph 1254,866,hdximg(ibutton_hard_0),TRUE
@@ -912,7 +932,7 @@
 							DrawGraph 1254,906,hdximg(ibutton_chaos_2),TRUE
 						} else {
 							if insquare(CursorPosX,CursorPosY,1254,906,1254+150,906+32) {
-								if GetMouseInput()&MOUSE_INPUT_LEFT :CurSelLev=2:PushButtonFlag=TRUE
+								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=2:PushButtonFlag=TRUE
 								DrawGraph 1254,906,hdximg(ibutton_chaos_1),TRUE
 							} else {
 								DrawGraph 1254,906,hdximg(ibutton_chaos_0),TRUE
@@ -922,9 +942,79 @@
 				}
 		}
 		if OptionWindowFlag==1 {
-			if insquare(CursorPosX,CursorPosY,1828,4,1828+64,4+64)&(GetMouseInput()&MOUSE_INPUT_LEFT) {
+			if insquare(CursorPosX,CursorPosY,1828,4,1828+64,4+64)&(MouseInput&MOUSE_INPUT_LEFT) {
 				OptionWindowFlag=2:OptionWindowCount=0
+				PlaySE int(hbasschannel(sndCancel)),1.0
 			}
+			if insquare(CursorPosX,CursorPosY,1617,120,1617+50,120+32) {
+				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :AddSpeed@-0.1:PlaySE int(hbasschannel(sndCursor)),1.0
+				if LClickKeepCount>30&SceneCount\5==0 :AddSpeed@-0.1
+			}
+			if insquare(CursorPosX,CursorPosY,1817,120,1817+50,120+32) {
+				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :AddSpeed@+0.1:PlaySE int(hbasschannel(sndCursor)),1.0
+				if LClickKeepCount>30&SceneCount\5==0 :AddSpeed@+0.1
+			}
+			if insquare(CursorPosX,CursorPosY,1617,192,1617+50,192+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+				GaugeType@--
+				if GaugeType@<GAUGE_ASSIST :GaugeType@=GAUGE_MADNESS
+				PlaySE int(hbasschannel(sndCursor)),1.0
+			}
+			if insquare(CursorPosX,CursorPosY,1817,192,1817+50,192+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+				GaugeType@++
+				if GaugeType@>GAUGE_MADNESS :GaugeType@=GAUGE_ASSIST
+				PlaySE int(hbasschannel(sndCursor)),1.0
+			}
+			if insquare(CursorPosX,CursorPosY,1617,264,1617+50,264+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+				ObjPlacement@--
+				if ObjPlacement@<OBJP_NORMAL :ObjPlacement@=OBJP_S_AUTO
+				PlaySE int(hbasschannel(sndCursor)),1.0
+			}
+			if insquare(CursorPosX,CursorPosY,1817,264,1817+50,264+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+				ObjPlacement@++
+				if ObjPlacement@>OBJP_S_AUTO :ObjPlacement@=OBJP_NORMAL
+				PlaySE int(hbasschannel(sndCursor)),1.0
+			}
+			if insquare(CursorPosX,CursorPosY,1617,336,1617+50,336+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+				TargetScoreRank@--
+				if TargetScoreRank@<TARGET_SCORE_MAX :TargetScoreRank@=TARGET_SCORE_ONLINETOP
+				PlaySE int(hbasschannel(sndCursor)),1.0
+			}
+			if insquare(CursorPosX,CursorPosY,1817,336,1817+50,336+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+				TargetScoreRank@++
+				if TargetScoreRank@>TARGET_SCORE_ONLINETOP :TargetScoreRank@=TARGET_SCORE_MAX
+				PlaySE int(hbasschannel(sndCursor)),1.0
+			}
+			if insquare(CursorPosX,CursorPosY,1617,408,1617+50,408+32) {
+				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :JudgeOffset@-1:PlaySE int(hbasschannel(sndCursor)),1.0
+				if LClickKeepCount>30&SceneCount\5==0 :JudgeOffset@-1
+			}
+			if insquare(CursorPosX,CursorPosY,1817,408,1817+50,408+32) {
+				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :JudgeOffset@+1:PlaySE int(hbasschannel(sndCursor)),1.0
+				if LClickKeepCount>30&SceneCount\5==0 :JudgeOffset@+1
+			}
+			if insquare(CursorPosX,CursorPosY,1617,480,1617+50,480+32) {
+				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :DispOffset@-1:PlaySE int(hbasschannel(sndCursor)),1.0
+				if LClickKeepCount>30&SceneCount\5==0 :DispOffset@-1
+			}
+			if insquare(CursorPosX,CursorPosY,1817,480,1817+50,480+32) {
+				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :DispOffset@+1:PlaySE int(hbasschannel(sndCursor)),1.0
+				if LClickKeepCount>30&SceneCount\5==0 :DispOffset@+1
+			}
+			if insquare(CursorPosX,CursorPosY,1765,552,1765+100,552+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+				JumpSceneFlag=TRUE
+				JumpSceneCount=0
+				JumpSceneID=ID_KEYCONFIG
+				PlaySE int(hbasschannel(sndCursor)),1.0
+			}
+			if insquare(CursorPosX,CursorPosY,1801,624,1801+64,624+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+				if drawbonusFlag@ :drawbonusFlag@=FALSE:else:drawbonusFlag@=TRUE
+				PlaySE int(hbasschannel(sndCursor)),1.0
+			}
+			if insquare(CursorPosX,CursorPosY,1801,696,1801+64,696+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+				if AutoPlayFlag@ :AutoPlayFlag@=FALSE:else:AutoPlayFlag@=TRUE
+				PlaySE int(hbasschannel(sndCursor)),1.0
+			}
+			AddSpeed@=limitf(AddSpeed@,0.1,10.0)
 		}
 
 		//ステータス
@@ -933,7 +1023,7 @@
 			DrawStringToHandle 24,1048,"XODA SAPPHIRE",GetColor(230,230,230),hdxfont(fPS20)
 			DrawStringToHandle 220,1052,"Music Select",GetColor(210,210,210),hdxfont(fPS14)
 
-		if PushButtonFlag==TRUE&(GetMouseInput()&MOUSE_INPUT_LEFT)==TRUE&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+		if PushButtonFlag==TRUE&(MouseInput&MOUSE_INPUT_LEFT)==TRUE&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
 			PlaySE int(hbasschannel(sndCursor)),1.0
 		}
 
@@ -1023,9 +1113,54 @@
 						//キーの割り当て
 						DrawGraph 615,20+6*(64+8)+16,hdximg(iobj_button_change),TRUE
 						//ボーナスの表示
-						DrawGraph 650,20+7*(64+8)+16,hdximg(iobj_switch_off),TRUE
+						if drawbonusFlag@ {
+							DrawGraph 650,20+7*(64+8)+16,hdximg(iobj_switch_on),TRUE
+						} else :DrawGraph 650,20+7*(64+8)+16,hdximg(iobj_switch_off),TRUE
 						//オートプレイ
-						DrawGraph 650,20+8*(64+8)+16,hdximg(iobj_switch_off),TRUE
+						if AutoPlayFlag@ {
+							DrawGraph 650,20+8*(64+8)+16,hdximg(iobj_switch_on),TRUE
+						} else :DrawGraph 650,20+8*(64+8)+16,hdximg(iobj_switch_off),TRUE
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+						//流れてくる音符の速さ
+						DrawStringXCenterToHandle 517,40+72*0,strf("x%.2f",AddSpeed@),150,GetColor(0,0,0),hdxfont(fPS20)
+						sdim tmpstr
+						switch GaugeType@
+							case GAUGE_ASSIST:tmpstr="ASSIST":swbreak
+							case GAUGE_NORMAL:tmpstr="NORMAL":swbreak
+							case GAUGE_EXPERT:tmpstr="EXPERT":swbreak
+							case GAUGE_MADNESS:tmpstr="MADNESS":swbreak
+							default:tmpstr="#undefined."+GaugeType@:swbreak
+						swend
+						DrawStringXCenterToHandle 517,40+72*1,tmpstr,150,GetColor(0,0,0),hdxfont(fPS20)
+						sdim tmpstr
+						switch ObjPlacement@
+							case OBJP_NORMAL:tmpstr="NORMAL":swbreak
+							case OBJP_MIRROR:tmpstr="MIRROR":swbreak
+							case OBJP_S_MIRROR:tmpstr="S-MIRROR":swbreak
+							case OBJP_N_MIRROR:tmpstr="N-MIRROR":swbreak
+							case OBJP_H_MIRROR:tmpstr="H-MIRROR":swbreak
+							case OBJP_RANDOM:tmpstr="RANDOM":swbreak
+							case OBJP_A_RANDOM:tmpstr="A-RANDOM":swbreak
+							case OBJP_S_AUTO:tmpstr="S-AUTO":swbreak
+						swend
+						DrawStringXCenterToHandle 517,40+72*2,tmpstr,150,GetColor(0,0,0),hdxfont(fPS20)
+						sdim tmpstr
+						switch TargetScoreRank@
+							case TARGET_SCORE_MAX:tmpstr="理論値スコア":swbreak
+							case TARGET_SCORE_EX:tmpstr="EXランク":swbreak
+							case TARGET_SCORE_SSS:tmpstr="SSSランク":swbreak
+							case TARGET_SCORE_SS:tmpstr="SSランク":swbreak
+							case TARGET_SCORE_S:tmpstr="Sランク":swbreak
+							case TARGET_SCORE_AAA:tmpstr="AAAランク":swbreak
+							case TARGET_SCORE_AA:tmpstr="AAランク":swbreak
+							case TARGET_SCORE_A:tmpstr="Aランク":swbreak
+							case TARGET_SCORE_B:tmpstr="Bランク":swbreak
+							case TARGET_SCORE_MYBEST:tmpstr="自己ベスト":swbreak
+							case TARGET_SCORE_ONLINETOP:tmpstr="歴代ベスト":swbreak
+						swend
+						DrawStringXCenterToHandle 517,40+72*3,tmpstr,150,GetColor(0,0,0),hdxfont(fNSCJM20)
+						DrawStringXCenterToHandle 517,40+72*4,str(JudgeOffset@)+" ms",150,GetColor(0,0,0),hdxfont(fPS20)
+						DrawStringXCenterToHandle 517,40+72*5,str(DispOffset@)+" px",150,GetColor(0,0,0),hdxfont(fPS20)
 				SetDrawScreen hdximg@(iScene)
 			}
 			switch OptionWindowFlag
@@ -1057,14 +1192,25 @@
 			swend
 			AddCount OptionWindowCount
 
+		if JumpSceneFlag {
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(JumpSceneCount,20)
+			DrawBox 0,0,BufWidth@,BufHeight@,Getcolor(0,0,0),TRUE
+			if JumpSceneCount>20 {
+				curSceneID@=JumpSceneID
+			}
+			AddCount JumpSceneCount
+		}
+
 		if DecideCount>25+TransitionFrame {
 			//---debug---
 			DrawLoadTransition $FFFFFF,TransitionFrame,0
 			InitScene ID_PLAY
 			LoadGamePlayImages
 			InitGamePlayFonts
+			InitGamePlaySounds
 			LoadPartnerIcon
-			OpenChartFile"Data/"+plitem_UUID(ActiveColumnID(ID_SONGS),CurSelLev)+"/"+CurSelLev+".bin"
+			OpenChartFile"Data/map-"+plitem_UUID(ActiveColumnID(ID_SONGS),CurSelLev)+".bin",ActiveColumnID(ID_SONGS),CurSelLev
 			cfunc64v BASS_ChannelStop,hbasschannel(bgmMain)
 			DrawLoadTransition 0,10,1
 			SetDrawScreen hdximg@(iScene)
@@ -1076,8 +1222,9 @@
 		AddCount SceneCount
 		AddCount SongChangeCount
 		AddCount CatChangeCount
-		bfMouseInput=GetMouseInput()
+		bfMouseInput=MouseInput
 		if DecideCount!-1 :AddCount DecideCount
+		if MouseInput&MOUSE_INPUT_LEFT :AddCount LClickKeepCount:else:LClickKeepCount=0
 
 	return
 #global

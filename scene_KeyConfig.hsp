@@ -1,0 +1,11 @@
+
+#module _KEYCONFIG_
+
+	#deffunc StartKeyConfig
+	return
+
+	#deffunc DrawKeyConfig
+		DrawDebugString 0,20,"okay."
+	return
+
+#global

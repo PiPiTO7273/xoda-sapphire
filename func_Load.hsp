@@ -37,6 +37,8 @@
 		LowQuaFlag@=ConvStrToBool(GetINIvalue(coreBuf,"Graphics","Low.Quality"))
 		dim CounterLev@
 		CounterLev@=int(GetINIvalue(coreBuf,"Graphics","Counter.Level"))
+		dim DrawCursorFlag@
+		DrawCursorFlag@=ConvStrToBool(GetINIvalue(coreBuf,"Graphics","Use.CustomCursor"))
 
 	return
 
@@ -55,6 +57,7 @@
 		if stat==-1 {
 			dialog"グラフィック機能の初期化に失敗しました。"
 		}
+		;SetUseGDIFlag TRUE
 
 		//変数初期化
 			dim KeyFlag@,256

@@ -1,109 +1,149 @@
 
-#include"hsp3utf.as"
+#include"hsp3_64.as"
+#include"dxlib_x64.as"
+#include"a2d.hsp"
+#include"bass_x64.as"
+#include"hspint64.as"
 
-#module "inimodule"
-#uselib "kernel32"
-#cfunc WritePrivateProfileString "WritePrivateProfileStringA" sptr,sptr,sptr,sptr
-#cfunc GetPrivateProfileString "GetPrivateProfileStringA" sptr,sptr,sptr,sptr,sptr,sptr
-#cfunc GetFullPathName "GetFullPathNameA" sptr,sptr,sptr,sptr
-#define MAX_PATH 512
-#define NULL 0
-#define nSize 256
-;--------INIInit(INIモジュール初期化)---------
-;p1 INIファイルのパス
-#deffunc INIInit str inii_s
-	sdim INI_FileName,strlen(inii_s):INI_FileName=inii_s
-	sdim INI_LongName,MAX_PATH
-	exist inii_s:ini_filesize = strsize
-	inii_size = GetFullPathName(varptr(INI_FileName),MAX_PATH,varptr(INI_LongName),NULL)
-	return inii_size
-;--------INIGet(INIから読み込む)---------
-;p1 セクション名
-;p2 キー名
-;refstr 取得した文字列
-;戻り値　取得したサイズ
-#defcfunc INIGet str inig_section,str inig_key
-	mref inig_stat,64
-	mref inig_refstr,65
-	if(ini_filesize = -1){return 0}
-	sdim INI_Section,strlen(inig_section):INI_Section=inig_section
-	sdim INI_Key,strlen(inig_key):INI_Key=inig_key
-	sdim lpReturnedString,nSize
-	inig_stat   = GetPrivateProfileString(varptr(INI_Section),varptr(INI_Key),NULL,varptr(lpReturnedString),nSize,varptr(INI_LongName))
-	inig_refstr = lpReturnedString
-	return inig_refstr
-;--------INISet(INIを書き換える)---------
-;p1 セクション名
-;p2 キー名（""でセクションを削除）
-;p3 書き換える文字列（""でキーを削除）
-#deffunc INISet str inis_section,str inis_key,str inis_str
-	sdim INI_Section,strlen(inis_section):INI_Section=inis_section
-	if (inis_key!=""){sdim INI_Key,strlen(inis_key):INI_Key=inis_key:INI_KeyPtr=varptr(INI_Key)}else{INI_KeyPtr=NULL}
-	if (inis_str!=""){sdim INI_String,strlen(inis_str):INI_String=inis_str:INI_StringPtr=varptr(INI_String)}else{INI_StringPtr=NULL}
-	ret = WritePrivateProfileString(varptr(INI_Section),INI_KeyPtr,INI_StringPtr,varptr(INI_LongName))
-	return
-#global
-
+#include"NameSpace.hsp"
+#include"mod_BinPkg.hsp"
+#include"mod_dxlibplus.hsp"
+#include"mod_4bithex.hsp"
+#include"func_Default.hsp"
+#include"func_Load.hsp"
+#include"func_Sync.hsp"
+#include"svc_Layer.hsp"
+#include"svc_Online.hsp"
+#include"scene_Launcher.hsp"
+#include"scene_Title.hsp"
+#include"scene_Login.hsp"
+#include"scene_ModeSelect.hsp"
+#include"scene_MusicSelect.hsp"
+#include"scene_Play.hsp"
+#include"scene_Result.hsp"
 
 #packopt hide 1
 
-exist"core.ini"
-if strsize==-1 {
-	dialog"ランチャーを起動できませんでした。\n\nエラー : 起動設定ファイルが見つかりません。",1,"エラー"
-	end
-}
-INIInit"core.ini"
+	gsel 0,-1
 
-screen 0,320,320
-title"起動設定"
+	LoadCoreSettings"core.ini"
+	if GetINIvalue(coreBuf@_load_,"Hash","core")!hash_core {
+		dialog"err"
+		goto*exit
+	}
+	InitDxlib
+	InitBASSlib
+	LoadCoreImages
+	InitCoreSceneMan
+	;InitScene ID_PLAY
+	randomize
 
-syscolor 15:boxf
+	DrawLoadTransition 0,TransitionFrame,0
+	DrawLoadScreen"起動中",0
+	DrawLoadScreen"Portalにサインインしています。しばらくお待ち下さい。",50
 
-font"MS GOTHIC UI",20,1
-color 0,0,0
-pos 20,20:mes"こんにちは、"+sysinfo(1)+"さん"
+	//セーブデータ同期
+		SetDefaultSaveData
+		WebAPI_Init
+		sdim LoginUserInfo
+		LoginUserInfo(ID_HOST)="puoro.ml/apiv2"
+		LoginUserInfo(ID_NAME)=GetINIvalue(coreBuf@_load_,"Auth","Name")
+		LoginUserInfo(ID_KEY)=GetINIvalue(coreBuf@_load_,"Auth","Password")
+		LoginUserInfo(ID_DECODE)=GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_0")
+		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_1")
+		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_2")
+		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_3")
+		RegLoginInfo LoginUserInfo
+		WebAPI_SyncProfile
 
-font"MS GOTHIC UI",16,1
-color 0,0,0
-pos 16,60:mes"画面解像度"
-objsize 130,20
-if INIGet("Graphics","Display.Width")=="1920"&INIGet("Graphics","Display.Height")=="1080" :flag_1080p=1
-if INIGet("Graphics","Display.Width")=="1280"&INIGet("Graphics","Display.Height")=="720" :flag_720p=1
-if INIGet("Graphics","Display.Width")=="640"&INIGet("Graphics","Display.Height")=="480" :flag_480p=1
-chkbox"1920x1080 (1080p)",flag_1080p
-sendmsg objinfo(stat,2),$F4,$9
-chkbox"1280x720 (720p)",flag_720p
-sendmsg objinfo(stat,2),$F4,$9
-chkbox"640x480",flag_480p
-sendmsg objinfo(stat,2),$F4,$9
-pos 160,60:mes"オプション"
-if INIGet("Graphics","FullScreen")=="TRUE" :flag_fullscreen=1
-if INIGet("Graphics","Vsync")=="TRUE" :flag_vsync=1
-chkbox"フルスクリーンで起動する",flag_fullscreen
-chkbox"垂直同期を有効にする",flag_vsync
-pos 16,150:mes"ムービーの品質"
-if INIGet("Graphics","Movie.Quality")=="high" :sel_mvqua=0
-if INIGet("Graphics","Movie.Quality")=="mid" :sel_mvqua=1
-if INIGet("Graphics","Movie.Quality")=="low" :sel_mvqua=2
-if INIGet("Graphics","Movie.Quality")=="disable" :sel_mvqua=3
-combox sel_mvqua,0,"高 (1920x1080)\n中 (1280x720)\n低 (640x480)\nムービーを表示しない"
+	DrawLoadScreen"シーンを準備中",300
 
-objsize 120,30
-pos 180,260:button"プレイ",*boot
-stop
+	InitScene ID_MUSICSELECT
+	LoadMusicSelectImages
+	LoadMusicSelectSounds
+	InitMusicSelectFonts
+	IRsync
+	ScanAllPlaylist
 
-*boot
-	sendmsg objinfo(0,2),$F0:flag_1080p=stat
-	sendmsg objinfo(1,2),$F0:flag_720p=stat
-	sendmsg objinfo(2,2),$F0:flag_480p=stat
-	if flag_1080p :INISet"Graphics","Display.Width","1920":INISet"Graphics","Display.Height","1080"
-	if flag_720p :INISet"Graphics","Display.Width","1280":INISet"Graphics","Display.Height","720"
-	if flag_480p :INISet"Graphics","Display.Width","640":INISet"Graphics","Display.Height","480"
-	if flag_fullscreen :INISet"Graphics","FullScreen","TRUE":else:INISet"Graphics","FullScreen","FALSE"
-	if flag_vsync :INISet"Graphics","Vsync","TRUE":else:INISet"Graphics","Vsync","FALSE"
-	if sel_mvqua==0 :INISet"Graphics","Movie.Quality","high"
-	if sel_mvqua==1 :INISet"Graphics","Movie.Quality","mid"
-	if sel_mvqua==2 :INISet"Graphics","Movie.Quality","low"
-	if sel_mvqua==3 :INISet"Graphics","Movie.Quality","disable"
-	exec INIGet("App","Path")
+	DrawLoadTransition 0,TransitionFrame,1
+	wait 50
+	StartMusicSelect
+
+*MainLoop
+
+	ProcessMessage
+	if stat==-1 :goto*Exit
+	await	//HSPプロセス自体のウィンドウメッセージ処理
+
+	//垂直同期が無効の場合のFPS補正
+		ddim curFPS@,1
+		curFPS@=double(cfunc64(RET_FLOAT,GetFPS))
+		if VsyncFlag@==FALSE {
+			FPSvalue@=int(curFPS@)
+			if FPSvalue@==0 :FPSvalue@=1000
+		}
+
+	//キー判定
+	repeat 256:KeyFlag(cnt)=CheckHitKey(cnt):loop
+
+	SetDrawScreen hdximg@(iScene)
+	ClearDrawScreen
+	SetDrawMode DX_DRAWMODE_BILINEAR
+
+	switch curSceneID
+		case ID_PLAY:DrawGamePlay:swbreak
+		case ID_MUSICSELECT:DrawMusicSelect:swbreak
+	swend
+
+	SetDrawScreen DX_SCREEN_BACK
+	ClearDrawScreen
+
+	//シーン
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawExtendGraph 0,0,DispWidth@,DispHeight@,hdximg@(iScene),TRUE
+
+	//マウスカーソル
+		cfunc64v GetMousePoint,varptr64(CursorPosX@),varptr64(CursorPosY@)
+		if CursorHideCount@>FPSvalue@*2&curSceneID==ID_PLAY {
+			setease 256,0,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(CursorHideCount@-FPSvalue@*2,FPSvalue@/4)
+		} else {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		}
+		DrawGraph CursorPosX@-32,CursorPosY@-32,hdximg_arr_cursor@(CursorImgCount@),TRUE
+
+		if bfCursorPosX@!CursorPosX@|bfCursorPosY@!CursorPosY@ {
+			CursorHideCount@=0
+		}
+		bfCursorPosX@=CursorPosX@:bfCursorPosY@=CursorPosY@
+
+	//デバッグ文字列
+
+		ChangeFont"MS GOTHIC":SetFontSize 16
+		ChangeFontType DX_FONTTYPE_NORMAL
+		DrawDebugString 0,0,"XODA Sapphire @debug"
+		DrawDebugString 0,1,"HD "+BufWidth@+"x"+BufHeight@+" -> "+DispWidth@+"x"+DispHeight@
+		DrawDebugString 0,2,"Server : "+LoginUserInfo(ID_HOST)+" @\""+LoginUserInfo(ID_NAME)+"\" & \""+LoginUserInfo(ID_KEY)+"\""
+		DrawDebugString 0,4,"FPS="+double(curFPS@)
+		DrawDebugString 0,6,"C="+coreCount+" F="+FrameCount+" S="+SceneCount+" ,Level="+CounterLev@
+		DrawDebugString 0,7,"Cursor ("+CursorPosX+","+CursorPosY+") "+GetMouseWheelRotVol()
+
+	coreCount++
+	AddCount FrameCount@
+	AddCount SceneCount@
+	repeat 256:bfKeyFlag(cnt)=KeyFlag(cnt):loop
+	AddCount CursorImgCount@
+	AddCount CursorHideCount@
+	if CursorImgCount@>57 :CursorImgCount@=0
+
+	ScreenFlip
+
+	goto*MainLoop
+
+*ExitProg
+	SendAllProfile
+	dxlib_End
+	return
+*Exit
+	gosub*ExitProg
 	end

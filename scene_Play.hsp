@@ -64,6 +64,23 @@
 	#enum fSQNUM24
 	#enum fSQNUM40
 
+	//BASS Audio Libraryサンプル、チャンネルハンドル(gameplay)
+	#enum sndDefaultAssign0	=	0
+	#enum sndDefaultAssign1
+	#enum sndDefaultAssign2
+	#enum sndDefaultAssign3
+	#enum sndDefaultAssign4
+	#enum sndDefaultAssign5
+	#enum sndBurst
+	#enum vocBurst100
+	#enum vocBurst200
+	#enum vocBurst300
+	#enum vocBurst400
+	#enum vocBurst500
+	#enum sndClear
+	#enum sndClearEX
+	#enum sndFailed
+
 	//オブジェクトの種類
 	#enum OBJ_DUMMY		=	0
 	#enum OBJ_SINGLENOTE
@@ -84,12 +101,6 @@
 	#enum jres_Good
 	#enum jres_Bad
 	#enum jres_Miss
-
-	//ゲージ
-	#enum GAUGE_ASSIST		=	0
-	#enum GAUGE_NORMAL
-	#enum GAUGE_EXPERT
-	#enum GAUGE_MADNESS
 
 	//プレイ画面の画像リソースを読み込み
 	#deffunc LoadGamePlayImages
@@ -171,8 +182,36 @@
 		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
 	return
 
+	//プレイ画面で使用するサウンドの初期化
+	#deffunc InitGamePlaySounds
+		dim64 hbasschannel:dim64 hbasssample
+		repeat 6
+			LoadBASSsample"Data/snd_Hit.wav",hbasschannel(sndDefaultAssign0+cnt),hbasssample(sndDefaultAssign0+cnt),0
+		loop
+		LoadBASSsample"Data/snd_Burst.wav",hbasschannel(sndBurst),hbasssample(sndBurst),0
+		LoadBASSsample"Data/voc_100.wav",hbasschannel(vocBurst100),hbasssample(vocBurst100),0
+		LoadBASSsample"Data/voc_200.wav",hbasschannel(vocBurst200),hbasssample(vocBurst200),0
+		LoadBASSsample"Data/voc_300.wav",hbasschannel(vocBurst300),hbasssample(vocBurst300),0
+		LoadBASSsample"Data/voc_400.wav",hbasschannel(vocBurst400),hbasssample(vocBurst400),0
+		LoadBASSsample"Data/voc_500.wav",hbasschannel(vocBurst500),hbasssample(vocBurst500),0
+		LoadBASSsample"Data/snd_Clear.wav",hbasschannel(sndClear),hbasssample(sndClear),0
+		LoadBASSsample"Data/snd_Clear_ex.wav",hbasschannel(sndClearEX),hbasssample(sndClearEX),0
+		LoadBASSsample"Data/snd_Failed.wav",hbasschannel(sndFailed),hbasssample(sndFailed),0
+	return
+
+	//ランダム配置を取得
+	#defcfunc GetRandomArrayMap int _max
+		sdim res:dim _arrflag,_max:dim _cnt
+		repeat
+			resrnd=rnd(_max)
+			if _arrflag(resrnd)==1 :continue
+			res+str(resrnd):_arrflag(resrnd)=1:_cnt++
+			if _cnt==_max :break
+		loop
+		return res
+
 	//譜面ファイルを開く
-	#deffunc OpenChartFile str _filename
+	#deffunc OpenChartFile str _filename,int _itemid,int _levid
 		DrawLoadScreen"しばらくお待ち下さい",100
 		sdim chartFileName
 		chartFileName=_filename
@@ -189,17 +228,19 @@
 		chartMetaInfo(META_SOURCE)=GetINIvalue(chartFileBuf,"Metadata","Source")
 		chartMetaInfo(META_DIFFICULTY)=GetINIvalue(chartFileBuf,"Metadata","Difficulty")
 		chartMetaInfo(META_LEVEL)=GetINIvalue(chartFileBuf,"Metadata","Level")
+		chartMetaInfo(META_RESID)=GetINIvalue(chartFileBuf,"Metadata","Resource")
 		chartMetaInfo(META_BGA)=GetINIvalue(chartFileBuf,"Metadata","Background.Video")
 		chartMetaInfo(META_BGM)=GetINIvalue(chartFileBuf,"Metadata","Background.Audio")
 		chartMetaInfo(META_BGAOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Background.Video.Offset")
 		chartMetaInfo(META_BGMOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Background.Audio.Offset")
 		chartMetaInfo(META_BGAIMAGE)=GetINIvalue(chartFileBuf,"Metadata","Background.Image")
 		chartMetaInfo(META_EVOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Event.Sound.Offset")
+		chartMetaInfo(META_TOTALOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Total.Offset")
+		chartMetaInfo(META_SIDEFLAG)=GetINIvalue(chartFileBuf,"Metadata","Side.NoteFlag")
+		if chartMetaInfo(META_SIDEFLAG)=="TRUE" :flagSideNote=TRUE:else:flagSideNote=FALSE
 
 		//UUID取り出し
-			sdim tmpstr:tmpstr=chartFileName:strrep tmpstr,"\\","/"
-			split tmpstr,"/",tmpstr
-			chartMetaInfo(META_UUID)=tmpstr(length(tmpstr)-2)
+			chartMetaInfo(META_UUID)=getpath(_filename,1+8)
 
 		//汎用ムービーのパス指定
 			if chartMetaInfo(META_BGA)=="" :chartMetaInfo(META_BGA)="general-movie-*.ogv"
@@ -229,7 +270,7 @@
 
 		//プレイ開始前の待機時間(ms)
 		dim PreTime
-		PreTime=3000
+		PreTime=5000
 
 		//BPM関連の変数を初期化
 		dim BPMTiming
@@ -259,7 +300,7 @@
 					if int(BPMinfoprm(0))==0 {
 						BPMTiming(BPMpointMax)=int(BPMinfoprm(0))
 					} else {
-						BPMTiming(BPMpointMax)=int(BPMinfoprm(0))+PreTime
+						BPMTiming(BPMpointMax)=int(BPMinfoprm(0))+PreTime+int(chartMetaInfo(META_TOTALOFFSET))
 					}
 					BPMValue(BPMpointMax)=double(BPMinfoprm(1))
 					BPMpointMax++
@@ -268,7 +309,7 @@
 					split INIval,",",Objinfoprm
 					ObjLaneID(ObjMax)=int(Objinfoprm(0))
 					if flagSideNote==FALSE :ObjLaneID(ObjMax)++		//サイドノーツ分を移動
-					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime
+					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime+int(chartMetaInfo(META_TOTALOFFSET))
 					ObjSoundID(ObjMax)=int(Objinfoprm(2))
 					ObjSoundVol(ObjMax)=int(Objinfoprm(3))
 					ObjLength(ObjMax)=1
@@ -282,7 +323,7 @@
 					split INIval,",",Objinfoprm
 					ObjLaneID(ObjMax)=int(Objinfoprm(0))
 					if flagSideNote==FALSE :ObjLaneID(ObjMax)++		//サイドノーツ分を移動
-					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime
+					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime+int(chartMetaInfo(META_TOTALOFFSET))
 					ObjSoundID(ObjMax)=int(Objinfoprm(3))
 					ObjSoundVol(ObjMax)=int(Objinfoprm(4))
 					ObjLength(ObjMax)=int(Objinfoprm(2))
@@ -296,7 +337,7 @@
 					split INIval,",",Objinfoprm
 					ObjLaneID(ObjMax)=int(Objinfoprm(0))
 					if flagSideNote==FALSE :ObjLaneID(ObjMax)++		//サイドノーツ分を移動
-					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime
+					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime+int(chartMetaInfo(META_TOTALOFFSET))
 					ObjSoundID(ObjMax)=-1
 					ObjSoundVol(ObjMax)=0
 					ObjLength(ObjMax)=1
@@ -344,29 +385,33 @@
 			loop
 
 		//キーサウンドの読み込み
+			dim UseDefaultKeySnd	//デフォルトのキーサウンドを使用するフラグ
+			exist"Data/mr/"+chartMetaInfo(META_RESID)+"/musicdata.pkg"
 			dim64 hSndDB:dim64 hsmpSndDB:dim keysndIndexID
 			sdim keysndBuf:dim hLoadCnt
-			binpkg_Load getpath(chartFileName,32)+"musicdata.pkg"
-			repeat SoundDBMax
-				keysndIndexID(hLoadCnt)=binpkg_GetIndex(SoundDBFileName(hLoadCnt))
-				if keysndIndexID(hLoadCnt)!-1 {
-					;binpkg_extract SoundDBFileName(hLoadCnt),"Cache/"+SoundDBFileName(hLoadCnt)
-					binpkg_CopytoBuffer keysndBuf,keysndIndexID(hLoadCnt)
-					hsmpSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(keysndBuf),0,binpkg_GetFileLength(keysndIndexID(hLoadCnt)),32,0)
-					if hsmpSndDB(hLoadCnt)==0 :logmes""+SoundDBFileName(hLoadCnt)+"\nError Code : "+BASS_ErrorGetCode()
-					hSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndDB(hLoadCnt),TRUE)
-					cfunc64v BASS_ChannelSetAttribute,hSndDB(hLoadCnt),BASS_ATTRIB_VOL,d2f(0.7)
-					hLoadCnt++
-				}
-				if cnt\100==0 :DrawLoadScreen"しばらくお待ち下さい",200+int(double(cnt)/double(SoundDBMax)*100.0*3.0)
-			loop
-			binpkg_Free
+			if strsize!-1 {
+				binpkg_Load"Data/mr/"+chartMetaInfo(META_RESID)+"/musicdata.pkg"
+				repeat SoundDBMax
+					keysndIndexID(hLoadCnt)=binpkg_GetIndex(SoundDBFileName(hLoadCnt))
+					if keysndIndexID(hLoadCnt)!-1 {
+						;binpkg_extract SoundDBFileName(hLoadCnt),"Cache/"+SoundDBFileName(hLoadCnt)
+						binpkg_CopytoBuffer keysndBuf,keysndIndexID(hLoadCnt)
+						hsmpSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(keysndBuf),0,binpkg_GetFileLength(keysndIndexID(hLoadCnt)),32,0)
+						if hsmpSndDB(hLoadCnt)==0 :logmes""+SoundDBFileName(hLoadCnt)+"\nError Code : "+BASS_ErrorGetCode()
+						hSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndDB(hLoadCnt),TRUE)
+						cfunc64v BASS_ChannelSetAttribute,hSndDB(hLoadCnt),BASS_ATTRIB_VOL,d2f(0.7)
+						hLoadCnt++
+					}
+					if cnt\100==0 :DrawLoadScreen"しばらくお待ち下さい",200+int(double(cnt)/double(SoundDBMax)*100.0*3.0)
+				loop
+				binpkg_Free
+			} else :UseDefaultKeySnd=TRUE
 
 		//BGM
 			if GetChartInfo(META_BGM)!"" {
-				exist getpath(chartFileName,32)+GetChartInfo(META_BGM)
+				exist"Data/mr/"+chartMetaInfo(META_RESID)+"/"+GetChartInfo(META_BGM)
 				sdim hBGMbuf,strsize
-				bload getpath(chartFileName,32)+GetChartInfo(META_BGM),hBGMbuf
+				bload"Data/mr/"+chartMetaInfo(META_RESID)+"/"+GetChartInfo(META_BGM),hBGMbuf
 				dim64 hSndBGM:dim64 hsmpSndBGM
 				hsmpSndBGM=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(hBGMbuf),0,varsize(hBGMbuf),32,0)
 				hSndBGM=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndBGM,TRUE)
@@ -406,8 +451,19 @@
 			memexpand graphBest_Decode,4*ObjMax
 			//-----debug----
 			graphTrainer_level=0.80	//理論値のn％のスコア
-			graphTarget_level=0.90	//理論値のn％のスコア
-			graphTarget_Desc="S+ランクのスコア"
+			switch TargetScoreRank@
+				case TARGET_SCORE_MAX:graphTarget_level=1.0:graphTarget_Desc="理論値スコア":swbreak
+				case TARGET_SCORE_EX:graphTarget_level=0.9:graphTarget_Desc="EXランクのスコア":swbreak
+				case TARGET_SCORE_SSS:graphTarget_level=0.866:graphTarget_Desc="SSSランクのスコア":swbreak
+				case TARGET_SCORE_SS:graphTarget_level=0.833:graphTarget_Desc="SSランクのスコア":swbreak
+				case TARGET_SCORE_S:graphTarget_level=0.8:graphTarget_Desc="Sランクのスコア":swbreak
+				case TARGET_SCORE_AAA:graphTarget_level=0.7:graphTarget_Desc="AAAランクのスコア":swbreak
+				case TARGET_SCORE_AA:graphTarget_level=0.6:graphTarget_Desc="AAランクのスコア":swbreak
+				case TARGET_SCORE_A:graphTarget_level=0.5:graphTarget_Desc="Aランクのスコア":swbreak
+				case TARGET_SCORE_B:graphTarget_level=0.4:graphTarget_Desc="Bランクのスコア":swbreak
+				case TARGET_SCORE_MYBEST:graphTarget_level=double(MybestRecordBuf(ID_REC_SCORE))/10000000.0:graphTarget_Desc="自己ベストのスコア":swbreak
+				case TARGET_SCORE_ONLINETOP:graphTarget_level=double(plitem_ir_score@_MusicSelect_(_itemid,_levid,0))/10000000.0:graphTarget_Desc="歴代ベストのスコア":swbreak
+			swend
 			repeat ObjMax
 				graphTrainer_score(cnt)=int(double(ObjHitScore*cnt)*graphTrainer_level)+BonusScore
 				graphBest_score(cnt)=lpeek(graphBest_Decode,4*cnt)
@@ -420,6 +476,31 @@
 			dim gaugeCapture_value,350
 			dim scoreCapture_flag,objmax
 			dim scoreCapture_value,objmax
+
+		//"譜面の配置"オプションの適用
+		dim ObjPlacement_map:ObjPlacement_map=0,1,2,3,4,5
+		switch ObjPlacement@
+			case OBJP_MIRROR:ObjPlacement_map=5,4,3,2,1,0:swbreak
+			case OBJP_S_MIRROR:ObjPlacement_map=5,1,2,3,4,0:swbreak
+			case OBJP_N_MIRROR:ObjPlacement_map=0,4,3,2,1,5:swbreak
+			case OBJP_H_MIRROR:ObjPlacement_map=0,2,1,4,3,5:swbreak
+			case OBJP_RANDOM
+				sdim tmpstr:tmpstr=GetRandomArrayMap(4)
+				ObjPlacement_map=0,1,2,3,4,5
+				repeat 4
+					ObjPlacement_map(1+cnt)=int(strmid(tmpstr,cnt,1))+1
+				loop
+			swbreak
+			case OBJP_A_RANDOM
+				sdim tmpstr:tmpstr=GetRandomArrayMap(6)
+				repeat 6
+					ObjPlacement_map(cnt)=int(strmid(tmpstr,cnt,1))
+				loop
+			swbreak
+		swend
+		repeat objmax
+			ObjLaneID(cnt)=ObjPlacement_map(ObjLaneID(cnt))
+		loop
 
 	return
 
@@ -442,6 +523,10 @@
 			dim ParticleEffImg,6
 			dim bonusDispCount
 			dim bonusDispImg
+			ddim easeAddSpeedA
+			ddim easeAddSpeedB
+			dim easeAddSpeedCount
+			ddim easeAddSpeedRes
 			dim numExcellent
 			dim numGreat
 			dim numGood
@@ -452,13 +537,11 @@
 			dim MaxCombo
 			dim judgeSign
 			dim curScore
-			dim GaugeType
 			ddim curGauge,1
 			dim BGAplayflag
 			dim BGAgenflag
 			dim BGMplayflag
 			dim burstCount
-			dim AutoPlayFlag
 			ddim TotalRagMs,1
 			dim curCount
 			ddim curCount_f,1
@@ -470,17 +553,14 @@
 			dim SceneCount
 			dim JudgeAfCnt
 			dim ResJudge
-			AutoPlayFlag=0
 			burstCount=-1
-			DispOffset=0
-			JudgeOffset=-20
-			GaugeType=GAUGE_EXPERT
 
-			if GaugeType==GAUGE_EXPERT|GaugeType==GAUGE_MADNESS :curGauge=100.0
+			easeAddSpeedA=AddSpeed@:easeAddSpeedB=AddSpeed@
+			if GaugeType@==GAUGE_EXPERT|GaugeType@==GAUGE_MADNESS :curGauge=100.0
 
 	//BGAファイルの処理
 		if GetChartInfo(META_BGA)!"" {
-			exist getpath(chartFileName,32)+GetChartInfo(META_BGA)
+			exist"Data/mr/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGA)
 			dim hdximg_gameplaybga
 			if strsize==-1 {
 				SetDXArchiveExtension"bin"
@@ -493,13 +573,13 @@
 				}
 				PlayMovieToGraph hdximg_gameplaybga,DX_PLAYTYPE_LOOP
 			} else {
-				hdximg_gameplaybga=LoadGraph(getpath(chartFileName,32)+GetChartInfo(META_BGA))
+				hdximg_gameplaybga=LoadGraph("Data/mr/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGA))
 				BGAgenflag=FALSE
 			}
 		}
 		if GetChartInfo(META_BGAIMAGE)!"" {
 			dim hdximg_gameplaybga
-			hdximg_gameplaybga=LoadGraph(getpath(chartFileName,32)+GetChartInfo(META_BGAIMAGE))
+			hdximg_gameplaybga=LoadGraph("Data/mr/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGAIMAGE))
 		}
 		stdCount=GetNowCount()
 	return
@@ -509,8 +589,28 @@
 
 		//遅延補正
 			TotalRagMs+double(curCount)-curCount_f
-			curCount=GetNowCount()-stdCount-TotalRagMs
+			curCount=GetNowCount()-stdCount;-TotalRagMs
 			curCount_f+1000.0/double(FPSvalue@)
+
+		//キー判定
+			if KeyFlag@(KEY_INPUT_UP)==TRUE {
+				easeAddSpeedA=AddSpeed@:AddSpeed@+0.005:easeAddSpeedB=AddSpeed@
+				easeAddSpeedCount=0
+			}
+			if KeyFlag@(KEY_INPUT_DOWN)==TRUE {
+				easeAddSpeedA=AddSpeed@:AddSpeed@-0.005:easeAddSpeedB=AddSpeed@
+				easeAddSpeedCount=0
+			}
+			if bfKeyFlag@(KEY_INPUT_LEFT)==FALSE&KeyFlag@(KEY_INPUT_LEFT)==TRUE {
+				easeAddSpeedA=AddSpeed@:AddSpeed@-0.5:easeAddSpeedB=AddSpeed@
+				easeAddSpeedCount=0
+			}
+			if bfKeyFlag@(KEY_INPUT_RIGHT)==FALSE&KeyFlag@(KEY_INPUT_RIGHT)==TRUE {
+				easeAddSpeedA=AddSpeed@:AddSpeed@+0.5:easeAddSpeedB=AddSpeed@
+				easeAddSpeedCount=0
+			}
+			AddSpeed@=limitf(AddSpeed@,0.1,10.0)
+			easeAddSpeedB=limitf(easeAddSpeedB,0.1,10.0)
 
 		//判定処理
 			dim KeybtJudge,2,6
@@ -536,11 +636,11 @@
 					if ObjJudgeFlag(cnt)==1 :continue
 					if ObjLaneID(cnt)!ProgLaneID :continue
 					if NearNoteGap(ProgLaneID)==-1 {
-						NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset-ObjTiming(cnt))
+						NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset@-ObjTiming(cnt))
 						NearNoteID(ProgLaneID)=cnt
 					} else {
-						if NearNoteGap(ProgLaneID)>abs(curCount+JudgeOffset-ObjTiming(cnt)) {
-							NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset-ObjTiming(cnt))
+						if NearNoteGap(ProgLaneID)>abs(curCount+JudgeOffset@-ObjTiming(cnt)) {
+							NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset@-ObjTiming(cnt))
 							NearNoteID(ProgLaneID)=cnt
 						}
 					}
@@ -569,11 +669,10 @@
 							cfunc64v BASS_ChannelPlay,hSndDB(ObjSoundID(KeyAssignID(ProgLaneID)))
 						}
 					}
-					if UseDefSndSet==TRUE {
-						cfunc64v BASS_ChannelSetPosition,hsnd(se_sndset_Default),0,0,0
-						cfunc64v BASS_ChannelPlay,hsnd(se_sndset_Default)
+					if UseDefaultKeySnd==TRUE {
+						PlaySE int(hbasschannel(sndDefaultAssign0+ProgLaneID)),0.5
 					}
-					if NearNoteID(ProgLaneID)!-1&AutoPlayFlag==0 {
+					if NearNoteID(ProgLaneID)!-1&AutoPlayFlag@==0 {
 						if ObjType(NearNoteID(ProgLaneID))==OBJ_SINGLENOTE|OBJ_holdSTART {
 							ObjJudgeProg
 							if ObjType(NearNoteID(ProgLaneID))==OBJ_holdSTART {
@@ -586,9 +685,9 @@
 					LaneEffMode(ProgLaneID)=3
 					LaneEffCount(ProgLaneID)=0
 
-					if ProgLongNoteID(ProgLaneID)!-1&AutoPlayFlag==0 {
+					if ProgLongNoteID(ProgLaneID)!-1&AutoPlayFlag@==0 {
 						NearNoteID(ProgLaneID)=ProgLongNoteID(ProgLaneID)
-						NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset-ObjTiming(NearNoteID(ProgLaneID)))
+						NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset@-ObjTiming(NearNoteID(ProgLaneID)))
 						ObjJudgeProg
 							if ResJudge==jres_Unknown {
 								ResJudge=jres_Miss
@@ -610,7 +709,7 @@
 				DrawGraph 0,0,hdximg(ibg_0),FALSE
 			} else {
 				if BGAgenflag==FALSE {
-					if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga
+					if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga:SetMovieVolumeToGraph 0,hdximg_gameplaybga
 				}
 				DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
 			}
@@ -687,11 +786,13 @@
 
 		//ノーツ
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-			easeAddSpeedRes=3.4
+			setease easeAddSpeedA,easeAddSpeedB,ease_cubic_out
+			easeAddSpeedRes=geteasef(easeAddSpeedCount,20)
+			AddCount easeAddSpeedCount
 			NoteHeight=32
 			repeat ObjMax
 				if ScrollSpeed!0.0&curCount>0 :ObjPosition(cnt)+(1000.0/double(FPSvalue@)*ScrollSpeed)
-				ObjDrawPos(cnt)=864+(ObjPosition(cnt)*easeAddSpeedRes)-DispOffset
+				ObjDrawPos(cnt)=864+(ObjPosition(cnt)*easeAddSpeedRes)-DispOffset@
 				DrawPosY=ObjDrawPos(cnt)
 				if ObjType(cnt)==OBJ_holdSTART {
 					tmpholdStartID=cnt
@@ -820,7 +921,7 @@
 			//最大コンボ
 				DrawStringToHandle 1596,909,strf("%04d",MaxCombo),GetColor(255,255,255),hdxfont(fSQNUM24)
 			//ノーツの速度
-				DrawStringToHandle 1556,974,strf("%.2f",easeAddSpeedRes),GetColor(255,255,255),hdxfont(fSQNUM24)
+				DrawStringToHandle 1556,974,strf("%.2f",AddSpeed@),GetColor(255,255,255),hdxfont(fSQNUM24)
 
 		//左パネル
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
@@ -880,11 +981,16 @@
 				ChartSeekPos=limit(int(double(curCount)/double(ObjTiming(ObjMax-1))*400.0),0,400)
 
 				//プレイの終了判定
-					if ChartSeekPos==400&FinishFlag==FALSE :FinishFlag=TRUE
+					if FinishFlag==FALSE {
+						FinishFlag=TRUE
+						repeat objmax
+							if objjudgeflag(cnt)==FALSE :FinishFlag=FALSE
+						loop
+					}
 					//終了時のムービー
 						if FinishFlag==TRUE&FinishCount==0 {
 							dim hFinishMovie:hFinishMovie=hdximg(istg_failed)
-							if GaugeType==GAUGE_ASSIST|GaugeType==GAUGE_NORMAL {	//通常ゲージ（加点方式）
+							if GaugeType@==GAUGE_ASSIST|GaugeType@==GAUGE_NORMAL {	//通常ゲージ（加点方式）
 								if curGauge>70.0 :hFinishMovie=hdximg(istg_clear)
 							} else {
 								if curGauge>0.0 :hFinishMovie=hdximg(istg_clear)	//ハードゲージ（減点方式）
@@ -894,6 +1000,12 @@
 
 							//再生開始
 							PlayMovieToGraph hFinishMovie
+							switch hFinishMovie
+								case hdximg(istg_clear):PlaySE int(hbasschannel(sndClear)),0.7:swbreak
+								case hdximg(istg_fullcombo):PlaySE int(hbasschannel(sndClearEX)),0.7:swbreak
+								case hdximg(istg_allex):PlaySE int(hbasschannel(sndClearEX)),0.7:swbreak
+								case hdximg(istg_failed):PlaySE int(hbasschannel(sndFailed)),0.7:swbreak
+							swend
 						}
 					if FinishFlag==TRUE :AddCount FinishCount
 				DrawBox 40,280,40+ChartSeekPos,280+4,$2BB7E4,TRUE
@@ -938,7 +1050,7 @@
 			loop
 
 		//ボーナス表示
-			if bonusDispCount!-1 {
+			if bonusDispCount!-1&drawbonusFlag@==TRUE {
 				if bonusDispCount>15+FPSvalue@*2 {
 					setease 150,0,ease_cubic_out
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(bonusDispCount-15-FPSvalue@*2,15)
@@ -986,7 +1098,6 @@
 			DrawStringToHandle 1618,182,"00.00",GetColor(30,30,30),hdxfont(fSQNUM16)
 
 		//プロフィール
-		/*
 			//アイコン
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				DrawGraph 20,390,hCharImg@charicon(RegCharID@portalsync),TRUE
@@ -1002,12 +1113,12 @@
 			//パートナーレベル
 				DrawStringToHandle 182,526,str(CharLev@charicon(RegCharID@portalsync)),GetColor(10,10,10),hdxfont(fNSCJM16)
 			//総合能力値
-				DrawStringToHandle 182,564,strf("%.3f",RegPfPoint@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)*/
+				DrawStringToHandle 182,564,strf("%.3f",RegPfPoint@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)
 
 		//ゲージ
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 600,300,hdximg(igauge_empty),TRUE
-			switch GaugeType
+			switch GaugeType@
 				case GAUGE_ASSIST
 					if curGauge>70.0 {
 						DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_assist_clear),TRUE,FALSE
@@ -1077,13 +1188,16 @@
 				if ObjTiming(cnt)<curCount {
 					ObjAutoFlag(cnt)=1
 					ObjAutoJudgeID=cnt
-					if AutoPlayFlag==1 {
+					if AutoPlayFlag@==1|(((ObjLaneID(cnt)==0)|(ObjLaneID(cnt)==5))&ObjPlacement@==OBJP_S_AUTO) {
 						ResJudge=jres_Excellent
 						UpdateJudgeValue ResJudge
 						ObjJudgeFlag(cnt)=1
 						if ObjSoundID(cnt)!-1 {
 							cfunc64v BASS_ChannelSetPosition,hSndDB(ObjSoundID(cnt)),0,0,0
 							cfunc64v BASS_ChannelPlay,hSndDB(ObjSoundID(cnt))
+						}
+						if UseDefaultKeySnd==TRUE {
+							PlaySE int(hbasschannel(sndDefaultAssign0+ProgLaneID)),0.5
 						}
 						LaneBombFlag(ObjLaneID(cnt))=1
 						LaneBombCount(ObjLaneID(cnt))=0
@@ -1174,14 +1288,14 @@
 			ParticleEffCount(ProgLaneID)=0
 			ParticleEffImg(ProgLaneID)=rnd(8)
 			if ResJudge!jres_Excellent {
-				if ObjTiming(NearNoteID(ProgLaneID))-(curCount+JudgeOffset)>0 {
+				if ObjTiming(NearNoteID(ProgLaneID))-(curCount+JudgeOffset@)>0 {
 					judgeSign=-1
 					numEarly++
 				} else {
 					judgeSign=1
 					numLate++
 				}
-				avgOffset_time+((curCount+JudgeOffset)-ObjTiming(NearNoteID(ProgLaneID)))
+				avgOffset_time+((curCount+JudgeOffset@)-ObjTiming(NearNoteID(ProgLaneID)))
 				avgOffset_prm++
 			}
 		}
@@ -1226,7 +1340,7 @@
 				numCombobreak++
 				curCombo=0
 
-				switch GaugeType
+				switch GaugeType@
 					case GAUGE_ASSIST:curGauge-1.0:swbreak
 					case GAUGE_NORMAL:curGauge-2.0:swbreak
 					case GAUGE_EXPERT:curGauge-4.0:swbreak
@@ -1238,7 +1352,7 @@
 				numCombobreak++
 				curCombo=0
 
-				switch GaugeType
+				switch GaugeType@
 					case GAUGE_ASSIST:curGauge-2.0:swbreak
 					case GAUGE_NORMAL:curGauge-4.0:swbreak
 					case GAUGE_EXPERT:curGauge-8.0:swbreak
@@ -1250,12 +1364,16 @@
 		easeScoreCount=0
 		if curGauge>=100.0 :curGauge=100.0
 		if curGauge<0.0 :curGauge=0.0
-		if (GaugeType==GAUGE_EXPERT|GaugeType==GAUGE_MADNESS)&curGauge==0.0 :FinishFlag=TRUE
+		if (GaugeType@==GAUGE_EXPERT|GaugeType@==GAUGE_MADNESS)&curGauge==0.0 :FinishFlag=TRUE
 
 		//バースト発動条件
 			if curCombo!0 {
 				;if curCombo==50 :burstCount=0:bonusDispImg=hdximg(ieff_bonus_combo):bonusDispCount=0
 				if curCombo\100==0 :burstCount=0:bonusDispImg=hdximg(ieff_bonus_combo):bonusDispCount=0
+			}
+			if burstCount==0 {
+				PlaySE int(hbasschannel(sndBurst)),0.6
+				PlaySE int(hbasschannel(vocBurst100+limit(curCombo/100\5,0,4))),0.5
 			}
 	return
 
@@ -1270,48 +1388,56 @@
 	return
 
 	#deffunc SendRecordData
-		sdim HTTPpostdata
-		HTTPpostdata+"key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendNewRecord")+"&"
-		HTTPpostdata+"id="+GetChartInfo(META_UUID)+"&"
-		HTTPpostdata+"name="+LoginUserInfo@(ID_NAME@)+"&"
-		HTTPpostdata+"score="+curScore+"&"
-		HTTPpostdata+"j_ex="+numExcellent+"&"
-		HTTPpostdata+"j_gr="+numGreat+"&"
-		HTTPpostdata+"j_go="+numGood+"&"
-		HTTPpostdata+"j_ba="+numBad+"&"
-		HTTPpostdata+"j_mi="+numMiss+"&"
-		HTTPpostdata+"j_ea="+numEarly+"&"
-		HTTPpostdata+"j_la="+numLate+"&"
-		HTTPpostdata+"maxcombo="+MaxCombo+"&"
+		//オートプレイの場合、スコア送信を無効化
+		if AutoPlayFlag@ :return
 
-		sdim tmpstr
-		tmpstr="FAILED"
-		if GaugeType==GAUGE_ASSIST&curGauge>70.0 :tmpstr="ASSIST-CLEAR"
-		if GaugeType==GAUGE_NORMAL&curGauge>70.0 :tmpstr="CLEAR"
-		if GaugeType==GAUGE_EXPERT&curGauge>0.0 :tmpstr="EXPERT-CLEAR"
-		if GaugeType==GAUGE_MADNESS&curGauge>0.0 :tmpstr="MADNESS-CLEAR"
-		if numBad==0&numMiss==0 :tmpstr="FULLCOMBO"
-		if numGreat==0&numGood==0&numBad==0&numMiss==0 :tmpstr="ALL-EXCELLENT"
-			HTTPpostdata+"type="+tmpstr+"&"
+		//HTTPリクエストを作成
+			sdim HTTPpostdata
+			HTTPpostdata+"key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendNewRecord")+"&"
+			HTTPpostdata+"id="+GetChartInfo(META_UUID)+"&"
+			HTTPpostdata+"name="+LoginUserInfo@(ID_NAME@)+"&"
+			HTTPpostdata+"score="+curScore+"&"
+			HTTPpostdata+"j_ex="+numExcellent+"&"
+			HTTPpostdata+"j_gr="+numGreat+"&"
+			HTTPpostdata+"j_go="+numGood+"&"
+			HTTPpostdata+"j_ba="+numBad+"&"
+			HTTPpostdata+"j_mi="+numMiss+"&"
+			HTTPpostdata+"j_ea="+numEarly+"&"
+			HTTPpostdata+"j_la="+numLate+"&"
+			HTTPpostdata+"maxcombo="+MaxCombo+"&"
 
-		sdim src4BINHEX,350:sdim dest4BINHEX
-		repeat 350
-			poke src4BINHEX,cnt,gaugeCapture_value(cnt)
-		loop
-		ConvHEXenc dest4BINHEX,src4BINHEX,350
-			HTTPpostdata+"g64="+dest4BINHEX+"&"
+			//クリアの種類
+			sdim tmpstr
+			tmpstr="FAILED"
+			if GaugeType@==GAUGE_ASSIST&curGauge>70.0 :tmpstr="ASSIST-CLEAR"
+			if GaugeType@==GAUGE_NORMAL&curGauge>70.0 :tmpstr="CLEAR"
+			if GaugeType@==GAUGE_EXPERT&curGauge>0.0 :tmpstr="EXPERT-CLEAR"
+			if GaugeType@==GAUGE_MADNESS&curGauge>0.0 :tmpstr="MADNESS-CLEAR"
+			if numBad==0&numMiss==0 :tmpstr="FULLCOMBO"
+			if numGreat==0&numGood==0&numBad==0&numMiss==0 :tmpstr="ALL-EXCELLENT"
+				HTTPpostdata+"type="+tmpstr+"&"
 
-		sdim src4BINHEX,4*objmax:sdim dest4BINHEX
-		repeat objmax
-			lpoke src4BINHEX,cnt*4,scoreCapture_value(cnt)
-		loop
-		ConvHEXenc dest4BINHEX,src4BINHEX,4*objmax
-			HTTPpostdata+"s64="+dest4BINHEX+"&"
+			//ゲージのグラフ
+			sdim src4BINHEX,350:sdim dest4BINHEX
+			repeat 350
+				poke src4BINHEX,cnt,gaugeCapture_value(cnt)
+			loop
+			ConvHEXenc dest4BINHEX,src4BINHEX,350
+				HTTPpostdata+"g64="+dest4BINHEX+"&"
 
-		if curScore>=MybestRecordBuf(ID_REC_SCORE) :WebAPI_SendNewRecord HTTPpostdata
-		sdim HTTPpostdata
+			//スコアのグラフ
+			sdim src4BINHEX,4*objmax:sdim dest4BINHEX
+			repeat objmax
+				lpoke src4BINHEX,cnt*4,scoreCapture_value(cnt)
+			loop
+			ConvHEXenc dest4BINHEX,src4BINHEX,4*objmax
+				HTTPpostdata+"s64="+dest4BINHEX+"&"
 
-		WebAPI_SendGlobalRanking GetChartInfo(META_UUID),curScore
+			//自己ベストを更新している場合、送信
+			if curScore>=MybestRecordBuf(ID_REC_SCORE) :WebAPI_SendNewRecord HTTPpostdata
+			sdim HTTPpostdata
+
+			WebAPI_SendGlobalRanking GetChartInfo(META_UUID),curScore
 	return
 
 #global

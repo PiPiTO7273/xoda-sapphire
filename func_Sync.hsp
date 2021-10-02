@@ -10,6 +10,16 @@
 		sdim RegBadge@portalsync		//称号
 		dim RegCharID@portalsync		//パートナーのID
 		ddim RegPfPoint@portalsync,1	//総合能力値
+
+		ddim AddSpeed@,1			//流れてくる音符の速さ
+		dim GaugeType@				//ゲージの種類
+		dim ObjPlacement@			//オブジェクトの配置
+		dim TargetScoreRank@		//目標スコアランク
+		dim JudgeOffset@			//判定オフセット
+		dim DispOffset@			//描画オフセット
+		dim AutoPlayFlag@			//オートプレイフラグ
+		dim drawbonusFlag@			//ボーナス表示フラグ
+
 		AccessID@portalsync="*"
 		RegName@portalsync="******"
 		RegLev@portalsync=1
@@ -17,6 +27,15 @@
 		RegBadge@portalsync="******"
 		RegCharID@portalsync=0
 		RegPfPoint@portalsync=0.0
+
+		AddSpeed@=1.0
+		GaugeType@=GAUGE_NORMAL
+		ObjPlacement@=OBJP_NORMAL
+		TargetScoreRank@=TARGET_SCORE_MAX
+		JudgeOffset@=0
+		DispOffset@=0
+		AutoPlayFlag@=FALSE
+		drawbonusFlag@=TRUE
 
 		//セーブデータを読み込み
 		repeat CharMax@charicon
@@ -112,6 +131,30 @@
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.BADGE")=="" :syncINIdata+"XODA.BADGE=\n"
 		RegBadge@portalsync=GetINIvalue(syncINIdata,"SAVEDATA","XODA.BADGE")
 
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.ADDSPEED")=="" :syncINIdata+"XODA.OPTION.ADDSPEED=1.0\n"
+		AddSpeed@=double(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.ADDSPEED"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.GAUGE")=="" :syncINIdata+"XODA.OPTION.GAUGE="+str(GAUGE_NORMAL)+"\n"
+		GaugeType@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.GAUGE"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.PLACEMENT")=="" :syncINIdata+"XODA.OPTION.PLACEMENT="+str(OBJP_NORMAL)+"\n"
+		ObjPlacement@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.PLACEMENT"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.TARGET")=="" :syncINIdata+"XODA.OPTION.TARGET="+str(TARGET_SCORE_MAX)+"\n"
+		TargetScoreRank@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.TARGET"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.JUDGEOFFSET")=="" :syncINIdata+"XODA.OPTION.JUDGEOFFSET=0\n"
+		JudgeOffset@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.JUDGEOFFSET"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.DISPOFFSET")=="" :syncINIdata+"XODA.OPTION.DISPOFFSET=0\n"
+		DispOffset@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.DISPOFFSET"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.AUTOPLAY")=="" :syncINIdata+"XODA.OPTION.AUTOPLAY=0\n"
+		AutoPlayFlag@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.AUTOPLAY"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.BONUSFLAG")=="" :syncINIdata+"XODA.OPTION.BONUSFLAG=0\n"
+		drawbonusFlag@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.BONUSFLAG"))
+
 	return
 
 	//スコアデータを取得
@@ -183,6 +226,25 @@
 
 	//世界ランキングにスコアを送信
 	#deffunc WebAPI_SendGlobalRanking str _uuid,int _score
-	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-SendGlobalRanking.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendGlobalRanking")+"&name="+LoginUserInfo@(ID_NAME@)+"&id="+_uuid+"&score="+_score)
+	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-SendGlobalRanking.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendGlobalRanking")+"&name="+RegName@portalsync+"&id="+_uuid+"&score="+_score)
+
+	//プロフィールを保存
+	#deffunc WebAPI_SendProfile str _obj,str _val
+	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+RegName@portalsync+"&password="+RegAuth@portalsync+"&decode="+WebAPI_DecodeKey+"&object="+_obj+"&value="+_val)
+
+	//プロフィールをすべて保存
+	#deffunc SendAllProfile
+		WebAPI_SendProfile"XODA.LEVEL",str(RegLev@portalsync)
+		WebAPI_SendProfile"XODA.RATE",str(RegPfPoint@portalsync)
+		WebAPI_SendProfile"XODA.BADGE",str(RegBadge@portalsync)
+		WebAPI_SendProfile"XODA.OPTION.ADDSPEED",str(AddSpeed@)
+		WebAPI_SendProfile"XODA.OPTION.GAUGE",str(GaugeType@)
+		WebAPI_SendProfile"XODA.OPTION.PLACEMENT",str(ObjPlacement@)
+		WebAPI_SendProfile"XODA.OPTION.TARGET",str(TargetScoreRank@)
+		WebAPI_SendProfile"XODA.OPTION.JUDGEOFFSET",str(JudgeOffset@)
+		WebAPI_SendProfile"XODA.OPTION.DISPOFFSET",str(DispOffset@)
+		WebAPI_SendProfile"XODA.OPTION.AUTOPLAY",str(AutoPlayFlag@)
+		WebAPI_SendProfile"XODA.OPTION.BONUSFLAG",str(drawbonusFlag@)
+	return
 
 #global

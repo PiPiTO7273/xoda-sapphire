@@ -13,6 +13,7 @@
 #enum global ID_BOOT		=	0
 #enum global ID_PLAY
 #enum global ID_MUSICSELECT
+#enum global ID_KEYCONFIG
 
 //譜面情報の識別子
 #enum global META_TITLE	=	0
@@ -27,6 +28,9 @@
 #enum global META_BGAIMAGE
 #enum global META_EVOFFSET
 #enum global META_UUID
+#enum global META_RESID
+#enum global META_TOTALOFFSET
+#enum global META_SIDEFLAG
 
 #enum global META_MAX
 
@@ -42,3 +46,32 @@
 #define global hash_core "fef896dab0abadaf7ebea29860f3957fe253d200322039fcfb42358b578ce944"
 
 #define global TransitionFrame 10
+
+//ゲージ
+#enum global GAUGE_ASSIST		=	0
+#enum global GAUGE_NORMAL
+#enum global GAUGE_EXPERT
+#enum global GAUGE_MADNESS
+
+//譜面の配置
+#enum global OBJP_NORMAL			=	0
+#enum global OBJP_MIRROR
+#enum global OBJP_S_MIRROR
+#enum global OBJP_N_MIRROR
+#enum global OBJP_H_MIRROR
+#enum global OBJP_RANDOM
+#enum global OBJP_A_RANDOM
+#enum global OBJP_S_AUTO
+
+//目標スコアの値
+#enum global TARGET_SCORE_MAX		=	0
+#enum global TARGET_SCORE_EX
+#enum global TARGET_SCORE_SSS
+#enum global TARGET_SCORE_SS
+#enum global TARGET_SCORE_S
+#enum global TARGET_SCORE_AAA
+#enum global TARGET_SCORE_AA
+#enum global TARGET_SCORE_A
+#enum global TARGET_SCORE_B
+#enum global TARGET_SCORE_MYBEST
+#enum global TARGET_SCORE_ONLINETOP
