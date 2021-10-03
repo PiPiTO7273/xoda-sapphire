@@ -63,6 +63,7 @@
 
 	//BASS Audio Libraryサンプル、チャンネルハンドル(musicselect)
 	#enum bgmMain	=	0
+	#enum bgmConfig
 	#enum sndCancel
 	#enum sndChange_0
 	#enum sndCursor
@@ -192,6 +193,7 @@
 		DrawLoadScreen"しばらくお待ち下さい",250
 		dim64 hbasschannel:dim64 hbasssample
 		LoadBASSsample"Data/bgm_MusicSelect.ogg",hbasschannel(bgmMain),hbasssample(bgmMain),BASS_SAMPLE_LOOP
+		LoadBASSsample"Data/bgm_Config.ogg",hbasschannel(bgmConfig),hbasssample(bgmConfig),BASS_SAMPLE_LOOP
 		LoadBASSsample"Data/snd_cancel.wav",hbasschannel(sndCancel),hbasssample(sndCancel),NULL
 		LoadBASSsample"Data/snd_change_0.wav",hbasschannel(sndChange_0),hbasssample(sndChange_0),NULL
 		LoadBASSsample"Data/snd_cursor.wav",hbasschannel(sndCursor),hbasssample(sndCursor),NULL
@@ -222,6 +224,8 @@
 		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
 		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
 		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
+
+		SetFontLineSpaceToHandle 26,hdxfont(fNSCJM20)
 	return
 
 	//IRを同期
@@ -496,7 +500,7 @@
 
 	#deffunc StartMusicSelect
 		//BGM再生
-			PlaySE int(hbasschannel(bgmMain)),0.7
+			PlaySE int(hbasschannel(bgmMain)),0.5
 
 		//背景動画再生
 			PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
@@ -1175,6 +1179,23 @@
 					setease 1150+500,1150,ease_cubic_out
 					DrawGraph getease(OptionWindowCount,20),0,hdximg(ibg_option),TRUE
 					DrawGraph getease(OptionWindowCount,20),80,hdximg(iwindow_option_obj),TRUE
+					//説明文
+						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+						sdim tmpstr,64,9
+						tmpstr(0)="流れてくる音符の速さを設定します。\n※音符の速さは楽曲のBPMに比例します。\n左のプレビューを参考にして、値を設定してください。"
+						tmpstr(1)="ゲージの難易度を設定します。\nASSISTとNORMALは70%以上でクリア、\nEXPERTとMADNESSは0%になると終了します。\nASSISTが最も減少しにくく、MADNESSが最も減少しやすいです。"
+						tmpstr(2)="NORMAL:通常の配置　MIRROR:左右反転　S-MIRROR:サイドレーンのみ反転\nN-MIRROR:通常レーンのみ反転\nH-MIRROR:通常レーンの中央を境にそれぞれ左右反転\nRANDOM:通常レーンをランダムに入れ替え　\nA-RANDOM:全てのレーンをランダムに入れ替え\nS-AUTO:サイドレーンを自動化"
+						tmpstr(3)="目標スコアのランクを設定します。\n自己ベストを設定した場合、一定のペースで増加します。"
+						tmpstr(4)="判定タイミングをミリ秒(ms)単位で調整します。"
+						tmpstr(5)="描画位置をピクセル(px)単位で調整します。"
+						tmpstr(6)="キーの割り当てを変更します。"
+						tmpstr(7)="ボーナスを表示するか設定します。\n非表示にした場合でも能力値は加算されます。"
+						tmpstr(8)="全ての音符が自動で判定されます。\n有効にすると、スコアは保存されません。"
+						repeat 9
+							if insquare(CursorPosX,CursorPosY,1185,104+72*cnt,1185+700,104+72*cnt+64) {
+								DrawStringToHandle 1190,895,tmpstr(cnt),Getcolor(0,0,0),hdxfont(fNSCJM20)
+							}
+						loop
 				swbreak
 				case 2
 					setease 130,0,ease_cubic_out
@@ -1196,8 +1217,16 @@
 			setease 0,256,ease_linear
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(JumpSceneCount,20)
 			DrawBox 0,0,BufWidth@,BufHeight@,Getcolor(0,0,0),TRUE
+			setease 0.5,0,ease_linear
+			cfunc64v BASS_ChannelSetAttribute,hbasschannel(bgmMain),BASS_ATTRIB_VOL,d2f(geteasef(JumpSceneCount,20))
 			if JumpSceneCount>20 {
 				curSceneID@=JumpSceneID
+				switch JumpSceneID
+					case ID_KEYCONFIG
+						LoadKeyConfigFonts
+						StartKeyConfig
+					swbreak
+				swend
 			}
 			AddCount JumpSceneCount
 		}
@@ -1211,7 +1240,7 @@
 			InitGamePlaySounds
 			LoadPartnerIcon
 			OpenChartFile"Data/map-"+plitem_UUID(ActiveColumnID(ID_SONGS),CurSelLev)+".bin",ActiveColumnID(ID_SONGS),CurSelLev
-			cfunc64v BASS_ChannelStop,hbasschannel(bgmMain)
+			cfunc64v BASS_ChannelPause,hbasschannel(bgmMain)
 			DrawLoadTransition 0,10,1
 			SetDrawScreen hdximg@(iScene)
 			ClearDrawScreen

@@ -19,6 +19,8 @@
 		dim DispOffset@			//描画オフセット
 		dim AutoPlayFlag@			//オートプレイフラグ
 		dim drawbonusFlag@			//ボーナス表示フラグ
+		dim confKeyCode@,14			//キーコンフィグ
+		dim confDefKeyCode@,14		//キーコンフィグ（既定）
 
 		AccessID@portalsync="*"
 		RegName@portalsync="******"
@@ -36,6 +38,23 @@
 		DispOffset@=0
 		AutoPlayFlag@=FALSE
 		drawbonusFlag@=TRUE
+		confDefKeyCode@(0)=KEY_INPUT_D
+		confDefKeyCode@(1)=KEY_INPUT_F
+		confDefKeyCode@(2)=KEY_INPUT_J
+		confDefKeyCode@(3)=KEY_INPUT_K
+		confDefKeyCode@(4)=KEY_INPUT_S
+		confDefKeyCode@(5)=KEY_INPUT_L
+		confDefKeyCode@(6)=KEY_INPUT_LEFT
+		confDefKeyCode@(7)=KEY_INPUT_RIGHT
+		confDefKeyCode@(8)=KEY_INPUT_UP
+		confDefKeyCode@(9)=KEY_INPUT_DOWN
+		confDefKeyCode@(10)=KEY_INPUT_BACK
+		confDefKeyCode@(11)=KEY_INPUT_RETURN
+		confDefKeyCode@(12)=KEY_INPUT_ESCAPE
+		confDefKeyCode@(13)=KEY_INPUT_SPACE
+		repeat 14
+			confKeyCode@(cnt)=confDefKeyCode@(cnt)
+		loop
 
 		//セーブデータを読み込み
 		repeat CharMax@charicon
@@ -46,6 +65,7 @@
 
 	//WebAPIを初期化
 	#deffunc WebAPI_Init
+		if OfflineMode :return
 		newcom objVBsc,"ScriptControl"
 		objVBsc("Language")="VBScript"
 		sdim VBscript_body:sdim VBscript_res
@@ -59,6 +79,7 @@
 
 	//HTTPリクエストを発行し、結果を取得(get)
 	#defcfunc WebAPI_Get str _url
+		if OfflineMode :return""
 		objVBsc->"Run" "httpget",_url
 		sdim AsciiCode_LF:poke AsciiCode_LF,0,10
 		sdim AsciiCode_CR:poke AsciiCode_CR,0,13
@@ -69,6 +90,7 @@
 
 	//HTTPリクエストを発行し、結果を取得(post)
 	#defcfunc WebAPI_Post str _url,str _prm
+		if OfflineMode :return""
 		objVBsc->"Run" "httppost",_url,_prm
 		sdim AsciiCode_LF:poke AsciiCode_LF,0,10
 		sdim AsciiCode_CR:poke AsciiCode_CR,0,13
@@ -154,6 +176,11 @@
 
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.BONUSFLAG")=="" :syncINIdata+"XODA.OPTION.BONUSFLAG=0\n"
 		drawbonusFlag@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.BONUSFLAG"))
+
+		repeat 14
+			if GetINIvalue(syncINIdata,"SAVEDATA","XODA.KEYCONFIG."+cnt)=="" :syncINIdata+"XODA.KEYCONFIG."+cnt+"="+confDefKeyCode@(cnt)+"\n"
+			confKeyCode@(cnt)=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.KEYCONFIG."+cnt))
+		loop
 
 	return
 

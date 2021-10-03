@@ -75,3 +75,5 @@
 #enum global TARGET_SCORE_B
 #enum global TARGET_SCORE_MYBEST
 #enum global TARGET_SCORE_ONLINETOP
+
+#define global OfflineMode 0

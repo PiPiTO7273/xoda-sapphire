@@ -2005,6 +2005,7 @@
 #func global GetDSoundObj "dx_GetDSoundObj" 
 #func global LoadMusicMemByResource "dx_LoadMusicMemByResource" str,str
 #func global GetFPS "dx_GetFPS"
+#func global SetFontLineSpaceToHandle "dx_SetFontLineSpaceToHandle" int,int
 
 #define global TRUE 1
 #define global FALSE 0

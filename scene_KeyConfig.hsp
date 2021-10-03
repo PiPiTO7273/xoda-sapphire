@@ -1,11 +1,268 @@
 
 #module _KEYCONFIG_
 
+	#enum ibg		=	0
+	#enum ilayer_0
+	#enum ilayer_1
+	#enum ibutton_back_0
+	#enum ibutton_back_1
+	#enum ibutton_default_0
+	#enum ibutton_default_1
+	#enum ibutton_change_0
+	#enum ibutton_change_1
+	#enum ilayer_accept
+	#enum ilayer_error
+	#enum inav
+
+	#enum fPS24	=	0
+
+	#deffunc LoadKeyConfigImages
+		dim hdximg
+		SetDXArchiveExtension"bin"
+		hdximg(ibg)=LoadGraph("Data/bg_Config.ogv")
+		hdximg(ilayer_0)=LoadGraph("Data/layer_keyconfig_0.png")
+		hdximg(ilayer_1)=LoadGraph("Data/layer_keyconfig_1.png")
+		hdximg(ibutton_back_0)=LoadGraph("Data/res_keyconfig_button_back/0.png")
+		hdximg(ibutton_back_1)=LoadGraph("Data/res_keyconfig_button_back/1.png")
+		hdximg(ibutton_default_0)=LoadGraph("Data/res_keyconfig_button_default/0.png")
+		hdximg(ibutton_default_1)=LoadGraph("Data/res_keyconfig_button_default/1.png")
+		hdximg(ibutton_change_0)=LoadGraph("Data/res_keyconfig_button_change/0.png")
+		hdximg(ibutton_change_1)=LoadGraph("Data/res_keyconfig_button_change/1.png")
+		hdximg(ilayer_accept)=LoadGraph("Data/layer_keyconfig_accept.png")
+		hdximg(ilayer_error)=LoadGraph("Data/layer_keyconfig_error.png")
+		hdximg(inav)=LoadGraph("Data/Nav_KeyConfig.png")
+		PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+	return
+
+	#deffunc LoadKeyConfigFonts
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fPS24)=LoadFontDataToHandle("Data/ps24.bin")
+	return
+
 	#deffunc StartKeyConfig
+		dim SceneCount
+		dim KeyAcceptFlag
+		dim KeyAcceptCount
+		dim KeyAcceptOutputID
+		dim MouseInput
+		dim bfMouseInput
+		sdim KeyCodeName,16,256
+		repeat 256
+			KeyCodeName(cnt)="#UNDEF"
+		loop
+		KeyCodeName(KEY_INPUT_BACK)="BackSpace"
+		KeyCodeName(KEY_INPUT_TAB)="Tab"
+		KeyCodeName(KEY_INPUT_RETURN)="Enter"
+		KeyCodeName(KEY_INPUT_LSHIFT)="L-Shift"
+		KeyCodeName(KEY_INPUT_RSHIFT)="R-Shift"
+		KeyCodeName(KEY_INPUT_LCONTROL)="L-Ctrl"
+		KeyCodeName(KEY_INPUT_RCONTROL)="R-Ctrl"
+		KeyCodeName(KEY_INPUT_ESCAPE)="ESC"
+		KeyCodeName(KEY_INPUT_SPACE)="Space"
+		KeyCodeName(KEY_INPUT_PGUP)="Page Up"
+		KeyCodeName(KEY_INPUT_PGDN)="Page Down"
+		KeyCodeName(KEY_INPUT_END)="End"
+		KeyCodeName(KEY_INPUT_HOME)="Home"
+		KeyCodeName(KEY_INPUT_LEFT)="Arrow-LEFT"
+		KeyCodeName(KEY_INPUT_UP)="Arrow-UP"
+		KeyCodeName(KEY_INPUT_RIGHT)="Arrow-RIGHT"
+		KeyCodeName(KEY_INPUT_DOWN)="Arrow-DOWN"
+		KeyCodeName(KEY_INPUT_INSERT)="Insert"
+		KeyCodeName(KEY_INPUT_DELETE)="Delete"
+		KeyCodeName(KEY_INPUT_MINUS)="-"
+		KeyCodeName(KEY_INPUT_YEN)="\\"
+		KeyCodeName(KEY_INPUT_PREVTRACK)="^"
+		KeyCodeName(KEY_INPUT_PERIOD)="."
+		KeyCodeName(KEY_INPUT_SLASH)="/"
+		KeyCodeName(KEY_INPUT_LALT)="L-Alt"
+		KeyCodeName(KEY_INPUT_RALT)="R-Alt"
+		KeyCodeName(KEY_INPUT_SCROLL)="ScrollLock"
+		KeyCodeName(KEY_INPUT_SEMICOLON)=";"
+		KeyCodeName(KEY_INPUT_COLON)=":"
+		KeyCodeName(KEY_INPUT_LBRACKET)="["
+		KeyCodeName(KEY_INPUT_RBRACKET)="]"
+		KeyCodeName(KEY_INPUT_AT)="@"
+		KeyCodeName(KEY_INPUT_BACKSLASH)="\\"
+		KeyCodeName(KEY_INPUT_COMMA)=","
+		KeyCodeName(KEY_INPUT_CAPSLOCK)="CapsLock"
+		KeyCodeName(KEY_INPUT_PAUSE)="PauseBreak"
+		KeyCodeName(KEY_INPUT_NUMPAD0)="NumPad 0"
+		KeyCodeName(KEY_INPUT_NUMPAD1)="NumPad 1"
+		KeyCodeName(KEY_INPUT_NUMPAD2)="NumPad 2"
+		KeyCodeName(KEY_INPUT_NUMPAD3)="NumPad 3"
+		KeyCodeName(KEY_INPUT_NUMPAD4)="NumPad 4"
+		KeyCodeName(KEY_INPUT_NUMPAD5)="NumPad 5"
+		KeyCodeName(KEY_INPUT_NUMPAD6)="NumPad 6"
+		KeyCodeName(KEY_INPUT_NUMPAD7)="NumPad 7"
+		KeyCodeName(KEY_INPUT_NUMPAD8)="NumPad 8"
+		KeyCodeName(KEY_INPUT_NUMPAD9)="NumPad 9"
+		KeyCodeName(KEY_INPUT_MULTIPLY)="NumPad *"
+		KeyCodeName(KEY_INPUT_ADD)="NumPad +"
+		KeyCodeName(KEY_INPUT_SUBTRACT)="NumPad -"
+		KeyCodeName(KEY_INPUT_DECIMAL)="NumPad ."
+		KeyCodeName(KEY_INPUT_DIVIDE)="NumPad /"
+		KeyCodeName(KEY_INPUT_NUMPADENTER)="NumPad Enter"
+		KeyCodeName(KEY_INPUT_A)="A"
+		KeyCodeName(KEY_INPUT_B)="B"
+		KeyCodeName(KEY_INPUT_C)="C"
+		KeyCodeName(KEY_INPUT_D)="D"
+		KeyCodeName(KEY_INPUT_E)="E"
+		KeyCodeName(KEY_INPUT_F)="F"
+		KeyCodeName(KEY_INPUT_G)="G"
+		KeyCodeName(KEY_INPUT_H)="H"
+		KeyCodeName(KEY_INPUT_I)="I"
+		KeyCodeName(KEY_INPUT_J)="J"
+		KeyCodeName(KEY_INPUT_K)="K"
+		KeyCodeName(KEY_INPUT_L)="L"
+		KeyCodeName(KEY_INPUT_M)="M"
+		KeyCodeName(KEY_INPUT_N)="N"
+		KeyCodeName(KEY_INPUT_O)="O"
+		KeyCodeName(KEY_INPUT_P)="P"
+		KeyCodeName(KEY_INPUT_Q)="Q"
+		KeyCodeName(KEY_INPUT_R)="R"
+		KeyCodeName(KEY_INPUT_S)="S"
+		KeyCodeName(KEY_INPUT_T)="T"
+		KeyCodeName(KEY_INPUT_U)="U"
+		KeyCodeName(KEY_INPUT_V)="V"
+		KeyCodeName(KEY_INPUT_W)="W"
+		KeyCodeName(KEY_INPUT_X)="X"
+		KeyCodeName(KEY_INPUT_Y)="Y"
+		KeyCodeName(KEY_INPUT_Z)="Z"
+		KeyCodeName(KEY_INPUT_0)="0"
+		KeyCodeName(KEY_INPUT_1)="1"
+		KeyCodeName(KEY_INPUT_2)="2"
+		KeyCodeName(KEY_INPUT_3)="3"
+		KeyCodeName(KEY_INPUT_4)="4"
+		KeyCodeName(KEY_INPUT_5)="5"
+		KeyCodeName(KEY_INPUT_6)="6"
+		KeyCodeName(KEY_INPUT_7)="7"
+		KeyCodeName(KEY_INPUT_8)="8"
+		KeyCodeName(KEY_INPUT_9)="9"
+
+		PlaySE int(hbasschannel@_musicselect_(bgmConfig@_musicselect_)),0.5
+
 	return
 
 	#deffunc DrawKeyConfig
-		DrawDebugString 0,20,"okay."
+
+		dim CursorPosX:dim CursorPosY
+		MouseInput=GetMouseInput()
+		CursorPosX=int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@)))
+		CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
+
+		//”wŒi
+		setease 0,256,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,20)
+		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg)
+
+		setease 0,256,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-5,10)
+		DrawGraph 48,32,hdximg(inav),TRUE
+
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,20)
+		setease -128,0,ease_cubic_out
+		DrawGraph 140+getease(SceneCount-10,20),200,hdximg(ilayer_0),TRUE
+
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-15,20)
+		setease -128,0,ease_cubic_out
+		DrawGraph 1035+getease(SceneCount-15,20),200,hdximg(ilayer_1),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		if insquare(CursorPosX,CursorPosY,1300,875,1300+250,875+50) {
+			if ((MouseInput&MOUSE_INPUT_LEFT)==TRUE)&((bfMouseInput&MOUSE_INPUT_LEFT)==FALSE)&KeyAcceptFlag==0 {
+				PlaySE int(hbasschannel@_musicselect_(sndCursor@_musicselect_)),0.7
+				repeat 14
+					confKeyCode@(cnt)=confDefKeyCode@(cnt)
+					WebAPI_SendProfile"XODA.KEYCONFIG."+cnt,str(confDefKeyCode@(cnt))
+				loop
+				PlaySE int(hbasschannel@_musicselect_(sndCursor@_musicselect_)),0.7
+			}
+			DrawGraph 1300,875,hdximg(ibutton_default_1),TRUE
+		} else {
+			DrawGraph 1300,875,hdximg(ibutton_default_0),TRUE
+		}
+		if insquare(CursorPosX,CursorPosY,1582,875,1582+200,875+50) {
+			if ((MouseInput&MOUSE_INPUT_LEFT)==TRUE)&((bfMouseInput&MOUSE_INPUT_LEFT)==FALSE)&KeyAcceptFlag==0 {
+				PlaySE int(hbasschannel@_musicselect_(sndCursor@_musicselect_)),0.7
+					DrawLoadTransition 0,TransitionFrame,0
+					repeat 10
+						ProcessMessage
+						setease 0.5,0,ease_linear
+						cfunc64v BASS_ChannelSetAttribute,int(hbasschannel@_musicselect_(bgmConfig@_musicselect_)),BASS_ATTRIB_VOL,d2f(geteasef(cnt,10))
+						ScreenFlip
+					loop
+					cfunc64v BASS_ChannelPause,hbasschannel@_musicselect_(bgmConfig@_musicselect_)
+					InitScene ID_MUSICSELECT
+					;LoadMusicSelectImages
+					;LoadMusicSelectSounds
+					InitMusicSelectFonts
+					;IRsync
+					;ScanAllPlaylist
+					DrawLoadTransition 0,TransitionFrame,1
+					wait 50
+					StartMusicSelect
+			}
+			DrawGraph 1582,875,hdximg(ibutton_back_1),TRUE
+		} else {
+			DrawGraph 1582,875,hdximg(ibutton_back_0),TRUE
+		}
+		repeat 14
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-cnt/2-15,15)
+			setease -64,0,ease_cubic_out
+			if insquare(CursorPosX,CursorPosY,840,200+52*cnt,840+100,200+52*cnt+40) {
+				if ((MouseInput&MOUSE_INPUT_LEFT)==TRUE)&((bfMouseInput&MOUSE_INPUT_LEFT)==FALSE)&KeyAcceptFlag==0 {
+					KeyAcceptFlag=1:KeyAcceptCount=0
+					KeyAcceptOutputID=cnt
+					PlaySE int(hbasschannel@_musicselect_(sndCursor@_musicselect_)),0.7
+				}
+				DrawGraph 840+getease(SceneCount-cnt/2-15,15),200+52*cnt,hdximg(ibutton_change_1),TRUE
+			} else {
+				DrawGraph 840+getease(SceneCount-cnt/2-15,15),200+52*cnt,hdximg(ibutton_change_0),TRUE
+			}
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-cnt/2-17,15)
+			setease -64,0,ease_cubic_out
+			DrawStringToHandle 590+getease(SceneCount-cnt/2-17,15),200+52*cnt+6,KeyCodeName(confKeyCode@(cnt)),Getcolor(255,255,255),hdxfont(fPS24)
+		loop
+
+		if KeyAcceptFlag==1 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(KeyAcceptCount,15)
+			setease 0.8,1,ease_cubic_out
+			EaseWidth=int(700.0*geteasef(KeyAcceptCount,15))
+			EaseHeight=int(410.0*geteasef(KeyAcceptCount,15))
+			EasePosX=BufWidth@/2-EaseWidth/2
+			EasePosY=BufHeight@/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ilayer_accept),TRUE
+
+			//ƒL[“ü—Í‚ðŠÄŽ‹
+			repeat 256
+				if CheckHitKey(cnt)==TRUE {
+					if cnt>=KEY_INPUT_F1&cnt<=KEY_INPUT_F12 {
+						KeyAcceptFlag=2:KeyAcceptCount=0
+						PlaySE int(hbasschannel@_musicselect_(sndError@_musicselect_)),0.7
+						break
+					}
+					confKeyCode@(KeyAcceptOutputID)=cnt:KeyAcceptFlag=0
+					WebAPI_SendProfile"XODA.KEYCONFIG."+KeyAcceptOutputID,str(cnt)
+					PlaySE int(hbasschannel@_musicselect_(sndDecide@_musicselect_)),0.7
+				}
+			loop
+		}
+		if KeyAcceptFlag==2 {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph BufWidth@/2-700/2,BufHeight@/2-410/2,hdximg(ilayer_error),TRUE
+			if MouseInput&MOUSE_INPUT_LEFT :PlaySE int(hbasschannel@_musicselect_(sndCancel@_musicselect_)),0.7:KeyAcceptFlag=0
+		}
+
+		AddCount SceneCount
+		AddCount KeyAcceptCount
+		bfMouseInput=MouseInput
+
 	return
 
 #global

@@ -63,6 +63,7 @@
 	LoadMusicSelectImages
 	LoadMusicSelectSounds
 	InitMusicSelectFonts
+	LoadKeyConfigImages
 	IRsync
 	ScanAllPlaylist
 

@@ -21,6 +21,7 @@
 #include"scene_MusicSelect.hsp"
 #include"scene_Play.hsp"
 #include"scene_Result.hsp"
+#include"scene_KeyConfig.hsp"
 
 #packopt hide 1
 
@@ -93,6 +94,7 @@
 	switch curSceneID
 		case ID_PLAY:DrawGamePlay:swbreak
 		case ID_MUSICSELECT:DrawMusicSelect:swbreak
+		case ID_KEYCONFIG:DrawKeyConfig:swbreak
 	swend
 
 	SetDrawScreen DX_SCREEN_BACK
@@ -104,13 +106,15 @@
 
 	//マウスカーソル
 		cfunc64v GetMousePoint,varptr64(CursorPosX@),varptr64(CursorPosY@)
-		if CursorHideCount@>FPSvalue@*2&curSceneID==ID_PLAY {
-			setease 256,0,ease_linear
-			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(CursorHideCount@-FPSvalue@*2,FPSvalue@/4)
-		} else {
-			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		if DrawCursorFlag@==TRUE {
+			if CursorHideCount@>FPSvalue@*2&curSceneID==ID_PLAY {
+				setease 256,0,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(CursorHideCount@-FPSvalue@*2,FPSvalue@/4)
+			} else {
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			}
+			DrawGraph CursorPosX@-32,CursorPosY@-32,hdximg_arr_cursor@(CursorImgCount@),TRUE
 		}
-		DrawGraph CursorPosX@-32,CursorPosY@-32,hdximg_arr_cursor@(CursorImgCount@),TRUE
 
 		if bfCursorPosX@!CursorPosX@|bfCursorPosY@!CursorPosY@ {
 			CursorHideCount@=0
@@ -118,7 +122,7 @@
 		bfCursorPosX@=CursorPosX@:bfCursorPosY@=CursorPosY@
 
 	//デバッグ文字列
-
+/*
 		ChangeFont"MS GOTHIC":SetFontSize 16
 		ChangeFontType DX_FONTTYPE_NORMAL
 		DrawDebugString 0,0,"XODA Sapphire @debug"
@@ -127,7 +131,8 @@
 		DrawDebugString 0,4,"FPS="+double(curFPS@)
 		DrawDebugString 0,6,"C="+coreCount+" F="+FrameCount+" S="+SceneCount+" ,Level="+CounterLev@
 		DrawDebugString 0,7,"Cursor ("+CursorPosX+","+CursorPosY+") "+GetMouseWheelRotVol()
-
+		DrawDebugString 0,8,"auto="+AutoPlayFlag@
+*/
 	coreCount++
 	AddCount FrameCount@
 	AddCount SceneCount@

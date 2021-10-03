@@ -241,6 +241,7 @@
 
 		//UUID取り出し
 			chartMetaInfo(META_UUID)=getpath(_filename,1+8)
+			strrep chartMetaInfo(META_UUID),"map-",""
 
 		//汎用ムービーのパス指定
 			if chartMetaInfo(META_BGA)=="" :chartMetaInfo(META_BGA)="general-movie-*.ogv"
@@ -1171,8 +1172,8 @@
 					cfunc64v BASS_ChannelStop,hSndBGM(cnt)
 					DrawLoadTransition 0,TransitionFrame,0
 					InitScene ID_MUSICSELECT
-					LoadMusicSelectImages
-					LoadMusicSelectSounds
+					;LoadMusicSelectImages
+					;LoadMusicSelectSounds
 					InitMusicSelectFonts
 					IRsync
 					ScanAllPlaylist
