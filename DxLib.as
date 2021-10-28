@@ -179,7 +179,7 @@
 #func global DrawObtainsString_CharClip "dx_DrawObtainsString_CharClip" int,int,int,str,int,int,int,int,int,int,int,int
 #func global DrawObtainsBox "dx_DrawObtainsBox" int,int,int,int,int,int,int
 #func global InputStringToCustom "dx_InputStringToCustom" int,int,int,str,int,int,int,int
-#func global KeyInputString "dx_KeyInputString" int,int,int,str,int
+#func global KeyInputString "dx_KeyInputString" int,int,int,int,int
 #func global KeyInputSingleCharString "dx_KeyInputSingleCharString" int,int,int,str,int
 #func global KeyInputNumber "dx_KeyInputNumber" int,int,int,int,int
 #func global GetIMEInputModeStr "dx_GetIMEInputModeStr" str

@@ -7,6 +7,7 @@ Level=9
 Resource=8ea0a1ac-b774-5dbb-0930-3c457b620f59
 Background.Video=Snow halation (TV Size).ogv
 Background.Audio=bgm.mp3
+Default.BPM=173.000000
 
 [Sound]
 Sound.Set=0,drum-hitclap10.wav

@@ -97,46 +97,60 @@
 		sdim i_keylist:dim i_vallist
 	return
 	#deffunc InitStrArray
-		sdim s_keylist:dim s_vallist
+		sdim s_keylist,128,1024:sdim s_vallist,1024,1024:dim s_valcnt
 	return
 	#deffunc RegIntArray str _key,int _value
 		if vartype(i_keylist)==4 :InitIntArray
 		dim mode:mode=0
 		repeat length(i_keylist)
 			if _key==i_keylist(cnt) {
-				vallist(cnt)=_value
+				i_vallist(cnt)=_value
 				mode=1
 			}
 		loop
 		if mode==0 {
 			i_keylist(length(i_keylist))=_key
-			vallist(length(vallist))=_value
+			i_vallist(length(i_vallist))=_value
 		}
 	return
 	#defcfunc GetIntArray str _key
 		dim res
 		repeat length(i_keylist)
-			if _key==i_keylist(cnt) :res=vallist(cnt)
+			if _key==i_keylist(cnt) :res=i_vallist(cnt)
 		loop
 	return res
-	#deffunc RegStrArray str _key,str _value
+	#deffunc RegStrArray str _key,var _value
 		if vartype(s_keylist)==4 :InitStrArray
 		dim mode:mode=0
 		repeat length(s_keylist)
 			if _key==s_keylist(cnt) {
-				vallist(cnt)=_value
+				memcpy s_vallist(cnt),_value,varsize(_value)
 				mode=1
 			}
 		loop
 		if mode==0 {
-			s_keylist(length(s_keylist))=_key
-			vallist(length(vallist))=_value
+			s_keylist(s_valcnt)=_key
+			memcpy s_vallist(s_valcnt),_value,varsize(_value)
+			s_valcnt++
 		}
 	return
 	#defcfunc GetStrArray str _key
 		dim res
 		repeat length(s_keylist)
-			if _key==s_keylist(cnt) :res=vallist(cnt)
+			if _key==s_keylist(cnt) :res=s_vallist(cnt)
 		loop
 	return res
+
+	#defcfunc GetPfPoint int _lev,int _score,int _maxcombo,str _dif,double _bonus
+		ddim tmpdouble,1
+		tmpdouble=10.0*(double(_lev)/10.0)*(double(_score)/10000000.0*1.5)*(1.0+double(_maxcombo)/1000.0)
+		switch _dif
+			case"Normal":tmpdouble+1.0*(double(_score)/10000000.0):swbreak
+			case"Hard":tmpdouble+1.25*(double(_score)/10000000.0):swbreak
+			case"Chaos":tmpdouble+1.5*(double(_score)/10000000.0):swbreak
+		swend
+		tmpdouble+_bonus
+	return tmpdouble
 #global
+InitIntArray
+InitStrArray

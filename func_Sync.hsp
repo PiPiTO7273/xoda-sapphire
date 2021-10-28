@@ -6,10 +6,14 @@
 		sdim AccessID@portalsync		//アクセスID
 		sdim RegName@portalsync		//名前
 		dim RegLev@portalsync		//レベル
+		dim RegEXP@portalsync		//経験値
 		sdim RegAuth@portalsync		//認証キー
 		sdim RegBadge@portalsync		//称号
 		dim RegCharID@portalsync		//パートナーのID
 		ddim RegPfPoint@portalsync,1	//総合能力値
+		dim NumFragments@portalsync	//音色のかけらの所持数
+		dim NumTickets@portalsync	//チャレンジチケットの所持数
+		dim NumLilly@portalsync		//Lilly(通貨単位)
 
 		ddim AddSpeed@,1			//流れてくる音符の速さ
 		dim GaugeType@				//ゲージの種類
@@ -21,6 +25,8 @@
 		dim drawbonusFlag@			//ボーナス表示フラグ
 		dim confKeyCode@,14			//キーコンフィグ
 		dim confDefKeyCode@,14		//キーコンフィグ（既定）
+		dim musicselect_ItemID@		//曲選択画面の項目ID
+		dim musicselect_LevelID@		//曲選択画面のレベル
 
 		AccessID@portalsync="*"
 		RegName@portalsync="******"
@@ -29,6 +35,10 @@
 		RegBadge@portalsync="******"
 		RegCharID@portalsync=0
 		RegPfPoint@portalsync=0.0
+		musicselect_ItemID@=0
+		musicselect_LevelID@=0
+		NumFragments@portalsync=0
+		NumTickets@portalsync=0
 
 		AddSpeed@=1.0
 		GaugeType@=GAUGE_NORMAL
@@ -60,6 +70,11 @@
 		repeat CharMax@charicon
 			CharLev@charicon(cnt)=1
 		loop
+
+		//経験値テーブルを読み込み
+		exist"Data/table_level.bin"
+		sdim expTablebuf@,strsize
+		bload"Data/table_level.bin",expTablebuf@
 
 	return
 
@@ -147,6 +162,9 @@
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LEVEL")=="" :syncINIdata+"XODA.LEVEL=1\n"
 		RegLev@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LEVEL"))
 
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.EXP")=="" :syncINIdata+"XODA.EXP=0\n"
+		RegEXP@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.EXP"))
+
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.RATE")=="" :syncINIdata+"XODA.RATE=0.0\n"
 		RegPfPoint@portalsync=double(GetINIvalue(syncINIdata,"SAVEDATA","XODA.RATE"))
 
@@ -177,11 +195,25 @@
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.BONUSFLAG")=="" :syncINIdata+"XODA.OPTION.BONUSFLAG=0\n"
 		drawbonusFlag@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.BONUSFLAG"))
 
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.MUSICSELECT.CURSORID")=="" :syncINIdata+"XODA.MUSICSELECT.CURSORID=0\n"
+		musicselect_ItemID@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.MUSICSELECT.CURSORID"))
+		
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.MUSICSELECT.LEVELID")=="" :syncINIdata+"XODA.MUSICSELECT.LEVELID=0\n"
+		musicselect_LevelID@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.MUSICSELECT.LEVELID"))
+
 		repeat 14
 			if GetINIvalue(syncINIdata,"SAVEDATA","XODA.KEYCONFIG."+cnt)=="" :syncINIdata+"XODA.KEYCONFIG."+cnt+"="+confDefKeyCode@(cnt)+"\n"
 			confKeyCode@(cnt)=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.KEYCONFIG."+cnt))
 		loop
 
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.NUMFRAGMENTS")=="" :syncINIdata+"XODA.NUMFRAGMENTS=0\n"
+		NumFragments@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.NUMFRAGMENTS"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.NUMTICKETS")=="" :syncINIdata+"XODA.NUMTICKETS=0\n"
+		NumTickets@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.NUMTICKETS"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.NUMLILLY")=="" :syncINIdata+"XODA.NUMLILLY=0\n"
+		NumLilly@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.NUMLILLY"))
 	return
 
 	//スコアデータを取得
@@ -202,7 +234,7 @@
 	#enum global ID_REC_DATE
 	#enum global ID_REC_AP
 	#defcfunc WebAPI_GetRecord
-		WebAPI_Init
+		WebAPI_Init:CheckNetworkConnection
 	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-GetRecord.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetRecord")+"&name="+RegName@portalsync)
 	#deffunc WebAPI_SyncRecord str _raw,str _uuid,array _struct
 		sdim WebAPI_resraw
@@ -228,7 +260,7 @@
 	//スコアデータを送信
 	#deffunc WebAPI_SendNewRecord str _data
 		sdim WebAPI_resraw
-		WebAPI_Init
+		WebAPI_Init:CheckNetworkConnection
 		WebAPI_resraw=WebAPI_Post("http://"+WebAPI_HostAddress+"/API-SendNewRecord.php",_data)
 		switch WebAPI_resraw
 			case"ERROR_AUTH_APIKEY"
@@ -248,20 +280,23 @@
 
 	//世界ランキングを取得
 	#defcfunc WebAPI_GetGlobalRanking
-		WebAPI_Init
+		WebAPI_Init:CheckNetworkConnection
 	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-GetGlobalRanking.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetGlobalRanking"))
 
 	//世界ランキングにスコアを送信
 	#deffunc WebAPI_SendGlobalRanking str _uuid,int _score
+		WebAPI_Init:CheckNetworkConnection
 	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-SendGlobalRanking.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendGlobalRanking")+"&name="+RegName@portalsync+"&id="+_uuid+"&score="+_score)
 
 	//プロフィールを保存
 	#deffunc WebAPI_SendProfile str _obj,str _val
+		WebAPI_Init:CheckNetworkConnection
 	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+RegName@portalsync+"&password="+RegAuth@portalsync+"&decode="+WebAPI_DecodeKey+"&object="+_obj+"&value="+_val)
 
 	//プロフィールをすべて保存
 	#deffunc SendAllProfile
 		WebAPI_SendProfile"XODA.LEVEL",str(RegLev@portalsync)
+		WebAPI_SendProfile"XODA.EXP",str(RegEXP@portalsync)
 		WebAPI_SendProfile"XODA.RATE",str(RegPfPoint@portalsync)
 		WebAPI_SendProfile"XODA.BADGE",str(RegBadge@portalsync)
 		WebAPI_SendProfile"XODA.OPTION.ADDSPEED",str(AddSpeed@)
@@ -272,6 +307,22 @@
 		WebAPI_SendProfile"XODA.OPTION.DISPOFFSET",str(DispOffset@)
 		WebAPI_SendProfile"XODA.OPTION.AUTOPLAY",str(AutoPlayFlag@)
 		WebAPI_SendProfile"XODA.OPTION.BONUSFLAG",str(drawbonusFlag@)
+		WebAPI_SendProfile"XODA.MUSICSELECT.CURSORID",str(musicselect_ItemID@)
+		WebAPI_SendProfile"XODA.MUSICSELECT.LEVELID",str(musicselect_LevelID@)
+		WebAPI_SendProfile"XODA.NUMFRAGMENTS",str(NumFragments@portalsync)
+		WebAPI_SendProfile"XODA.NUMTICKETS",str(NumTickets@portalsync)
+		WebAPI_SendProfile"XODA.NUMLILLY",str(NumLilly@portalsync)
 	return
+
+	//接続ハッシュ取得
+	#defcfunc WebAPI_Connection
+		if WebAPI_Get("http://"+WebAPI_HostAddress+"/connection.php")==Acckey@ :return TRUE:else:return FALSE
+
+	//接続チェック
+	#deffunc CheckNetworkConnection
+		if WebAPI_Connection() :return
+		ShowErrorMsg"ERROR_SVC_CONNECTION"
+		goto*ExitProg@
+		return
 
 #global

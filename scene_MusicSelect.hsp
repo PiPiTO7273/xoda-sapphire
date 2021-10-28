@@ -4,6 +4,8 @@
 	//DXライブラリグラフィック(musicselect)
 	#enum ilayer_all	=	0
 	#enum ibg
+	#enum ibg_Load
+	#enum ibg_nextstage
 	#enum iwindow_category
 	#enum iwindow_songs
 	#enum iwindow_ranking
@@ -24,6 +26,7 @@
 	#enum ifolder_assist
 	#enum ibg_window
 	#enum inav
+	#enum inav_nextstage
 	#enum ibg_item
 	#enum icursor_category
 	#enum icursor_list
@@ -50,6 +53,12 @@
 	#enum iIcon_difficulty_star_1
 	#enum iIcon_difficulty_star_2
 	#enum iIcon_Artwork_Dummy
+	#enum iIcon_item_normal
+	#enum iIcon_item_hard
+	#enum iIcon_item_chaos
+	#enum iIcon_normal
+	#enum iIcon_hard
+	#enum iIcon_chaos
 	#enum ibutton_option_0
 	#enum ibutton_option_1
 	#enum ibutton_option_2
@@ -60,6 +69,18 @@
 	#enum iobj_button_change
 	#enum iobj_switch_off
 	#enum iobj_switch_on
+	#enum ibg_lanepreview
+	#enum ibg_playerinfo
+	#enum inote_preview
+	#enum ilanehide
+	#enum ibadge_failed
+	#enum ibadge_assist
+	#enum ibadge_clear
+	#enum ibadge_expert
+	#enum ibadge_madness
+	#enum ibadge_fc
+	#enum ibadge_allex
+	#enum ilayer_playerinfo_button
 
 	//BASS Audio Libraryサンプル、チャンネルハンドル(musicselect)
 	#enum bgmMain	=	0
@@ -86,6 +107,7 @@
 	#enum fPS16
 	#enum fPS18
 	#enum fPS20
+	#enum fPS24
 	#enum fSQNUM16
 	#enum fSQNUM24
 	#enum fSQNUM40
@@ -126,11 +148,13 @@
 	#const NUM_ITEM_CATEGORY		14
 
 	#deffunc LoadMusicSelectImages
-		DrawLoadScreen"しばらくお待ち下さい",130
+		DrawLoadScreen
 		dim hdximg
 		SetDXArchiveExtension"bin"
 		hdximg(ilayer_all)=MakeScreen(BufWidth@,BufHeight@,TRUE)
-		hdximg(ibg)=LoadGraph("Data/bg_Main.ogv")
+		hdximg(ibg)=hdximg@(ibg_common_0)
+		hdximg(ibg_Load)=hdximg@(ibg_common_1)
+		hdximg(ibg_nextstage)=LoadGraph("Data/bg_nextstage.png")
 		hdximg(ifolder_all)=LoadGraph("Data/res_musicselect_item/category_all.png")
 		hdximg(ifolder_rank_ex)=LoadGraph("Data/res_musicselect_item/category_rank_ex.png")
 		hdximg(ifolder_rank_s)=LoadGraph("Data/res_musicselect_item/category_rank_s.png")
@@ -147,6 +171,7 @@
 		hdximg(ifolder_assist)=LoadGraph("Data/res_musicselect_item/category_assist.png")
 		hdximg(ibg_window)=LoadGraph("Data/bg_musicselect_window.png")
 		hdximg(inav)=LoadGraph("Data/Nav_MusicSelect.png")
+		hdximg(inav_nextstage)=LoadGraph("Data/Nav_Nextstage.png")
 		hdximg(ibg_item)=LoadGraph("Data/res_musicselect_item/bg_item.png")
 		hdximg(icursor_category)=LoadGraph("Data/cursor_musicselect_category.png")
 		hdximg(icursor_list)=LoadGraph("Data/cursor_musicselect_list.png")
@@ -173,6 +198,12 @@
 		hdximg(iIcon_difficulty_star_1)=LoadGraph("Data/Icon_Difficulty_1.png")
 		hdximg(iIcon_difficulty_star_2)=LoadGraph("Data/Icon_Difficulty_2.png")
 		hdximg(iIcon_Artwork_Dummy)=LoadGraph("Data/Icon_Artwork_Dummy.png")
+		hdximg(iIcon_item_normal)=LoadGraph("Data/Icon_item_Normal.png")
+		hdximg(iIcon_item_hard)=LoadGraph("Data/Icon_item_Hard.png")
+		hdximg(iIcon_item_chaos)=LoadGraph("Data/Icon_item_Chaos.png")
+		hdximg(iIcon_normal)=LoadGraph("Data/Icon_musicselect_normal.png")
+		hdximg(iIcon_hard)=LoadGraph("Data/Icon_musicselect_hard.png")
+		hdximg(iIcon_chaos)=LoadGraph("Data/Icon_musicselect_chaos.png")
 		hdximg(ibutton_option_0)=LoadGraph("Data/res_musicselect_button_option/0.png")
 		hdximg(ibutton_option_1)=LoadGraph("Data/res_musicselect_button_option/1.png")
 		hdximg(ibutton_option_2)=LoadGraph("Data/res_musicselect_button_option/2.png")
@@ -183,6 +214,18 @@
 		hdximg(iobj_button_change)=LoadGraph("Data/res_obj_option/button_change.png")
 		hdximg(iobj_switch_off)=LoadGraph("Data/res_obj_option/switch_off.png")
 		hdximg(iobj_switch_on)=LoadGraph("Data/res_obj_option/switch_on.png")
+		hdximg(ibg_lanepreview)=LoadGraph("Data/bg_musicselect_preview.png")
+		hdximg(inote_preview)=LoadGraph("Data/note_0.png")
+		hdximg(ilanehide)=LoadGraph("Data/layer_musicselect_lanehide.png")
+		hdximg(ibg_playerinfo)=LoadGraph("Data/bg_musicselect_playerinfo.png")
+		hdximg(ibadge_failed)=LoadGraph("Data/Icon_Badge_Failed.png")
+		hdximg(ibadge_assist)=LoadGraph("Data/Icon_Badge_Assist.png")
+		hdximg(ibadge_clear)=LoadGraph("Data/Icon_Badge_Clear.png")
+		hdximg(ibadge_expert)=LoadGraph("Data/Icon_Badge_Expert.png")
+		hdximg(ibadge_madness)=LoadGraph("Data/Icon_Badge_Madness.png")
+		hdximg(ibadge_fc)=LoadGraph("Data/Icon_Badge_FullCombo.png")
+		hdximg(ibadge_allex)=LoadGraph("Data/Icon_Badge_AllEx.png")
+		hdximg(ilayer_playerinfo_button)=LoadGraph("Data/layer_playerinfo_button.png")
 		hdximg(iwindow_category)=MakeScreen(450,811,TRUE)
 		hdximg(iwindow_songs)=MakeScreen(700,811,TRUE)
 		hdximg(iwindow_ranking)=MakeScreen(350,210,TRUE)
@@ -190,7 +233,7 @@
 	return
 
 	#deffunc LoadMusicSelectSounds
-		DrawLoadScreen"しばらくお待ち下さい",250
+		DrawLoadScreen
 		dim64 hbasschannel:dim64 hbasssample
 		LoadBASSsample"Data/bgm_MusicSelect.ogg",hbasschannel(bgmMain),hbasssample(bgmMain),BASS_SAMPLE_LOOP
 		LoadBASSsample"Data/bgm_Config.ogg",hbasschannel(bgmConfig),hbasssample(bgmConfig),BASS_SAMPLE_LOOP
@@ -205,7 +248,7 @@
 
 	//曲選択画面で使用するフォントの初期化
 	#deffunc InitMusicSelectFonts
-		DrawLoadScreen"しばらくお待ち下さい",300
+		DrawLoadScreen
 		InitFontToHandle
 		dim hdxfont
 		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
@@ -221,6 +264,7 @@
 		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
 		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
 		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+		hdxfont(fPS24)=LoadFontDataToHandle("Data/ps24.bin")
 		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
 		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
 		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
@@ -230,174 +274,18 @@
 
 	//IRを同期
 	#deffunc IRsync
-		DrawLoadScreen"しばらくお待ち下さい",400
+		DrawLoadScreen
 		sdim IRsyncbuf
 		IRsyncbuf=WebAPI_GetRecord()
+		DrawLoadScreen
 		sdim IRrankbuf
 		IRrankbuf=WebAPI_GetGlobalRanking()
 		dim FirstLoadFlag
 		return
 
 	//ライブラリをスキャン
-	#define global ScanAllPlaylist(%1=0) _ScanAllPlaylist %1
-	#deffunc _ScanAllPlaylist int _filter
+	#deffunc ScanAllPlaylist
 
-		//一度全ての項目をスキャン
-		if _filter!ID_CAT_ALL {
-			ScanAllPlaylist ID_CAT_ALL
-
-			//フィルター処理
-				dim numcatitem:dim catobjid:dim catlevid
-				repeat numitem
-					plitemid=cnt
-					repeat 3
-						switch _filter
-							case ID_CAT_RANK_EX
-								sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
-								if tmpstr=="EX"|tmpstr=="EX+"|tmpstr="MAX" {
-									catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
-									numcatitem++
-								}
-							swbreak
-							case ID_CAT_RANK_S
-								sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
-								if tmpstr=="SSS"|tmpstr=="SS"|tmpstr=="S" {
-									catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
-									numcatitem++
-								}
-							swbreak
-							case ID_CAT_RANK_AAA
-								sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
-								if tmpstr=="AAA"|tmpstr=="AAA+" {
-									catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
-									numcatitem++
-								}
-							swbreak
-							case ID_CAT_RANK_AA
-								sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
-								if tmpstr=="AA"|tmpstr=="AA+" {
-									catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
-									numcatitem++
-								}
-							swbreak
-							case ID_CAT_RANK_A
-								sdim tmpstr:tmpstr=GetScoreRank(double(plitem_mybest_score(plitemid,cnt))/10000000.0*100.0)
-								if tmpstr=="A"|tmpstr=="A+" {
-									catobjid(numcatitem)=plitemid:catlevid(numcatitem)=cnt
-									numcatitem++
-								}
-							swbreak
-						swend
-					loop
-				loop
-
-			//全てのプレイリストをバックアップ
-				sdim plitem_Title@_org_,64,numitem,3
-				sdim plitem_Artist@_org_,64,numitem,3
-				sdim plitem_Source@_org_,64,numitem,3
-				sdim plitem_UUID@_org_,32,numitem,3
-				sdim plitem_resID@_org_,32,numitem,3
-				sdim plitem_Path@_org_,64,numitem,3
-				dim plitem_Level@_org_,numitem,3
-				dim plitem_mybest_score@_org_,numitem,3
-				sdim plitem_mybest_rank@_org_,4,numitem,3
-				sdim plitem_mybest_rate@_org_,5,numitem,3
-				sdim plitem_mybest_cleartype@_org_,16,numitem,3
-				dim plitem_mybest_judge@_org_,numitem,3,7
-				sdim plitem_mybest_ratio@_org_,8,numitem,3
-				sdim plitem_mybest_gauge@_org_,350,numitem,3
-				sdim plitem_ir_name@_org_,32,numitem,3,100
-				dim plitem_ir_score@_org_,numitem,3,100
-				dim plitem_ir_myrank@_org_,numitem,3
-				dim plitem_ir_maxrank@_org_,numitem,3
-
-				dim plitemid:dim pllevid
-				repeat numitem
-					plitemid=cnt
-					repeat 3
-						pllevid=cnt
-						plitem_Title@_org_(plitemid,pllevid)=plitem_Title(plitemid,pllevid)
-						plitem_Artist@_org_(plitemid,pllevid)=plitem_Artist(plitemid,pllevid)
-						plitem_Source@_org_(plitemid,pllevid)=plitem_Source(plitemid,pllevid)
-						plitem_UUID@_org_(plitemid,pllevid)=plitem_UUID(plitemid,pllevid)
-						plitem_resID@_org_(plitemid,pllevid)=plitem_resID(plitemid,pllevid)
-						plitem_Path@_org_(plitemid,pllevid)=plitem_Path(plitemid,pllevid)
-						plitem_Level@_org_(plitemid,pllevid)=plitem_Level(plitemid,pllevid)
-						plitem_mybest_score@_org_(plitemid,pllevid)=plitem_mybest_score(plitemid,pllevid)
-						plitem_mybest_rank@_org_(plitemid,pllevid)=plitem_mybest_rank(plitemid,pllevid)
-						plitem_mybest_rate@_org_(plitemid,pllevid)=plitem_mybest_rate(plitemid,pllevid)
-						plitem_mybest_cleartype@_org_(plitemid,pllevid)=plitem_mybest_cleartype(plitemid,pllevid)
-						plitem_mybest_judge@_org_(plitemid,pllevid,ID_DATA_EXCELLENT)=plitem_mybest_judge(plitemid,pllevid,ID_DATA_EXCELLENT)
-						plitem_mybest_judge@_org_(plitemid,pllevid,ID_DATA_GREAT)=plitem_mybest_judge(plitemid,pllevid,ID_DATA_GREAT)
-						plitem_mybest_judge@_org_(plitemid,pllevid,ID_DATA_GOOD)=plitem_mybest_judge(plitemid,pllevid,ID_DATA_GOOD)
-						plitem_mybest_judge@_org_(plitemid,pllevid,ID_DATA_BAD)=plitem_mybest_judge(plitemid,pllevid,ID_DATA_BAD)
-						plitem_mybest_judge@_org_(plitemid,pllevid,ID_DATA_MISS)=plitem_mybest_judge(plitemid,pllevid,ID_DATA_MISS)
-						plitem_mybest_judge@_org_(plitemid,pllevid,ID_DATA_EARLY)=plitem_mybest_judge(plitemid,pllevid,ID_DATA_EARLY)
-						plitem_mybest_judge@_org_(plitemid,pllevid,ID_DATA_LATE)=plitem_mybest_judge(plitemid,pllevid,ID_DATA_LATE)
-						plitem_mybest_ratio@_org_(plitemid,pllevid)=plitem_mybest_ratio(plitemid,pllevid)
-						plitem_mybest_gauge@_org_(plitemid,pllevid)=plitem_mybest_gauge(plitemid,pllevid)
-						//世界ランキング
-						repeat 100
-							plitem_ir_name@_org_(plitemid,pllevid,cnt)=plitem_ir_name(plitemid,pllevid,cnt)
-							plitem_ir_score@_org_(plitemid,pllevid,cnt)=plitem_ir_score(plitemid,pllevid,cnt)
-						loop
-						plitem_ir_myrank@_org_(plitemid,pllevid)=plitem_ir_myrank(plitemid,pllevid)
-						plitem_ir_maxrank@_org_(plitemid,pllevid)=plitem_ir_maxrank(plitemid,pllevid)
-					loop
-				loop
-
-			//全てのプレイリストから楽曲情報をコピー
-				sdim plitem_Title,64,numcatitem,1
-				sdim plitem_Artist,64,numcatitem,1
-				sdim plitem_Source,64,numcatitem,1
-				sdim plitem_UUID,32,numcatitem,1
-				sdim plitem_resID,32,numcatitem,1
-				sdim plitem_Path,64,numcatitem,1
-				dim plitem_Level,numcatitem,1
-				dim plitem_mybest_score,numcatitem,1
-				sdim plitem_mybest_rank,4,numcatitem,1
-				sdim plitem_mybest_rate,5,numcatitem,1
-				sdim plitem_mybest_cleartype,16,numcatitem,1
-				dim plitem_mybest_judge,numcatitem,1,7
-				sdim plitem_mybest_ratio,8,numcatitem,1
-				sdim plitem_mybest_gauge,350,numcatitem,1
-				sdim plitem_ir_name,32,numcatitem,1,100
-				dim plitem_ir_score,numcatitem,1,100
-				dim plitem_ir_myrank,numcatitem,1
-				dim plitem_ir_maxrank,numcatitem,1
-
-				repeat numcatitem
-					plitemid=cnt
-					plitem_Title(plitemid,0)=plitem_Title@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_Artist(plitemid,0)=plitem_Artist@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_Source(plitemid,0)=plitem_Source@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_UUID(plitemid,0)=plitem_UUID@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_resID(plitemid,0)=plitem_resID@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_Path(plitemid,0)=plitem_Path@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_Level(plitemid,0)=plitem_Level@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_artwork(plitemid,0)=GetIntArray("mapimg."+plitem_UUID(plitemid,0))
-					plitem_mybest_score(plitemid,0)=plitem_mybest_score@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_mybest_rank(plitemid,0)=plitem_mybest_rank@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_mybest_rate(plitemid,0)=plitem_mybest_rate@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_mybest_cleartype(plitemid,0)=plitem_mybest_cleartype@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_mybest_judge(plitemid,0,ID_DATA_EXCELLENT)=plitem_mybest_judge@_org_(catobjid(plitemid),catlevid(plitemid),ID_DATA_EXCELLENT)
-					plitem_mybest_judge(plitemid,0,ID_DATA_GREAT)=plitem_mybest_judge@_org_(catobjid(plitemid),catlevid(plitemid),ID_DATA_GREAT)
-					plitem_mybest_judge(plitemid,0,ID_DATA_GOOD)=plitem_mybest_judge@_org_(catobjid(plitemid),catlevid(plitemid),ID_DATA_GOOD)
-					plitem_mybest_judge(plitemid,0,ID_DATA_BAD)=plitem_mybest_judge@_org_(catobjid(plitemid),catlevid(plitemid),ID_DATA_BAD)
-					plitem_mybest_judge(plitemid,0,ID_DATA_MISS)=plitem_mybest_judge@_org_(catobjid(plitemid),catlevid(plitemid),ID_DATA_MISS)
-					plitem_mybest_judge(plitemid,0,ID_DATA_EARLY)=plitem_mybest_judge@_org_(catobjid(plitemid),catlevid(plitemid),ID_DATA_EARLY)
-					plitem_mybest_judge(plitemid,0,ID_DATA_LATE)=plitem_mybest_judge@_org_(catobjid(plitemid),catlevid(plitemid),ID_DATA_LATE)
-					plitem_mybest_ratio(plitemid,0)=plitem_mybest_ratio@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_mybest_gauge(plitemid,0)=plitem_mybest_gauge@_org_(catobjid(plitemid),catlevid(plitemid))
-					repeat 100
-						plitem_ir_name(plitemid,0,cnt)=plitem_ir_name@_org_(catobjid(plitemid),catlevid(plitemid),cnt)
-						plitem_ir_score(plitemid,0,cnt)=plitem_ir_score@_org_(catobjid(plitemid),catlevid(plitemid),cnt)
-					loop
-					plitem_ir_myrank(plitemid,0)=plitem_ir_myrank@_org_(catobjid(plitemid),catlevid(plitemid))
-					plitem_ir_maxrank(plitemid,0)=plitem_ir_maxrank@_org_(catobjid(plitemid),catlevid(plitemid))
-				loop
-			numitem=numcatitem
-		} else {
 			dim numitem
 
 			numitem=int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))	//項目数
@@ -422,6 +310,13 @@
 			dim plitem_ir_score,numitem,3,100
 			dim plitem_ir_myrank,numitem,3
 			dim plitem_ir_maxrank,numitem,3
+			ddim plitem_defbpm,numitem,3
+			ddim plitem_pfpoint,numitem,3
+			dim plitem_totalnotes,numitem,3
+
+			ddim RegPfPoint@portalsync,1
+			ddim PfPointArr,10
+			dim PfPointArrMax
 
 			//解析
 			repeat numitem
@@ -434,6 +329,10 @@
 					//譜面ファイルの存在を確認
 					exist plitem_Path(plitemid,pllevid)
 					if strsize!-1 {
+						//IR取得
+						sdim IRsyncstruct
+						WebAPI_SyncRecord IRsyncbuf,plitem_UUID(plitemid,pllevid),IRsyncstruct
+
 						//メタデータ取得
 						sdim tmpstr,strsize:bload plitem_Path(plitemid,pllevid),tmpstr
 						plitem_Title(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Title")
@@ -441,16 +340,18 @@
 						plitem_Source(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Source")
 						plitem_Level(plitemid,pllevid)=int(GetINIvalue(tmpstr,"Metadata","Level"))
 						plitem_resID(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Resource")
-						if FirstLoadFlag==FALSE {
-							dim tmpint:tmpint=LoadGraph("Data/"+plitem_UUID(plitemid,pllevid)+"/"+GetINIvalue(tmpstr,"Metadata","Artwork"))
-							if tmpint<=0 :tmpint=hdximg(iIcon_Artwork_Dummy)
-							RegIntArray "mapimg."+plitem_UUID(plitemid,pllevid),tmpint
-						}
-						plitem_artwork(plitemid,pllevid)=GetIntArray("mapimg."+plitem_UUID(plitemid,pllevid))
+						dim tmpint:tmpint=LoadGraph("Data/mr/"+plitem_resID(plitemid,pllevid)+"/"+GetINIvalue(tmpstr,"Metadata","Artwork"))
+						if tmpint<=0 :tmpint=hdximg(iIcon_Artwork_Dummy)
+						plitem_artwork(plitemid,pllevid)=tmpint
+						plitem_defbpm(plitemid,pllevid)=double(GetINIvalue(tmpstr,"Metadata","Default.BPM"))
+						notesel tmpstr
+						repeat notemax
+							noteget tmpstr(1),cnt
+							if strmid(tmpstr(1),0,5)=="Note." :plitem_totalnotes(plitemid,pllevid)++
+						loop
+						noteunsel
 
-						//IR取得
-						sdim IRsyncstruct
-						WebAPI_SyncRecord IRsyncbuf,plitem_UUID(plitemid,pllevid),IRsyncstruct
+						//IR解析
 						plitem_mybest_score(plitemid,pllevid)=int(IRsyncstruct(ID_REC_SCORE))
 						plitem_mybest_rank(plitemid,pllevid)=GetScoreRank(double(plitem_mybest_score(plitemid,pllevid))/10000000.0*100.0)
 						plitem_mybest_rate(plitemid,pllevid)=strf("%.1f",double(plitem_mybest_score(plitemid,pllevid))/10000000.0*100.0)+"%"
@@ -472,6 +373,7 @@
 							ConvHEXdec HEXdecbin,IRsyncstruct(ID_REC_PACE_4BINHEX)
 							memcpy plitem_mybest_gauge(plitemid,pllevid),HEXdecbin,350
 						}
+						plitem_pfpoint(plitemid,pllevid)=double(IRsyncstruct(ID_REC_AP))
 						//世界ランキング
 						repeat 100
 							sdim tmpstr:tmpstr=GetINIvalue(IRrankbuf,"SAVEDATA",plitem_UUID(plitemid,pllevid)+".RANK#"+(cnt+1))
@@ -486,16 +388,64 @@
 							if tmpstr(1)==LoginUserInfo@(ID_NAME@) :plitem_ir_myrank(plitemid,pllevid)=cnt
 							if tmpstr(1)==""&tmpstr(2)=="" :plitem_ir_maxrank(plitemid,pllevid)=cnt:break
 						loop
+
+						//総合能力値を計算
+						PfPointArr(PfPointArrMax)=plitem_pfpoint(plitemid,pllevid)
+						PfPointArrMax++
 					}
 				loop
 			loop
-			if FirstLoadFlag==FALSE {
-				FirstLoadFlag=TRUE
-			}
-		}
+
+			//総合能力値の算出
+			sortval PfPointArr,1
+			repeat 10
+				RegPfPoint@portalsync+PfPointArr(cnt)
+			loop
+			RegPfPoint@portalsync=RegPfPoint@portalsync/10.0
 
 		ActiveColumnID(ID_SONGS)=0
 		bfActiveColumnID(ID_SONGS)=0
+	return
+
+	#deffunc SetFilterRefDB int _ref
+		dim c,numitem*3,3:dim lv,numitem*3,3:dim numfilteritem
+		if _ref==ID_CAT_ALL {
+			numfilteritem=numitem
+			repeat numitem
+				plitemid=cnt
+				repeat 3
+					pllevid=cnt
+					c(plitemid,pllevid)=plitemid:lv(plitemid,pllevid)=pllevid
+				loop
+			loop
+		}
+		if _ref>=ID_CAT_RANK_EX&_ref<=ID_CAT_RANK_C {
+			repeat numitem
+				plitemid=cnt
+				repeat 3
+					pllevid=cnt
+					if plitem_mybest_score(plitemid,pllevid)>=(9-(_ref-ID_CAT_RANK_EX))*1000000&plitem_mybest_score(plitemid,pllevid)<(9-(_ref-ID_CAT_RANK_EX)+1)*1000000 {
+						c(numfilteritem,0)=plitemid:c(numfilteritem,1)=plitemid:c(numfilteritem,2)=plitemid
+						lv(numfilteritem,0)=pllevid:lv(numfilteritem,1)=pllevid:lv(numfilteritem,2)=pllevid
+						numfilteritem++
+					}
+				loop
+			loop
+		}
+		if _ref>=ID_CAT_TYPE_ALLEX&_ref<=ID_CAT_TYPE_ASSIST {
+			sdim tmpstr:tmpstr="ALL-EXCELLENT","FULLCOMBO","MADNESS-CLEAR","EXPERT-CLEAR","CLEAR","ASSIST-CLEAR"
+			repeat numitem
+				plitemid=cnt
+				repeat 3
+					pllevid=cnt
+					if plitem_mybest_cleartype(plitemid,pllevid)==tmpstr(_ref-ID_CAT_TYPE_ALLEX) {
+						c(numfilteritem,0)=plitemid:c(numfilteritem,1)=plitemid:c(numfilteritem,2)=plitemid
+						lv(numfilteritem,0)=pllevid:lv(numfilteritem,1)=pllevid:lv(numfilteritem,2)=pllevid
+						numfilteritem++
+					}
+				loop
+			loop
+		}
 	return
 
 	#deffunc StartMusicSelect
@@ -531,7 +481,12 @@
 			dim JumpSceneFlag
 			dim JumpSceneCount
 			dim JumpSceneID
+			ddim PreviewBPM,1
+			dim PreviewPosY
 			DecideCount=-1
+
+		ActiveColumnID(ID_SONGS)=musicselect_ItemID@
+		CurSelLev=musicselect_LevelID@
 	return
 
 	#deffunc DrawMusicSelect
@@ -565,16 +520,24 @@
 					bfHoverColumnID(ID_CATEGORY)=HoverColumnID(ID_CATEGORY)
 					//ボタンが押された
 					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&HoverColumnID(ID_CATEGORY)!-1 {
+						dim tmpint:tmpint=ActiveColumnID(ID_CATEGORY)
 						ActiveColumnID(ID_CATEGORY)=HoverColumnID(ID_CATEGORY)
-						ScanAllPlaylist ActiveColumnID(ID_CATEGORY)
-						SongChangeCount=0:CatChangeCount=0
+						SetFilterRefDB ActiveColumnID(ID_CATEGORY)
+						if numfilteritem==0 {
+							SetFilterRefDB tmpint
+							PlaySE int(hbasschannel(sndError)),0.7
+							ActiveColumnID(ID_CATEGORY)=tmpint
+						} else {
+							ActiveColumnID(ID_SONGS)=0
+							SongChangeCount=0:CatChangeCount=0
+						}
 						PushButtonFlag=TRUE
 					}
 				}
 				HoverColumnID(ID_SONGS)=-1
 				if insquare(CursorPosX,CursorPosY,450,229,450+700,229+811) {
 					//曲選択
-					repeat numitem
+					repeat numfilteritem
 						dim SenseColumnPos
 						SenseColumnPos=229+10+cnt*(50+8)+ScrollEaseB(ID_SONGS)
 						if insquare(CursorPosX,CursorPosY,450,SenseColumnPos,450+700,SenseColumnPos+50) {
@@ -591,8 +554,9 @@
 					}
 				}
 			}
+
 			repeat 3
-				if plitem_UUID(ActiveColumnID(ID_SONGS),CurSelLev)=="*" {
+				if plitem_UUID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))=="*"|plitem_UUID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))=="" {
 					switch CurSelLev
 						case 0:CurSelLev=2:swbreak
 						case 1:CurSelLev=0:swbreak
@@ -600,6 +564,9 @@
 					swend
 				} else:break
 			loop
+
+			if ActiveColumnID(ID_CATEGORY)==0 :musicselect_ItemID@=ActiveColumnID(ID_SONGS)
+			musicselect_LevelID@=CurSelLev
 
 		//背景動画
 			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
@@ -617,6 +584,11 @@
 		//ウィンドウの背景
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 0,165,hdximg(ibg_window),TRUE
+
+		//曲数
+			setease 0,numfilteritem,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawStringToHandle 1058,183,strf("%04d",getease(CatChangeCount,20)),Getcolor(255,255,255),hdxfont(fPS24)
 
 		//カテゴリー選択ウィンドウ
 			SetDrawScreen hdximg(iwindow_category)
@@ -681,12 +653,12 @@
 					OnScrollCount(ID_SONGS)=0
 				}
 				if ScrollEaseB(ID_SONGS)>0 :ScrollEaseB(ID_SONGS)=0
-				if (10*2+(8+50)*numitem)-811>0 {
-					if ScrollEaseB(ID_SONGS)<-((10*2+(8+50)*numitem)-811) :ScrollEaseB(ID_SONGS)=-((10*2+(8+50)*numitem)-811)
+				if (10*2+(8+50)*numfilteritem)-811>0 {
+					if ScrollEaseB(ID_SONGS)<-((10*2+(8+50)*numfilteritem)-811) :ScrollEaseB(ID_SONGS)=-((10*2+(8+50)*numfilteritem)-811)
 				} else :ScrollEaseB(ID_SONGS)=0
 				AddCount OnScrollCount(ID_SONGS)
 				//アイテム描画
-				repeat numitem
+				repeat numfilteritem
 					setease ScrollEaseA(ID_SONGS),ScrollEaseB(ID_SONGS),ease_cubic_out
 					dim itemposy:itemposy=10+cnt*(50+8)+getease(OnScrollCount(ID_SONGS),10)
 					if itemposy<-50 :continue
@@ -694,8 +666,31 @@
 					//項目
 						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 						DrawGraph 15,itemposy,hdximg(ibg_item),TRUE
+						switch lv(cnt,CurSelLev)
+							case 0:DrawGraph 15+564,itemposy+38,hdximg(iIcon_item_normal),TRUE:swbreak
+							case 1:DrawGraph 15+564,itemposy+38,hdximg(iIcon_item_hard),TRUE:swbreak
+							case 2:DrawGraph 15+564,itemposy+38,hdximg(iIcon_item_chaos),TRUE:swbreak
+						swend
+
+						//バッジ
+						plitemid=cnt
+						repeat 3
+							if ActiveColumnID(ID_CATEGORY)!0&cnt!lv(plitemid,CurSelLev) :continue
+							pllevid=cnt
+							switch plitem_mybest_cleartype(c(plitemid,pllevid),lv(plitemid,pllevid))
+								case"ASSIST-CLEAR":DrawGraph 539+28*pllevid,itemposy+15,hdximg(ibadge_assist),TRUE:swbreak
+								case"CLEAR":DrawGraph 539+28*pllevid,itemposy+15,hdximg(ibadge_clear),TRUE:swbreak
+								case"EXPERT-CLEAR":DrawGraph 539+28*pllevid,itemposy+15,hdximg(ibadge_expert),TRUE:swbreak
+								case"MADNESS-CLEAR":DrawGraph 539+28*pllevid,itemposy+15,hdximg(ibadge_madness),TRUE:swbreak
+								case"FULLCOMBO":DrawGraph 539+28*pllevid,itemposy+15,hdximg(ibadge_fc),TRUE:swbreak
+								case"ALL-EXCELLENT":DrawGraph 539+28*pllevid,itemposy+15,hdximg(ibadge_allex),TRUE:swbreak
+								case"FAILED":DrawGraph 539+28*pllevid,itemposy+15,hdximg(ibadge_failed),TRUE:swbreak
+							swend
+						loop
+
+						//曲名
 						SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-						DrawStringToHandle 47,itemposy+11,plitem_Title(cnt,0),GetColor(10,10,10),hdxfont(fNSCJM24)
+						DrawStringToHandle 47,itemposy+11,plitem_Title(c(cnt,0),0),GetColor(10,10,10),hdxfont(fNSCJM24)
 
 					//ホバーエフェクト
 						if HoverColumnID(ID_SONGS)==cnt {
@@ -720,18 +715,19 @@
 			DrawGraph 1170,189,hdximg(ibg_meta),TRUE
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			//曲名
-			DrawStringToHandle 1492,231,plitem_Title(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(10,10,10),hdxfont(fNSCJM24)
+			DrawStringToHandle 1492,231,plitem_Title(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),GetColor(10,10,10),hdxfont(fNSCJM24)
 			//アーティスト名
-			DrawStringToHandle 1492,283,plitem_Artist(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(30,30,30),hdxfont(fNSCJM20)
+			DrawStringToHandle 1492,283,plitem_Artist(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),GetColor(30,30,30),hdxfont(fNSCJM20)
 			//アルバム
-			DrawStringToHandle 1492,333,plitem_Source(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(50,50,50),hdxfont(fNSCJM16)
+			DrawStringToHandle 1492,333,plitem_Source(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),GetColor(50,50,50),hdxfont(fNSCJM16)
 			//アルバムアート
-			if numitem!0 {
+			if numfilteritem!0 {
 				setease 250,200,ease_cubic_out
 				EaseWidth=getease(SongChangeCount,30)
 				DrawPosX=1170+200/2-EaseWidth/2:DrawPosY=189+200/2-EaseWidth/2
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-				DrawExtendGraph DrawPosX,DrawPosY,DrawPosX+EaseWidth,DrawPosY+EaseWidth,plitem_artwork(ActiveColumnID(ID_SONGS),CurSelLev),FALSE
+				;SetDrawMode DX_DRAWMODE_BILINEAR
+				DrawExtendGraph DrawPosX,DrawPosY,DrawPosX+EaseWidth,DrawPosY+EaseWidth,plitem_artwork(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),FALSE
 			}
 
 		//詳細
@@ -739,39 +735,41 @@
 			DrawGraph 1150,425,hdximg(ibg_detail),TRUE
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 			//自己ベストスコア
-			setease 0,plitem_mybest_score(ActiveColumnID(ID_SONGS),CurSelLev),ease_linear
+			setease 0,plitem_mybest_score(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),ease_linear
 			DrawStringToHandle 1173,536,strf("%08d",getease(SongChangeCount,15)),GetColor(255,255,255),hdxfont(fPS16)
 			//獲得スコアランク
-			DrawStringToHandle 1273,536,plitem_mybest_rank(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1273,536,plitem_mybest_rank(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),GetColor(255,255,255),hdxfont(fPS16)
 			//スコアレート（％）
-			DrawStringToHandle 1333,536,plitem_mybest_rate(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1333,536,plitem_mybest_rate(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),GetColor(255,255,255),hdxfont(fPS16)
 			//クリアの種類
-			DrawStringToHandle 1398,536,plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1398,536,plitem_mybest_cleartype(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),GetColor(255,255,255),hdxfont(fPS16)
 			//EXCELLENT判定数
-			setease 0,plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_EXCELLENT),ease_cubic_out
+			setease 0,plitem_mybest_judge(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev),ID_DATA_EXCELLENT),ease_cubic_out
 			DrawStringToHandle 1269,585,strf("%04d",getease(SongChangeCount,20)),GetColor(255,255,255),hdxfont(fPS16)
 			//GREAT判定数
-			setease 0,plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_GREAT),ease_cubic_out
+			setease 0,plitem_mybest_judge(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev),ID_DATA_GREAT),ease_cubic_out
 			DrawStringToHandle 1269,604,strf("%04d",getease(SongChangeCount,22)),GetColor(255,255,255),hdxfont(fPS16)
 			//GOOD判定数
-			setease 0,plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_GOOD),ease_cubic_out
+			setease 0,plitem_mybest_judge(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev),ID_DATA_GOOD),ease_cubic_out
 			DrawStringToHandle 1269,623,strf("%04d",getease(SongChangeCount,24)),GetColor(255,255,255),hdxfont(fPS16)
 			//BAD判定数
-			setease 0,plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_BAD),ease_cubic_out
+			setease 0,plitem_mybest_judge(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev),ID_DATA_BAD),ease_cubic_out
 			DrawStringToHandle 1269,642,strf("%04d",getease(SongChangeCount,26)),GetColor(255,255,255),hdxfont(fPS16)
 			//MISS判定数
-			setease 0,plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_MISS),ease_cubic_out
+			setease 0,plitem_mybest_judge(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev),ID_DATA_MISS),ease_cubic_out
 			DrawStringToHandle 1269,661,strf("%04d",getease(SongChangeCount,28)),GetColor(255,255,255),hdxfont(fPS16)
 			//EARLY判定数
-			setease 0,plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_EARLY),ease_cubic_out
+			setease 0,plitem_mybest_judge(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev),ID_DATA_EARLY),ease_cubic_out
 			DrawStringToHandle 1398,585,strf("%04d",getease(SongChangeCount,20)),GetColor(255,255,255),hdxfont(fPS16)
 			//LATE判定数
-			setease 0,plitem_mybest_judge(ActiveColumnID(ID_SONGS),CurSelLev,ID_DATA_LATE),ease_cubic_out
+			setease 0,plitem_mybest_judge(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev),ID_DATA_LATE),ease_cubic_out
 			DrawStringToHandle 1398,604,strf("%04d",getease(SongChangeCount,24)),GetColor(255,255,255),hdxfont(fPS16)
 			//EARLY/LATE比
-			DrawStringToHandle 1398,625,plitem_mybest_ratio(ActiveColumnID(ID_SONGS),CurSelLev),GetColor(255,255,255),hdxfont(fPS16)
+			DrawStringToHandle 1398,625,plitem_mybest_ratio(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),GetColor(255,255,255),hdxfont(fPS16)
+			//能力値
+			DrawStringToHandle 1333,663,strf("%.2f",plitem_pfpoint(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))),Getcolor(255,255,255),hdxfont(fPS16)
 			//ゲージのグラフ
-			if peek(plitem_mybest_gauge(ActiveColumnID(ID_SONGS),CurSelLev),0)==255 {		//ゲージ記録なし
+			if peek(plitem_mybest_gauge(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),0)==255 {		//ゲージ記録なし
 				setease 100,256,ease_linear+ease_loop
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,60)
 				DrawGraph 1170,706,hdximg(ilayer_nodata),TRUE
@@ -779,19 +777,34 @@
 				setease 0,350-1,ease_cubic_out
 				repeat getease(SongChangeCount,60)		//グラフ描画
 					dim GraphColorCode:dim GraphDrawValue
-					GraphDrawValue(0)=int(double(peek(plitem_mybest_gauge(ActiveColumnID(ID_SONGS),CurSelLev),cnt))*0.8)
-					GraphDrawValue(1)=int(double(peek(plitem_mybest_gauge(ActiveColumnID(ID_SONGS),CurSelLev),cnt+1))*0.8)
+					GraphDrawValue(0)=int(double(peek(plitem_mybest_gauge(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),cnt))*0.8)
+					GraphDrawValue(1)=int(double(peek(plitem_mybest_gauge(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),cnt+1))*0.8)
 
 					GraphColorCode=GetColor(255,255,255)
-					if plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev)=="ASSIST-CLEAR"|plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev)=="CLEAR" {		//加点式
+					if plitem_mybest_cleartype(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))=="ASSIST-CLEAR"|plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev)=="CLEAR" {		//加点式
 						if GraphDrawValue(0)>70.0 :GraphColorCode=GetColor(100,255,100):else:GraphColorCode=GetColor(255,50,50)
 					}
-					if plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev)=="EXPERT-CLEAR" :GraphColorCode=GetColor(255,50,80)	//EXPERTゲージ
-					if plitem_mybest_cleartype(ActiveColumnID(ID_SONGS),CurSelLev)=="MADNESS-CLEAR" :GraphColorCode=GetColor(132,60,160) //MADNESSゲージ
+					if plitem_mybest_cleartype(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))=="EXPERT-CLEAR" :GraphColorCode=GetColor(255,50,80)	//EXPERTゲージ
+					if plitem_mybest_cleartype(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))=="MADNESS-CLEAR" :GraphColorCode=GetColor(132,60,160) //MADNESSゲージ
 
 					DrawLine 1170+cnt,706+80-GraphDrawValue(0),1170+1+cnt,706+80-GraphDrawValue(1),GraphColorCode,2
 				loop
 			}
+
+		//トレーナー
+			ddim TrainerRate,1:sdim tmpstr:dim tmpint
+			switch CurSelLev
+				case 0:tmpstr="Normal":swbreak
+				case 1:tmpstr="Hard":swbreak
+				case 2:tmpstr="Chaos":swbreak
+			swend
+			tmpint=plitem_totalnotes(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
+			MaxPfPoint=GetPfPoint(int(plitem_Level(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))),10000000,tmpint,tmpstr,0)
+			TrainerRate=limitf(double(plitem_pfpoint(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)))/MaxPfPoint*100.0+5.0,0.0,100.0)
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			setease 0,499,ease_cubic_in
+			DrawStringToHandle 1370,967,"適正レベル Lv."+(1+getease(int(TrainerRate*10.0),1000)),GetColor(255,255,255),hdxfont(fNSCJM16)
+			DrawStringToHandle 1370,991,"レート : "+strf("%.2f",(TrainerRate))+"%",Getcolor(255,255,255),hdxfont(fNSCJM15)
 
 		//世界ランキング
 			SetDrawScreen hdximg(iwindow_ranking)
@@ -827,13 +840,13 @@
 						case 2:hDrawIcon=hdximg(iIcon_Rank_3):swbreak
 						default:hDrawIcon=hdximg(iIcon_rank_def):swbreak
 					swend
-					if plitem_ir_name(ActiveColumnID(ID_SONGS),CurSelLev,cnt)=="" :plitem_ir_name(ActiveColumnID(ID_SONGS),CurSelLev,cnt)="----"
+					if plitem_ir_name(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev),cnt)=="" :plitem_ir_name(ActiveColumnID(ID_SONGS),CurSelLev,cnt)="----"
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 					DrawGraph 0,itemposy,hDrawIcon,TRUE
 					SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 					DrawStringToHandle 26,itemposy+2,""+(cnt+1)+numstr(cnt\10),GetColor(255,255,255),hdxfont(fSQNUM16)
-					DrawStringToHandle 110,itemposy,plitem_ir_name(ActiveColumnID(ID_SONGS),CurSelLev,cnt),GetColor(255,255,255),hdxfont(fPS16)
-					DrawStringToHandle 230,itemposy,strf("%08d",plitem_ir_score(ActiveColumnID(ID_SONGS),CurSelLev,cnt)),GetColor(255,255,255),hdxfont(fPS16)
+					DrawStringToHandle 110,itemposy,plitem_ir_name(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev),cnt),GetColor(255,255,255),hdxfont(fPS16)
+					DrawStringToHandle 230,itemposy,strf("%08d",plitem_ir_score(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev),cnt)),GetColor(255,255,255),hdxfont(fPS16)
 				loop
 			SetDrawScreen hdximg(ilayer_all)
 			setease 100,256,ease_cubic_out
@@ -843,8 +856,8 @@
 
 		//自分の順位
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-			if plitem_ir_myrank(ActiveColumnID(ID_SONGS),CurSelLev)!-1 {
-				DrawStringToHandle 1560,761,str(plitem_ir_myrank(ActiveColumnID(ID_SONGS),CurSelLev)+1)+" / "+str(plitem_ir_maxrank(ActiveColumnID(ID_SONGS),CurSelLev)),GetColor(255,255,255),hdxfont(fSQNUM16)
+			if plitem_ir_myrank(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))!-1 {
+				DrawStringToHandle 1560,761,str(plitem_ir_myrank(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))+1)+" / "+str(plitem_ir_maxrank(ActiveColumnID(ID_SONGS),CurSelLev)),GetColor(255,255,255),hdxfont(fSQNUM16)
 			} else {
 				DrawStringToHandle 1560,761,"NO DATA",GetColor(255,255,255),hdxfont(fSQNUM16)
 			}
@@ -856,10 +869,10 @@
 				DrawPosX=1420
 			} else {
 				tmpint=1
-				DrawPosX=1254
+				DrawPosX=1420
 			}
 			repeat tmpint
-				dim NumDrawStars:NumDrawStars=plitem_Level(ActiveColumnID(ID_SONGS),cnt)
+				dim NumDrawStars:NumDrawStars=plitem_Level(c(ActiveColumnID(ID_SONGS),cnt),lv(ActiveColumnID(ID_SONGS),cnt))
 				dim hDrawStar
 				pllevid=cnt
 				setease 0,limit(NumDrawStars,0,4*3),ease_cubic_out
@@ -873,6 +886,28 @@
 				loop
 			loop
 
+		//プレイヤー情報
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1170,41,hdximg(ibg_playerinfo),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				//名前
+				DrawStringToHandle 1315,54,RegName@portalsync,Getcolor(0,0,0),hdxfont(fPS24)
+				//レベル
+				DrawStringToHandle 1315,86,"Lv. "+RegLev@portalsync,Getcolor(0,0,0),hdxfont(fPS16)
+				//総合能力値
+				DrawStringToHandle 1397,109,strf("%.2f",RegPfPoint@portalsync),Getcolor(0,0,0),hdxfont(fPS16)
+				//経験値
+				DrawStringToHandle 1450,86,"EXP "+RegEXP@portalsync+" / "+lpeek(expTablebuf@,RegLev@portalsync*4),Getcolor(0,0,0),hdxfont(fPS16)
+				DrawBox 1450,109,1450+int(100.0*(double(RegEXP@portalsync)/double(lpeek(expTablebuf@,RegLev@portalsync*4)))),109+8,$3FECF2,TRUE
+
+			if insquare(CursorPosX,CursorPosY,1635,57,1635+140,57+30) {
+				DrawGraph 1635,57,hdximg(ilayer_playerinfo_button),TRUE
+				if (MouseInput&MOUSE_INPUT_LEFT) {
+					OpenEditCommentDialog
+					SetDrawScreen hdximg(ilayer_all)
+				}
+			}
+
 		//ボタンの描画と判定
 		if OptionWindowFlag==0|OptionWindowFlag==2 {
 			//プレイ開始ボタン
@@ -882,6 +917,7 @@
 						DrawGraph 1620,960,hdximg(ibutton_start_2),TRUE
 						PushButtonFlag=TRUE
 						PlaySE int(hbasschannel(sndDecide)),1.0
+						PlayMovieToGraph hdximg(ibg_Load),DX_PLAYTYPE_LOOP
 						DecideCount=0
 					} else {
 						DrawGraph 1620,960,hdximg(ibutton_start_1),TRUE
@@ -907,7 +943,7 @@
 
 			//難易度変更ボタン
 				if ActiveColumnID(ID_CATEGORY)==0 {	//すべての楽曲のときのみ
-					if plitem_UUID(ActiveColumnID(ID_SONGS),0)!"*" {
+					if plitem_UUID(c(ActiveColumnID(ID_SONGS),0),0)!"*" {
 						if CurSelLev==0 {	//normal
 							DrawGraph 1254,826,hdximg(ibutton_normal_2),TRUE
 						} else {
@@ -919,7 +955,7 @@
 							}
 						}
 					}
-					if plitem_UUID(ActiveColumnID(ID_SONGS),1)!"*" {
+					if plitem_UUID(c(ActiveColumnID(ID_SONGS),1),1)!"*" {
 						if CurSelLev==1 {	//hard
 							DrawGraph 1254,866,hdximg(ibutton_hard_2),TRUE
 						} else {
@@ -931,7 +967,7 @@
 							}
 						}
 					}
-					if plitem_UUID(ActiveColumnID(ID_SONGS),2)!"*" {
+					if plitem_UUID(c(ActiveColumnID(ID_SONGS),2),2)!"*" {
 						if CurSelLev==2 {	//chaos
 							DrawGraph 1254,906,hdximg(ibutton_chaos_2),TRUE
 						} else {
@@ -943,82 +979,101 @@
 							}
 						}
 					}
+				} else {
+					switch lv(ActiveColumnID(ID_SONGS),CurSelLev)
+					case 0:DrawGraph 1254,826,hdximg(ibutton_normal_1),TRUE:swbreak
+					case 1:DrawGraph 1254,826,hdximg(ibutton_hard_1),TRUE:swbreak
+					case 2:DrawGraph 1254,826,hdximg(ibutton_chaos_1),TRUE:swbreak
+					swend
 				}
 		}
+		//オプションウィンドウのボタン判定
 		if OptionWindowFlag==1 {
+			//閉じるボタン
 			if insquare(CursorPosX,CursorPosY,1828,4,1828+64,4+64)&(MouseInput&MOUSE_INPUT_LEFT) {
 				OptionWindowFlag=2:OptionWindowCount=0
 				PlaySE int(hbasschannel(sndCancel)),1.0
 			}
-			if insquare(CursorPosX,CursorPosY,1617,120,1617+50,120+32) {
-				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :AddSpeed@-0.1:PlaySE int(hbasschannel(sndCursor)),1.0
-				if LClickKeepCount>30&SceneCount\5==0 :AddSpeed@-0.1
-			}
-			if insquare(CursorPosX,CursorPosY,1817,120,1817+50,120+32) {
-				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :AddSpeed@+0.1:PlaySE int(hbasschannel(sndCursor)),1.0
-				if LClickKeepCount>30&SceneCount\5==0 :AddSpeed@+0.1
-			}
-			if insquare(CursorPosX,CursorPosY,1617,192,1617+50,192+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
-				GaugeType@--
-				if GaugeType@<GAUGE_ASSIST :GaugeType@=GAUGE_MADNESS
-				PlaySE int(hbasschannel(sndCursor)),1.0
-			}
-			if insquare(CursorPosX,CursorPosY,1817,192,1817+50,192+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
-				GaugeType@++
-				if GaugeType@>GAUGE_MADNESS :GaugeType@=GAUGE_ASSIST
-				PlaySE int(hbasschannel(sndCursor)),1.0
-			}
-			if insquare(CursorPosX,CursorPosY,1617,264,1617+50,264+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
-				ObjPlacement@--
-				if ObjPlacement@<OBJP_NORMAL :ObjPlacement@=OBJP_S_AUTO
-				PlaySE int(hbasschannel(sndCursor)),1.0
-			}
-			if insquare(CursorPosX,CursorPosY,1817,264,1817+50,264+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
-				ObjPlacement@++
-				if ObjPlacement@>OBJP_S_AUTO :ObjPlacement@=OBJP_NORMAL
-				PlaySE int(hbasschannel(sndCursor)),1.0
-			}
-			if insquare(CursorPosX,CursorPosY,1617,336,1617+50,336+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
-				TargetScoreRank@--
-				if TargetScoreRank@<TARGET_SCORE_MAX :TargetScoreRank@=TARGET_SCORE_ONLINETOP
-				PlaySE int(hbasschannel(sndCursor)),1.0
-			}
-			if insquare(CursorPosX,CursorPosY,1817,336,1817+50,336+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
-				TargetScoreRank@++
-				if TargetScoreRank@>TARGET_SCORE_ONLINETOP :TargetScoreRank@=TARGET_SCORE_MAX
-				PlaySE int(hbasschannel(sndCursor)),1.0
-			}
-			if insquare(CursorPosX,CursorPosY,1617,408,1617+50,408+32) {
-				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :JudgeOffset@-1:PlaySE int(hbasschannel(sndCursor)),1.0
-				if LClickKeepCount>30&SceneCount\5==0 :JudgeOffset@-1
-			}
-			if insquare(CursorPosX,CursorPosY,1817,408,1817+50,408+32) {
-				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :JudgeOffset@+1:PlaySE int(hbasschannel(sndCursor)),1.0
-				if LClickKeepCount>30&SceneCount\5==0 :JudgeOffset@+1
-			}
-			if insquare(CursorPosX,CursorPosY,1617,480,1617+50,480+32) {
-				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :DispOffset@-1:PlaySE int(hbasschannel(sndCursor)),1.0
-				if LClickKeepCount>30&SceneCount\5==0 :DispOffset@-1
-			}
-			if insquare(CursorPosX,CursorPosY,1817,480,1817+50,480+32) {
-				if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :DispOffset@+1:PlaySE int(hbasschannel(sndCursor)),1.0
-				if LClickKeepCount>30&SceneCount\5==0 :DispOffset@+1
-			}
-			if insquare(CursorPosX,CursorPosY,1765,552,1765+100,552+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
-				JumpSceneFlag=TRUE
-				JumpSceneCount=0
-				JumpSceneID=ID_KEYCONFIG
-				PlaySE int(hbasschannel(sndCursor)),1.0
-			}
-			if insquare(CursorPosX,CursorPosY,1801,624,1801+64,624+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
-				if drawbonusFlag@ :drawbonusFlag@=FALSE:else:drawbonusFlag@=TRUE
-				PlaySE int(hbasschannel(sndCursor)),1.0
-			}
-			if insquare(CursorPosX,CursorPosY,1801,696,1801+64,696+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
-				if AutoPlayFlag@ :AutoPlayFlag@=FALSE:else:AutoPlayFlag@=TRUE
-				PlaySE int(hbasschannel(sndCursor)),1.0
-			}
-			AddSpeed@=limitf(AddSpeed@,0.1,10.0)
+			//流れてくる音符の速さ
+				if insquare(CursorPosX,CursorPosY,1617,120,1617+50,120+32) {
+					if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :AddSpeed@-0.1:PlaySE int(hbasschannel(sndCursor)),1.0
+					if LClickKeepCount>30&SceneCount\5==0 :AddSpeed@-0.1
+				}
+				if insquare(CursorPosX,CursorPosY,1817,120,1817+50,120+32) {
+					if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :AddSpeed@+0.1:PlaySE int(hbasschannel(sndCursor)),1.0
+					if LClickKeepCount>30&SceneCount\5==0 :AddSpeed@+0.1
+				}
+			//ゲージの難易度
+				if insquare(CursorPosX,CursorPosY,1617,192,1617+50,192+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+					GaugeType@--
+					if GaugeType@<GAUGE_ASSIST :GaugeType@=GAUGE_MADNESS
+					PlaySE int(hbasschannel(sndCursor)),1.0
+				}
+				if insquare(CursorPosX,CursorPosY,1817,192,1817+50,192+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+					GaugeType@++
+					if GaugeType@>GAUGE_MADNESS :GaugeType@=GAUGE_ASSIST
+					PlaySE int(hbasschannel(sndCursor)),1.0
+				}
+			//譜面の配置
+				if insquare(CursorPosX,CursorPosY,1617,264,1617+50,264+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+					ObjPlacement@--
+					if ObjPlacement@<OBJP_NORMAL :ObjPlacement@=OBJP_S_AUTO
+					PlaySE int(hbasschannel(sndCursor)),1.0
+				}
+				if insquare(CursorPosX,CursorPosY,1817,264,1817+50,264+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+					ObjPlacement@++
+					if ObjPlacement@>OBJP_S_AUTO :ObjPlacement@=OBJP_NORMAL
+					PlaySE int(hbasschannel(sndCursor)),1.0
+				}
+			//目標スコア
+				if insquare(CursorPosX,CursorPosY,1617,336,1617+50,336+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+					TargetScoreRank@--
+					if TargetScoreRank@<TARGET_SCORE_MAX :TargetScoreRank@=TARGET_SCORE_ONLINETOP
+					PlaySE int(hbasschannel(sndCursor)),1.0
+				}
+				if insquare(CursorPosX,CursorPosY,1817,336,1817+50,336+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+					TargetScoreRank@++
+					if TargetScoreRank@>TARGET_SCORE_ONLINETOP :TargetScoreRank@=TARGET_SCORE_MAX
+					PlaySE int(hbasschannel(sndCursor)),1.0
+				}
+			//判定タイミングの調整
+				if insquare(CursorPosX,CursorPosY,1617,408,1617+50,408+32) {
+					if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :JudgeOffset@-1:PlaySE int(hbasschannel(sndCursor)),1.0
+					if LClickKeepCount>30&SceneCount\5==0 :JudgeOffset@-1
+				}
+				if insquare(CursorPosX,CursorPosY,1817,408,1817+50,408+32) {
+					if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :JudgeOffset@+1:PlaySE int(hbasschannel(sndCursor)),1.0
+					if LClickKeepCount>30&SceneCount\5==0 :JudgeOffset@+1
+				}
+			//描画位置の調整
+				if insquare(CursorPosX,CursorPosY,1617,480,1617+50,480+32) {
+					if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :DispOffset@-1:PlaySE int(hbasschannel(sndCursor)),1.0
+					if LClickKeepCount>30&SceneCount\5==0 :DispOffset@-1
+				}
+				if insquare(CursorPosX,CursorPosY,1817,480,1817+50,480+32) {
+					if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE :DispOffset@+1:PlaySE int(hbasschannel(sndCursor)),1.0
+					if LClickKeepCount>30&SceneCount\5==0 :DispOffset@+1
+				}
+			//キーの割り当て
+				if insquare(CursorPosX,CursorPosY,1765,552,1765+100,552+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+					JumpSceneFlag=TRUE
+					JumpSceneCount=0
+					JumpSceneID=ID_KEYCONFIG
+					PlaySE int(hbasschannel(sndCursor)),1.0
+				}
+			//ボーナスの表示
+				if insquare(CursorPosX,CursorPosY,1801,624,1801+64,624+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+					if drawbonusFlag@ :drawbonusFlag@=FALSE:else:drawbonusFlag@=TRUE
+					PlaySE int(hbasschannel(sndCursor)),1.0
+				}
+			//オートプレイ
+				if insquare(CursorPosX,CursorPosY,1801,696,1801+64,696+32)&(MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+					if AutoPlayFlag@ :AutoPlayFlag@=FALSE:else:AutoPlayFlag@=TRUE
+					PlaySE int(hbasschannel(sndCursor)),1.0
+				}
+
+			//設定値の制限
+				AddSpeed@=limitf(AddSpeed@,0.1,10.0)
 		}
 
 		//ステータス
@@ -1042,12 +1097,64 @@
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount+1,20)
 		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ilayer_all),TRUE
 
-		setease 0,256,ease_linear
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(DecideCount-25,TransitionFrame)
-		DrawBox 0,0,BufWidth@,BufHeight@,GetColor(255,255,255),TRUE
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(DecideCount-15,40)
+		setease 1.1,1,ease_cubic_out
+		EaseWidth=int(double(BufWidth@)*geteasef(DecideCount-15,40))
+		EaseHeight=int(double(BufHeight@)*geteasef(DecideCount-15,40))
+		EasePosX=BufWidth@/2-EaseWidth/2:EasePosY=BufHeight@/2-EaseHeight/2
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_Load),TRUE
+
+		//NEXT STAGE
+		if DecideCount>10 {
+			//背景
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount-20,15)
+			setease 1.5,1,ease_cubic_out
+			EaseWidth=int(double(350)*geteasef(DecideCount-20,15))
+			EaseHeight=int(double(558)*geteasef(DecideCount-20,15))
+			EasePosX=BufWidth@/2-EaseWidth/2:EasePosY=BufHeight@/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_nextstage),TRUE
+
+			DrawGraph EasePosX+EaseWidth-96,EasePosY+EaseHeight-46,hdximg(iIcon_normal+lv(ActiveColumnID(ID_SONGS),CurSelLev)),TRUE
+
+			//曲名・アーティスト名
+			EasePosX=785
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(DecideCount-30,15)
+			DrawStringXCenterToHandle EasePosX,624,plitem_Title(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),350,GetColor(0,0,0),hdxfont(fNSCJM24)
+			DrawStringXCenterToHandle EasePosX,674,plitem_Artist(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),350,Getcolor(10,10,10),hdxfont(fNSCJM16)
+
+			//難易度表記
+			switch lv(ActiveColumnID(ID_SONGS),CurSelLev)
+				case 0:tmpstr="NORMAL":tmpint=$28BCEB:swbreak
+				case 1:tmpstr="HARD":tmpint=$EB9D28:swbreak
+				case 2:tmpstr="CHAOS":tmpint=$EB28C4:swbreak
+			swend
+			tmpstr+" Lv."+plitem_Level(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
+			DrawStringXCenterToHandle EasePosX,712,tmpstr,350,tmpint,hdxfont(fEOEXB16)
+
+			//画像
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(DecideCount-35,15)
+			EasePosX=820
+			DrawExtendGraph EasePosX,290,EasePosX+280,290+280,plitem_artwork(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),TRUE
+
+			//ナビゲーション
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			setease -452,48,ease_cubic_out
+			DrawGraph getease(DecideCount,30),40,hdximg(inav_nextstage),TRUE
+
+			//暗転
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(DecideCount-(10+25+60*2+30),30)
+			DrawBox 0,0,BufWidth@,BufHeight@,0,TRUE
+
+			setease 0.5,0,ease_linear
+			cfunc64v BASS_ChannelSetAttribute,hbasschannel(bgmMain),BASS_ATTRIB_VOL,d2f(geteasef(DecideCount-(10+25+60*2+30),20))
+		}
 
 		setease 256,0,ease_linear
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,TransitionFrame)
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,25)
 		DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
 
 		//オプションウィンドウ
@@ -1126,45 +1233,50 @@
 						} else :DrawGraph 650,20+8*(64+8)+16,hdximg(iobj_switch_off),TRUE
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 						//流れてくる音符の速さ
-						DrawStringXCenterToHandle 517,40+72*0,strf("x%.2f",AddSpeed@),150,GetColor(0,0,0),hdxfont(fPS20)
-						sdim tmpstr
-						switch GaugeType@
-							case GAUGE_ASSIST:tmpstr="ASSIST":swbreak
-							case GAUGE_NORMAL:tmpstr="NORMAL":swbreak
-							case GAUGE_EXPERT:tmpstr="EXPERT":swbreak
-							case GAUGE_MADNESS:tmpstr="MADNESS":swbreak
-							default:tmpstr="#undefined."+GaugeType@:swbreak
-						swend
-						DrawStringXCenterToHandle 517,40+72*1,tmpstr,150,GetColor(0,0,0),hdxfont(fPS20)
-						sdim tmpstr
-						switch ObjPlacement@
-							case OBJP_NORMAL:tmpstr="NORMAL":swbreak
-							case OBJP_MIRROR:tmpstr="MIRROR":swbreak
-							case OBJP_S_MIRROR:tmpstr="S-MIRROR":swbreak
-							case OBJP_N_MIRROR:tmpstr="N-MIRROR":swbreak
-							case OBJP_H_MIRROR:tmpstr="H-MIRROR":swbreak
-							case OBJP_RANDOM:tmpstr="RANDOM":swbreak
-							case OBJP_A_RANDOM:tmpstr="A-RANDOM":swbreak
-							case OBJP_S_AUTO:tmpstr="S-AUTO":swbreak
-						swend
-						DrawStringXCenterToHandle 517,40+72*2,tmpstr,150,GetColor(0,0,0),hdxfont(fPS20)
-						sdim tmpstr
-						switch TargetScoreRank@
-							case TARGET_SCORE_MAX:tmpstr="理論値スコア":swbreak
-							case TARGET_SCORE_EX:tmpstr="EXランク":swbreak
-							case TARGET_SCORE_SSS:tmpstr="SSSランク":swbreak
-							case TARGET_SCORE_SS:tmpstr="SSランク":swbreak
-							case TARGET_SCORE_S:tmpstr="Sランク":swbreak
-							case TARGET_SCORE_AAA:tmpstr="AAAランク":swbreak
-							case TARGET_SCORE_AA:tmpstr="AAランク":swbreak
-							case TARGET_SCORE_A:tmpstr="Aランク":swbreak
-							case TARGET_SCORE_B:tmpstr="Bランク":swbreak
-							case TARGET_SCORE_MYBEST:tmpstr="自己ベスト":swbreak
-							case TARGET_SCORE_ONLINETOP:tmpstr="歴代ベスト":swbreak
-						swend
-						DrawStringXCenterToHandle 517,40+72*3,tmpstr,150,GetColor(0,0,0),hdxfont(fNSCJM20)
-						DrawStringXCenterToHandle 517,40+72*4,str(JudgeOffset@)+" ms",150,GetColor(0,0,0),hdxfont(fPS20)
-						DrawStringXCenterToHandle 517,40+72*5,str(DispOffset@)+" px",150,GetColor(0,0,0),hdxfont(fPS20)
+							DrawStringXCenterToHandle 517,40+72*0,strf("x%.2f",AddSpeed@),150,GetColor(0,0,0),hdxfont(fPS20)
+						//ゲージの難易度
+							sdim tmpstr
+							switch GaugeType@
+								case GAUGE_ASSIST:tmpstr="ASSIST":swbreak
+								case GAUGE_NORMAL:tmpstr="NORMAL":swbreak
+								case GAUGE_EXPERT:tmpstr="EXPERT":swbreak
+								case GAUGE_MADNESS:tmpstr="MADNESS":swbreak
+								default:tmpstr="#undefined."+GaugeType@:swbreak
+							swend
+							DrawStringXCenterToHandle 517,40+72*1,tmpstr,150,GetColor(0,0,0),hdxfont(fPS20)
+						//譜面の配置
+							sdim tmpstr
+							switch ObjPlacement@
+								case OBJP_NORMAL:tmpstr="NORMAL":swbreak
+								case OBJP_MIRROR:tmpstr="MIRROR":swbreak
+								case OBJP_S_MIRROR:tmpstr="S-MIRROR":swbreak
+								case OBJP_N_MIRROR:tmpstr="N-MIRROR":swbreak
+								case OBJP_H_MIRROR:tmpstr="H-MIRROR":swbreak
+								case OBJP_RANDOM:tmpstr="RANDOM":swbreak
+								case OBJP_A_RANDOM:tmpstr="A-RANDOM":swbreak
+								case OBJP_S_AUTO:tmpstr="S-AUTO":swbreak
+							swend
+							DrawStringXCenterToHandle 517,40+72*2,tmpstr,150,GetColor(0,0,0),hdxfont(fPS20)
+						//目標スコア
+							sdim tmpstr
+							switch TargetScoreRank@
+								case TARGET_SCORE_MAX:tmpstr="理論値スコア":swbreak
+								case TARGET_SCORE_EX:tmpstr="EXランク":swbreak
+								case TARGET_SCORE_SSS:tmpstr="SSSランク":swbreak
+								case TARGET_SCORE_SS:tmpstr="SSランク":swbreak
+								case TARGET_SCORE_S:tmpstr="Sランク":swbreak
+								case TARGET_SCORE_AAA:tmpstr="AAAランク":swbreak
+								case TARGET_SCORE_AA:tmpstr="AAランク":swbreak
+								case TARGET_SCORE_A:tmpstr="Aランク":swbreak
+								case TARGET_SCORE_B:tmpstr="Bランク":swbreak
+								case TARGET_SCORE_MYBEST:tmpstr="自己ベスト":swbreak
+								case TARGET_SCORE_ONLINETOP:tmpstr="歴代ベスト":swbreak
+							swend
+							DrawStringXCenterToHandle 517,40+72*3,tmpstr,150,GetColor(0,0,0),hdxfont(fNSCJM20)
+						//判定タイミングの調整
+							DrawStringXCenterToHandle 517,40+72*4,str(JudgeOffset@)+" ms",150,GetColor(0,0,0),hdxfont(fPS20)
+						//描画位置の調整
+							DrawStringXCenterToHandle 517,40+72*5,str(DispOffset@)+" px",150,GetColor(0,0,0),hdxfont(fPS20)
 				SetDrawScreen hdximg@(iScene)
 			}
 			switch OptionWindowFlag
@@ -1172,7 +1284,7 @@
 					setease 0,130,ease_cubic_out
 					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(OptionWindowCount,20)
 					setease 0,800,ease_cubic_out
-					GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(OptionWindowCount,20)
+					if LowQuaFlag@==FALSE:GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(OptionWindowCount,20)
 					DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
 					setease 200,256,ease_cubic_out
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(OptionWindowCount,20)
@@ -1186,7 +1298,7 @@
 						tmpstr(1)="ゲージの難易度を設定します。\nASSISTとNORMALは70%以上でクリア、\nEXPERTとMADNESSは0%になると終了します。\nASSISTが最も減少しにくく、MADNESSが最も減少しやすいです。"
 						tmpstr(2)="NORMAL:通常の配置　MIRROR:左右反転　S-MIRROR:サイドレーンのみ反転\nN-MIRROR:通常レーンのみ反転\nH-MIRROR:通常レーンの中央を境にそれぞれ左右反転\nRANDOM:通常レーンをランダムに入れ替え　\nA-RANDOM:全てのレーンをランダムに入れ替え\nS-AUTO:サイドレーンを自動化"
 						tmpstr(3)="目標スコアのランクを設定します。\n自己ベストを設定した場合、一定のペースで増加します。"
-						tmpstr(4)="判定タイミングをミリ秒(ms)単位で調整します。"
+						tmpstr(4)="判定タイミングをミリ秒(ms)単位で調整します。\nEARLYが多い場合は+方向に、LATEが多い場合は-方向に調整します。"
 						tmpstr(5)="描画位置をピクセル(px)単位で調整します。"
 						tmpstr(6)="キーの割り当てを変更します。"
 						tmpstr(7)="ボーナスを表示するか設定します。\n非表示にした場合でも能力値は加算されます。"
@@ -1196,12 +1308,34 @@
 								DrawStringToHandle 1190,895,tmpstr(cnt),Getcolor(0,0,0),hdxfont(fNSCJM20)
 							}
 						loop
+
+					//レーンプレビュー
+					setease 0,256,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(OptionWindowCount,20)
+					DrawGraph 0,0,hdximg(ibg_lanepreview),TRUE
+					PreviewBPM=plitem_defbpm(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
+					if OptionWindowCount==0 :PreviewPosY=0
+					PreviewPosY+1000.0/FPSvalue@*PreviewBPM/400.0*AddSpeed@
+					if PreviewPosY>864+(60000.0/PreviewBPM)*4*(PreviewBPM/400.0)*AddSpeed@ :PreviewPosY=0
+					repeat 4
+						DrawPosY=int(PreviewPosY-(60000.0/PreviewBPM)*double(cnt)*(PreviewBPM/400.0)*AddSpeed@)
+						if DrawPosY>864-32 :continue
+						DrawGraph 418+90*cnt,DrawPosY,hdximg(inote_preview),TRUE
+					loop
+					DrawGraph 300,0,hdximg(ilanehide),TRUE
+
+					//BPM表記
+					setease 0,256,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(OptionWindowCount,20)
+					setease -64,0,ease_cubic_out
+					DrawStringXCenterToHandle 300+getease(OptionWindowCount,20),970,"BPM "+strf("%.2f",PreviewBPM)+" x "+strf("%.2f",AddSpeed@)+" = "+strf("%.2f",(PreviewBPM*AddSpeed@)),596,Getcolor(255,255,255),hdxfont(fPS24)
+
 				swbreak
 				case 2
 					setease 130,0,ease_cubic_out
 					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(OptionWindowCount,20)
 					setease 800,0,ease_cubic_out
-					GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(OptionWindowCount,20)
+					if LowQuaFlag@==FALSE:GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(OptionWindowCount,20)
 					DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
 					setease 256,0,ease_cubic_out
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(OptionWindowCount,20)
@@ -1213,6 +1347,7 @@
 			swend
 			AddCount OptionWindowCount
 
+		//他シーンへジャンプ
 		if JumpSceneFlag {
 			setease 0,256,ease_linear
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(JumpSceneCount,20)
@@ -1231,23 +1366,21 @@
 			AddCount JumpSceneCount
 		}
 
-		if DecideCount>25+TransitionFrame {
+		//決定
+		if DecideCount>10+25+60*3 {
 			//---debug---
-			DrawLoadTransition $FFFFFF,TransitionFrame,0
+			PauseMovieToGraph hdximg(ibg_Load)
+			PauseMovieToGraph hdximg(ibg)
 			InitScene ID_PLAY
-			LoadGamePlayImages
 			InitGamePlayFonts
-			InitGamePlaySounds
-			LoadPartnerIcon
-			OpenChartFile"Data/map-"+plitem_UUID(ActiveColumnID(ID_SONGS),CurSelLev)+".bin",ActiveColumnID(ID_SONGS),CurSelLev
-			cfunc64v BASS_ChannelPause,hbasschannel(bgmMain)
-			DrawLoadTransition 0,10,1
+			OpenChartFile"Data/map-"+plitem_UUID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))+".bin",ActiveColumnID(ID_SONGS),CurSelLev
 			SetDrawScreen hdximg@(iScene)
 			ClearDrawScreen
-			wait 50
+			cfunc64v BASS_ChannelPause,hbasschannel(bgmMain)
 			StartGameplay
 		}
 
+		//各種カウンタ
 		AddCount SceneCount
 		AddCount SongChangeCount
 		AddCount CatChangeCount

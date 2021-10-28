@@ -4,16 +4,15 @@
 #enum global iBlur
 #enum global iConsole
 #enum global iCursor
-#enum global ibg_load
-#enum global ibg_load_pic
-#enum global iprogbar
-#enum global ibg_tips
+#enum global ibg_common_0
+#enum global ibg_common_1
 
 //シーンID
 #enum global ID_BOOT		=	0
 #enum global ID_PLAY
 #enum global ID_MUSICSELECT
 #enum global ID_KEYCONFIG
+#enum global ID_RESULT
 
 //譜面情報の識別子
 #enum global META_TITLE	=	0
@@ -41,11 +40,11 @@
 #define global LogChargridWidth 9
 #define global LogChargridHeight 18
 
-#define global OfflinePass 1
+#define global OfflinePass 0
 
 #define global hash_core "fef896dab0abadaf7ebea29860f3957fe253d200322039fcfb42358b578ce944"
 
-#define global TransitionFrame 10
+#define global TransitionFrame 20
 
 //ゲージ
 #enum global GAUGE_ASSIST		=	0
@@ -77,3 +76,19 @@
 #enum global TARGET_SCORE_ONLINETOP
 
 #define global OfflineMode 0
+
+//キーコンフィグ
+#enum global KEYCONF_BUTTON_1		=	0
+#enum global KEYCONF_BUTTON_2
+#enum global KEYCONF_BUTTON_3
+#enum global KEYCONF_BUTTON_4
+#enum global KEYCONF_LSIDE
+#enum global KEYCONF_RSIDE
+#enum global KEYCONF_SPEEDUP
+#enum global KEYCONF_SPEEDDOWN
+#enum global KEYCONF_SPEEDUP_AD
+#enum global KEYCONF_SPEEDDOWN_AD
+#enum global KEYCONF_RETRY
+#enum global KEYCONF_DECIDE
+#enum global KEYCONF_CANCEL
+#enum global KEYCONF_OPTION

@@ -5,6 +5,7 @@ Source=BMS
 Difficulty=Converted
 Level=12
 Resource=8972ad0f-de5f-b7ac-e2ca-e41f63dddca0
+Default.BPM=192.000000
 
 [Sound]
 Sound.Set=0,aarp a#4.wav

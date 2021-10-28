@@ -7,6 +7,7 @@ Resource=48f6c238-7235-c736-11ae-c86f59765530
 Background.Video=bg.ogv
 Background.Video.Offset=-45
 Level=10
+Default.BPM=192.000000
 
 [Sound]
 Sound.Set=0,b_BassA_v100l16o3ap.wav

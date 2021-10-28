@@ -8,6 +8,7 @@ Resource=0ef19e44-89ce-8122-d292-7ccf2fa61133
 Background.Video=21007.ogv
 Background.Video.Offset=-740
 Event.Sound.Offset=14
+Default.BPM=191.000000
 
 [Sound]
 Sound.Set=0,0001.wav

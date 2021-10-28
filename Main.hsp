@@ -39,9 +39,7 @@
 	;InitScene ID_PLAY
 	randomize
 
-	DrawLoadTransition 0,TransitionFrame,0
-	DrawLoadScreen"起動中",0
-	DrawLoadScreen"Portalにサインインしています。しばらくお待ち下さい。",50
+	DrawLoadScreen
 
 	//セーブデータ同期
 		SetDefaultSaveData
@@ -57,18 +55,23 @@
 		RegLoginInfo LoginUserInfo
 		WebAPI_SyncProfile
 
-	DrawLoadScreen"シーンを準備中",300
+	DrawLoadScreen
 
 	InitScene ID_MUSICSELECT
 	LoadMusicSelectImages
 	LoadMusicSelectSounds
 	InitMusicSelectFonts
+	LoadGamePlayImages
+	LoadPartnerIcon
+	InitGamePlaySounds
 	LoadKeyConfigImages
+	LoadResultImages
+	LoadResultSounds
 	IRsync
 	ScanAllPlaylist
+	SetFilterRefDB ID_CAT_ALL
 
-	DrawLoadTransition 0,TransitionFrame,1
-	wait 50
+	wait
 	StartMusicSelect
 
 *MainLoop
@@ -80,10 +83,6 @@
 	//垂直同期が無効の場合のFPS補正
 		ddim curFPS@,1
 		curFPS@=double(cfunc64(RET_FLOAT,GetFPS))
-		if VsyncFlag@==FALSE {
-			FPSvalue@=int(curFPS@)
-			if FPSvalue@==0 :FPSvalue@=1000
-		}
 
 	//キー判定
 	repeat 256:KeyFlag(cnt)=CheckHitKey(cnt):loop
@@ -96,6 +95,7 @@
 		case ID_PLAY:DrawGamePlay:swbreak
 		case ID_MUSICSELECT:DrawMusicSelect:swbreak
 		case ID_KEYCONFIG:DrawKeyConfig:swbreak
+		case ID_RESULT:DrawResult:swbreak
 	swend
 
 	SetDrawScreen DX_SCREEN_BACK
@@ -107,7 +107,7 @@
 
 	//マウスカーソル
 		cfunc64v GetMousePoint,varptr64(CursorPosX@),varptr64(CursorPosY@)
-		if DrawCursorFlag@==TRUE {
+		if DrawCursorFlag@==TRUE|FullScreenFlag@==TRUE {
 			if CursorHideCount@>FPSvalue@*2&curSceneID==ID_PLAY {
 				setease 256,0,ease_linear
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(CursorHideCount@-FPSvalue@*2,FPSvalue@/4)
@@ -133,6 +133,7 @@
 		DrawDebugString 0,6,"C="+coreCount+" F="+FrameCount+" S="+SceneCount+" ,Level="+CounterLev@
 		DrawDebugString 0,7,"Cursor ("+CursorPosX+","+CursorPosY+") "+GetMouseWheelRotVol()
 		DrawDebugString 0,8,"auto="+AutoPlayFlag@
+		DrawDebugString 0,10,"?cursellev="+cursellev@_musicselect_
 */
 	coreCount++
 	AddCount FrameCount@
@@ -147,9 +148,9 @@
 	goto*MainLoop
 
 *ExitProg
-	SendAllProfile
 	dxlib_End
-	return
-*Exit
-	gosub*ExitProg
+	BASS_Free
 	end
+*Exit
+	SendAllProfile
+	goto*ExitProg

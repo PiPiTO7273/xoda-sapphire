@@ -6,6 +6,7 @@ Difficulty=Converted
 Level=9
 Resource=7a71f4bf-e135-a71c-36dc-a915a487e892
 Artwork=img.png
+Default.BPM=175.000000
 
 [Sound]
 Sound.Set=0,amensnr.wav

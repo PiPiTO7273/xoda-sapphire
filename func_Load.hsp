@@ -39,6 +39,8 @@
 		CounterLev@=int(GetINIvalue(coreBuf,"Graphics","Counter.Level"))
 		dim DrawCursorFlag@
 		DrawCursorFlag@=ConvStrToBool(GetINIvalue(coreBuf,"Graphics","Use.CustomCursor"))
+		sdim Acckey@
+		Acckey@=GetINIvalue(coreBuf,"Hash","acckey")
 
 	return
 
@@ -66,6 +68,7 @@
 			dim CursorHideCount@
 			dim bfCursorPosX@:dim bfCursorPosY@
 			dim CursorPosX@:dim CursorPosY@
+			dim PreloaderCount
 	return
 
 	//BASS Audio Libraryを初期化
@@ -93,11 +96,12 @@
 		repeat 58
 			hdximg_arr_cursor@(cnt)=LoadGraph("Data/res_cursor/"+cnt+".png")
 		loop
-		hdximg@(ibg_load)=LoadGraph("Data/bg_Load.ogv")
-		hdximg@(ibg_load_pic)=LoadGraph("Data/bg_Load.png")
-		hdximg@(iprogbar)=LoadGraph("Data/progbar_load.png")
-		hdximg@(ibg_tips)=LoadGraph("Data/bg_Tips.png")
-		PlayMovieToGraph hdximg@(ibg_load),DX_PLAYTYPE_LOOP
+		dim hdximg_arr_preloader@,8
+		repeat 8
+			hdximg_arr_preloader@(cnt)=LoadGraph("Data/res_preloader/"+cnt+".png")
+		loop
+		hdximg@(ibg_common_0)=LoadGraph("Data/bg_Main.ogv")
+		hdximg@(ibg_common_1)=LoadGraph("Data/bg_Load.ogv")
 	return
 
 	//グローバル空間の変数を初期化
@@ -143,6 +147,7 @@
 		sdim CharName@charicon
 		sdim CharDesc@charicon
 		sdim CharSkill@charicon
+		dim CharPrice@charicon
 		dim CharLev@charicon
 		CharMax@charicon=int(GetINIvalue(coreBuf,"Partner","Reg.Max"))*2
 		SetDXArchiveExtension"bin"
@@ -162,64 +167,22 @@
 		loop
 	return
 
-	#define global DrawLoadScreen(%1="",%2=0,%3=256,%4=0) _DrawLoadScreen %1,%2,%3,%4
-	#deffunc _DrawLoadScreen str _msg,int _progval,int _alpha,int _color
-
-		sdim tipstxt,10
-		tipstxt(0)="カルディのドライマンゴーはマジで美味しいから。\nみんな買ったほうがいいよ。"
-		tipstxt(1)="マックの期間限定とかいろいろあるけど、\n結局はソーセージマフィンが一番安いし美味い。"
-		tipstxt(2)="ダイエット中なのに隣で夜食食うやつってさ\nマジで腹立つよね"
-		tipstxt(3)="ロード画面って暇よな"
-		tipstxt(4)="烏龍茶飲んだら脂肪の吸収が抑えられるとか聞くけど\n実際のところどうなんだろうね"
-		tipstxt(5)="和式のトイレ嫌い"
-		tipstxt(6)="このTipsって意味ある？"
-		tipstxt(7)="ペットボトルの飲み物って中途半端に残っちゃうよね"
-		tipstxt(8)="セブンのサラダチキンはマジで美味い。\n俺的にはハーブがおすすめ"
-		tipstxt(9)="髪伸びてきたら邪魔よな"
+	#deffunc DrawLoadScreen
 
 		ProcessMessage
 
-		SetDrawScreen hdximg@(iScene)
-		ClearDrawScreen
-		SetDrawMode DX_DRAWMODE_BILINEAR
-
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg@(ibg_load),FALSE
-
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-		DrawGraph 0,0,hdximg@(ibg_load_pic),TRUE
-		DrawExtendGraph 80,968,80+_progval,968+8,hdximg@(iprogbar),FALSE
-		DrawGraph -16,413,hdximg@(ibg_tips),TRUE
-
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-		ChangeFont"Meiryo":ChangeFontType DX_FONTTYPE_ANTIALIASING_4X4
-		SetFontSize 16
-		DrawString 80,928,_msg,GetColor(255,255,255)
-		SetFontSize 24
-		DrawString 214,495,tipstxt((gettime(6)/10)\10),GetColor(10,10,10)
-
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256-_alpha
-		DrawBox 0,0,BufWidth@,BufHeight@,_color,TRUE
-
 		SetDrawScreen DX_SCREEN_BACK
 		ClearDrawScreen
-		SetDrawBlendMode DX_BLENDMODE_NOBLEND
-		DrawExtendGraph 0,0,DispWidth@,DispHeight@,hdximg@(iScene),TRUE
+		SetDrawScreen hdximg@(iScene)
+		ClearDrawScreen
 
-		ScreenFlip
-		return
+		SetDrawScreen DX_SCREEN_FRONT
+		ClearDrawScreen
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph DispWidth@-369,DispHeight@-120,hdximg_arr_preloader@(PreloaderCount\8),TRUE
 
-	#deffunc DrawLoadTransition int _color,int _time,int _flag
-		if LowQuaFlag@==TRUE :return
-		repeat _time+1
-			if _flag==0 {
-				setease 0,256,ease_linear
-				DrawLoadScreen"しばらくお待ち下さい",0,getease(cnt,_time),_color
-			} else {
-				setease 256,0,ease_linear
-				DrawLoadScreen"しばらくお待ち下さい",500,getease(cnt,_time),_color
-			}
-		loop
+		PreloaderCount++
+
 		return
 
 #global

@@ -7,6 +7,7 @@ Level=9
 Resource=e6c69635-0bf7-c9ee-961c-63f5734c2de7
 Background.Video=bga.mp4
 Background.Video.Offset=-480
+Default.BPM=190.000000
 
 [Sound]
 Sound.Set=0,Arp_001.wav

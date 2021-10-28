@@ -7,6 +7,7 @@ Level=8
 Resource=e0965fce-5864-b79f-f271-c8cfc73ae149
 Background.Audio=bgm.mp3
 Background.Video=video.ogv
+Default.BPM=143.000000
 
 [Sound]
 Sound.Set=0,drum-hitclap10.wav

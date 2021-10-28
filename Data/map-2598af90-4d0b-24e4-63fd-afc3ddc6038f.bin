@@ -6,6 +6,7 @@ Difficulty=Converted
 Level=12
 Resource=833ce4f9-7ada-a710-69d2-d24a13d8cafb
 Event.Sound.Offset=7
+Default.BPM=200.000000
 
 [Sound]
 Sound.Set=0,0001.wav

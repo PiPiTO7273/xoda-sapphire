@@ -6,6 +6,7 @@ Difficulty=Converted
 Resource=76aa4870-fb57-24ba-e997-195ec9fcd08a
 Background.Video=12004.ogv
 Level=12
+Default.BPM=200.000000
 
 [Sound]
 Sound.Set=0,0001.wav
