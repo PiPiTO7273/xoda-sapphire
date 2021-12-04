@@ -1,0 +1,46 @@
+
+#module _commonbg_
+
+#deffunc DrawCommonBackground int _fid
+
+	SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+	DrawBox 0,0,BufWidth@,BufHeight@,$FFFFFF,TRUE
+
+	dim shapemovf:shapemovf=_fid/2
+/*
+	dim tmphid:tmphid=hdximg@(ishape_commonbg)
+	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+	repeat 2
+	DrawGraph -364*cnt+shapemovf\364,364*cnt-shapemovf\364,tmphid,TRUE
+	loop
+	repeat 3
+	DrawGraph 364*cnt-shapemovf\364,364-364*cnt+shapemovf\364,tmphid,TRUE
+	loop
+	repeat 4
+		DrawGraph 364*2-364*cnt+shapemovf\364,364*cnt-shapemovf\364,tmphid,TRUE
+	loop
+	repeat 5
+		DrawGraph 364*cnt-shapemovf\364,364*3-364*cnt+shapemovf\364,tmphid,TRUE
+	loop
+	repeat 5
+		DrawGraph 364*4-364*cnt+shapemovf\364,364*cnt-shapemovf\364,tmphid,TRUE
+	loop
+	repeat 7
+		DrawGraph 364*cnt-shapemovf\364,364*5-364*cnt+shapemovf\364,tmphid,TRUE
+	loop
+	repeat 6
+		DrawGraph 364*6-364*cnt+shapemovf\364,364*cnt-shapemovf\364,tmphid,TRUE
+	loop*/
+
+	dim tmphid:tmphid=hdximg@(ishape_commonbg)
+	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+	repeat 8
+	col=cnt
+	shapemovf+91
+	repeat 4
+		DrawGraph 364*col-364*cnt+shapemovf\364,364*cnt-shapemovf\364,tmphid,TRUE
+	loop
+	loop
+	return
+
+#global

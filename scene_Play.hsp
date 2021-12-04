@@ -1,0 +1,1611 @@
+
+#module _Play_
+
+	//DXライブラリグラフィック(gameplay)
+	#enum ibg_0			=	0
+	#enum ibg_top
+	#enum ibg_bottom
+	#enum ibg_songinfo
+	#enum ibg_playerdata
+	#enum ibg_scoregraph
+	#enum ibg_score
+	#enum ichip_key
+	#enum ichip_key_active
+	#enum inote_0
+	#enum ihold_org_0
+	#enum ihold_0
+	#enum ijudge_excellent
+	#enum ijudge_great
+	#enum ijudge_good
+	#enum ijudge_bad
+	#enum ijudge_miss
+	#enum ieff_lane
+	#enum ieff_particle_0
+	#enum ieff_particle_1
+	#enum ieff_particle_2
+	#enum ieff_particle_3
+	#enum ieff_particle_4
+	#enum ieff_particle_5
+	#enum ieff_particle_6
+	#enum ieff_particle_7
+	#enum ieff_bonus_combo
+	#enum igraph_current
+	#enum igraph_trainer
+	#enum igraph_best
+	#enum igraph_target
+	#enum icursor_Seek
+	#enum igauge_assist
+	#enum igauge_assist_clear
+	#enum igauge_normal
+	#enum igauge_normal_clear
+	#enum igauge_expert
+	#enum igauge_madness
+	#enum igauge_empty
+	#enum igauge_value
+	#enum istg_clear
+	#enum istg_fullcombo
+	#enum istg_allex
+	#enum istg_failed
+
+	//DXライブラリフォントハンドル(gameplay)
+	#enum fEOEXB16			=	0
+	#enum fEOEXB20
+	#enum fFAB50
+	#enum fNSCJM12
+	#enum fNSCJM15
+	#enum fNSCJM16
+	#enum fNSCJM20
+	#enum fNSCJM32
+	#enum fPS14
+	#enum fPS16
+	#enum fPS18
+	#enum fPS20
+	#enum fSQNUM16
+	#enum fSQNUM24
+	#enum fSQNUM40
+
+	//BASS Audio Libraryサンプル、チャンネルハンドル(gameplay)
+	#enum sndDefaultAssign0	=	0
+	#enum sndDefaultAssign1
+	#enum sndDefaultAssign2
+	#enum sndDefaultAssign3
+	#enum sndDefaultAssign4
+	#enum sndDefaultAssign5
+	#enum sndBurst
+	#enum vocBurst100
+	#enum vocBurst200
+	#enum vocBurst300
+	#enum vocBurst400
+	#enum vocBurst500
+	#enum sndClear
+	#enum sndClearEX
+	#enum sndFailed
+
+	//オブジェクトの種類
+	#enum OBJ_DUMMY		=	0
+	#enum OBJ_SINGLENOTE
+	#enum OBJ_holdSTART
+	#enum OBJ_holdEND
+
+	//判定幅
+	#const jWid_Excellent	40
+	#const jWid_Great		80
+	#const jWid_Good		120
+	#const jWid_Bad		160
+	#const jWid_Miss		240
+
+	//判定の種類
+	#enum jres_Unknown		=	0
+	#enum jres_Excellent
+	#enum jres_Great
+	#enum jres_Good
+	#enum jres_Bad
+	#enum jres_Miss
+
+	//プレイ画面の画像リソースを読み込み
+	#deffunc LoadGamePlayImages
+		;DrawLoadScreen
+		SetDXArchiveExtension"bin"
+		dim hdximg
+		hdximg(ibg_0)=LoadGraph("Data/bg_0.png")
+		hdximg(ibg_top)=LoadGraph("Data/bg_Top.png")
+		hdximg(ibg_bottom)=LoadGraph("Data/bg_Bottom.png")
+		hdximg(ibg_songinfo)=LoadGraph("Data/bg_SongInfo.png")
+		hdximg(ibg_playerdata)=LoadGraph("Data/bg_playerdata.png")
+		hdximg(ibg_scoregraph)=LoadGraph("Data/bg_scoregraph.png")
+		hdximg(ibg_score)=LoadGraph("Data/bg_score.png")
+		hdximg(ichip_key)=LoadGraph("Data/chip_Key.png")
+		hdximg(ichip_key_active)=LoadGraph("Data/chip_key_active.png")
+		hdximg(inote_0)=LoadGraph("Data/note_0.png")
+		hdximg(ihold_org_0)=LoadGraph("Data/note_hold_0.png")
+		hdximg(ijudge_excellent)=LoadGraph("Data/res_judge/judge_excellent.png")
+		hdximg(ijudge_great)=LoadGraph("Data/res_judge/judge_great.png")
+		hdximg(ijudge_good)=LoadGraph("Data/res_judge/judge_good.png")
+		hdximg(ijudge_bad)=LoadGraph("Data/res_judge/judge_bad.png")
+		hdximg(ijudge_miss)=LoadGraph("Data/res_judge/judge_miss.png")
+		hdximg(ieff_lane)=LoadGraph("Data/effect_lane.png")
+		repeat 8
+			hdximg(ieff_particle_0+cnt)=LoadGraph("Data/res_effect_particle/effect_Particle_"+cnt+".png")
+		loop
+		hdximg(ieff_bonus_combo)=LoadGraph("Data/bonus_Combo.png")
+		hdximg(igraph_current)=LoadGraph("Data/graph_current.png")
+		hdximg(igraph_trainer)=LoadGraph("Data/graph_trainer.png")
+		hdximg(igraph_best)=LoadGraph("Data/graph_best.png")
+		hdximg(igraph_target)=LoadGraph("Data/graph_target.png")
+		hdximg(icursor_Seek)=LoadGraph("Data/cursor_Seek.png")
+		hdximg(igauge_assist)=LoadGraph("Data/res_gauge/gauge_assist.png")
+		hdximg(igauge_assist_clear)=LoadGraph("Data/res_gauge/gauge_assist_clear.png")
+		hdximg(igauge_normal)=LoadGraph("Data/res_gauge/gauge_normal.png")
+		hdximg(igauge_normal_clear)=LoadGraph("Data/res_gauge/gauge_normal_clear.png")
+		hdximg(igauge_expert)=LoadGraph("Data/res_gauge/gauge_expert.png")
+		hdximg(igauge_madness)=LoadGraph("Data/res_gauge/gauge_madness.png")
+		hdximg(igauge_empty)=LoadGraph("Data/res_gauge/gauge_empty.png")
+		hdximg(igauge_value)=LoadGraph("Data/res_gauge/gauge_value.png")
+		hdximg(istg_clear)=LoadGraph("Data/res_stg/stg_Clear.ogv")
+		hdximg(istg_fullcombo)=LoadGraph("Data/res_stg/stg_FullCombo.ogv")
+		hdximg(istg_allex)=LoadGraph("Data/res_stg/stg_AllEx.ogv")
+		hdximg(istg_failed)=LoadGraph("Data/res_stg/stg_Failed.ogv")
+
+		dim hdximg_arr_bomb,10
+		cfunc64v LoadDivGraph,"Data/effect_bomb.png",10,5,2,192,192,varptr64(hdximg_arr_bomb)
+		dim hdximg_arr_burst,16
+		cfunc64v LoadDivGraph,"Data/effect_Burst.png",16,2,8,384,384,varptr64(hdximg_arr_burst)
+
+		dim hdximg_char:hdximg_char=MakeScreen(80,64,TRUE)
+
+		//ロングノーツ用
+			hdximg(ihold_0)=MakeScreen(90,1024,TRUE)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			repeat 1024/90+1
+				SetDrawScreen hdximg(ihold_0)
+					DrawGraph 0,cnt*90,hdximg(ihold_org_0),TRUE
+			loop
+	return
+
+	//プレイ画面で使用するフォントの初期化
+	#deffunc InitGamePlayFonts
+		DrawLoadScreen
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
+		hdxfont(fEOEXB20)=LoadFontDataToHandle("Data/eoexb20.bin")
+		hdxfont(fFAB50)=LoadFontDataToHandle("Data/fab50.bin")
+		hdxfont(fNSCJM12)=LoadFontDataToHandle("Data/nscjm12.bin")
+		hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
+		hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
+		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
+		hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
+		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
+		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
+		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
+		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
+	return
+
+	//プレイ画面で使用するサウンドの初期化
+	#deffunc InitGamePlaySounds
+		dim64 hbasschannel:dim64 hbasssample
+		repeat 6
+			LoadBASSsample"Data/snd_Hit.wav",hbasschannel(sndDefaultAssign0+cnt),hbasssample(sndDefaultAssign0+cnt),0
+		loop
+		LoadBASSsample"Data/snd_Burst.wav",hbasschannel(sndBurst),hbasssample(sndBurst),0
+		LoadBASSsample"Data/voc_100.wav",hbasschannel(vocBurst100),hbasssample(vocBurst100),0
+		LoadBASSsample"Data/voc_200.wav",hbasschannel(vocBurst200),hbasssample(vocBurst200),0
+		LoadBASSsample"Data/voc_300.wav",hbasschannel(vocBurst300),hbasssample(vocBurst300),0
+		LoadBASSsample"Data/voc_400.wav",hbasschannel(vocBurst400),hbasssample(vocBurst400),0
+		LoadBASSsample"Data/voc_500.wav",hbasschannel(vocBurst500),hbasssample(vocBurst500),0
+		LoadBASSsample"Data/snd_Clear.wav",hbasschannel(sndClear),hbasssample(sndClear),0
+		LoadBASSsample"Data/snd_Clear_ex.wav",hbasschannel(sndClearEX),hbasssample(sndClearEX),0
+		LoadBASSsample"Data/snd_Failed.wav",hbasschannel(sndFailed),hbasssample(sndFailed),0
+	return
+
+	//ランダム配置を取得
+	#defcfunc GetRandomArrayMap int _max
+		sdim res:dim _arrflag,_max:dim _cnt
+		repeat
+			resrnd=rnd(_max)
+			if _arrflag(resrnd)==1 :continue
+			res+str(resrnd):_arrflag(resrnd)=1:_cnt++
+			if _cnt==_max :break
+		loop
+		return res
+
+	//譜面ファイルを開く
+	#deffunc OpenChartFile str _filename,int _itemid,int _levid
+		DrawLoadScreen
+
+		//パラメータ保管
+		dim ChartItemID:dim ChartLevID
+		ChartItemID=_itemid:ChartLevID=_levid
+
+		sdim chartFileName
+		chartFileName=_filename
+		exist chartFileName
+		if strsize==-1 {
+			return -1
+		}
+		sdim chartFileBuf,strsize
+		bload chartFileName,chartFileBuf
+
+		sdim chartMetaInfo,META_MAX
+		chartMetaInfo(META_TITLE)=GetINIvalue(chartFileBuf,"Metadata","Title")
+		chartMetaInfo(META_ARTIST)=GetINIvalue(chartFileBuf,"Metadata","Artist")
+		chartMetaInfo(META_SOURCE)=GetINIvalue(chartFileBuf,"Metadata","Source")
+		chartMetaInfo(META_DIFFICULTY)=GetINIvalue(chartFileBuf,"Metadata","Difficulty")
+		chartMetaInfo(META_LEVEL)=GetINIvalue(chartFileBuf,"Metadata","Level")
+		chartMetaInfo(META_RESID)=GetINIvalue(chartFileBuf,"Metadata","Resource")
+		chartMetaInfo(META_BGA)=GetINIvalue(chartFileBuf,"Metadata","Background.Video")
+		chartMetaInfo(META_BGM)=GetINIvalue(chartFileBuf,"Metadata","Background.Audio")
+		chartMetaInfo(META_BGAOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Background.Video.Offset")
+		chartMetaInfo(META_BGMOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Background.Audio.Offset")
+		chartMetaInfo(META_BGAIMAGE)=GetINIvalue(chartFileBuf,"Metadata","Background.Image")
+		chartMetaInfo(META_EVOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Event.Sound.Offset")
+		chartMetaInfo(META_TOTALOFFSET)=GetINIvalue(chartFileBuf,"Metadata","Total.Offset")
+		chartMetaInfo(META_SIDEFLAG)=GetINIvalue(chartFileBuf,"Metadata","Side.NoteFlag")
+		if chartMetaInfo(META_SIDEFLAG)=="TRUE" :flagSideNote=TRUE:else:flagSideNote=FALSE
+
+		//UUID取り出し
+			chartMetaInfo(META_UUID)=getpath(_filename,1+8)
+			strrep chartMetaInfo(META_UUID),"map-",""
+
+		//汎用ムービーのパス指定
+			if chartMetaInfo(META_BGA)=="" :chartMetaInfo(META_BGA)="general-movie-*.ogv"
+			if BGAquality@=="*" :chartMetaInfo(META_BGA)="*"
+
+		notesel chartFileBuf
+		sdim INIline
+		sdim INIkey:sdim INIval
+
+		//オブジェクト関連の変数を初期化
+		dim objTiming
+		dim objLaneID
+		dim objType
+		dim objSoundID
+		dim objSoundVol
+		dim objLength
+		dim objAssignFlag
+		dim objAutoFlag
+		dim objJudgeFlag
+		dim objDrawPos
+		ddim objBPM,1
+		dim ObjMax
+
+		//サウンドライブラリ関連の変数を初期化
+		sdim SoundDBFileName
+		dim SoundDBMax
+
+		//プレイ開始前の待機時間(ms)
+		dim PreTime
+		PreTime=5000
+
+		//BPM関連の変数を初期化
+		dim BPMTiming
+		ddim BPMValue,1
+		dim BPMpointMax
+
+		//サウンドイベント関連の変数を初期化
+		dim SndEventID
+		dim SndEventTime
+		ddim SndEventVol,1
+		dim SndEventMax
+		dim SndPlayFlag
+
+		//譜面ファイルの構文を解析
+		repeat notemax
+			noteget INIline,cnt
+			split INIline,"=",INIkey,INIval
+			switch INIkey
+				case"Sound.Set"		//キーサウンドを定義
+					split INIval,",",Objinfoprm
+					SoundDBFileName(int(Objinfoprm(0)))=Objinfoprm(1)
+					SoundDBMax++
+				swbreak
+				case"BPM.Set"			//BPM変更地点
+					sdim BPMinfoprm
+					split INIval,",",BPMinfoprm
+					if int(BPMinfoprm(0))==0 {
+						BPMTiming(BPMpointMax)=int(BPMinfoprm(0))
+					} else {
+						BPMTiming(BPMpointMax)=int(BPMinfoprm(0))+PreTime+int(chartMetaInfo(META_TOTALOFFSET))
+					}
+					BPMValue(BPMpointMax)=double(BPMinfoprm(1))
+					BPMpointMax++
+				swbreak
+				case"Note.Single"		//シングルノート
+					split INIval,",",Objinfoprm
+					ObjLaneID(ObjMax)=int(Objinfoprm(0))
+					if flagSideNote==FALSE :ObjLaneID(ObjMax)++		//サイドノーツ分を移動
+					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime+int(chartMetaInfo(META_TOTALOFFSET))
+					ObjSoundID(ObjMax)=int(Objinfoprm(2))
+					ObjSoundVol(ObjMax)=int(Objinfoprm(3))
+					ObjLength(ObjMax)=1
+					ObjType(ObjMax)=OBJ_SINGLENOTE
+					ObjJudgeFlag(ObjMax)=0
+					ObjAssignFlag(ObjMax)=0
+					ObjAutoFlag(ObjMax)=0
+					ObjMax++
+				swbreak
+				case"Note.Hold.Start"	//ホールドノーツ（始点）
+					split INIval,",",Objinfoprm
+					ObjLaneID(ObjMax)=int(Objinfoprm(0))
+					if flagSideNote==FALSE :ObjLaneID(ObjMax)++		//サイドノーツ分を移動
+					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime+int(chartMetaInfo(META_TOTALOFFSET))
+					ObjSoundID(ObjMax)=int(Objinfoprm(3))
+					ObjSoundVol(ObjMax)=int(Objinfoprm(4))
+					ObjLength(ObjMax)=int(Objinfoprm(2))
+					ObjType(ObjMax)=OBJ_holdSTART
+					ObjJudgeFlag(ObjMax)=0
+					ObjAssignFlag(ObjMax)=0
+					ObjAutoFlag(ObjMax)=0
+					ObjMax++
+				swbreak
+				case"Note.Hold.End"		//ホールドノーツ（終点）
+					split INIval,",",Objinfoprm
+					ObjLaneID(ObjMax)=int(Objinfoprm(0))
+					if flagSideNote==FALSE :ObjLaneID(ObjMax)++		//サイドノーツ分を移動
+					ObjTiming(ObjMax)=int(Objinfoprm(1))+PreTime+int(chartMetaInfo(META_TOTALOFFSET))
+					ObjSoundID(ObjMax)=-1
+					ObjSoundVol(ObjMax)=0
+					ObjLength(ObjMax)=1
+					ObjType(ObjMax)=OBJ_holdEND
+					ObjJudgeFlag(ObjMax)=0
+					ObjAssignFlag(ObjMax)=0
+					ObjAutoFlag(ObjMax)=0
+					ObjMax++
+				swbreak
+				case"Play"			//サウンドイベント
+					split INIval,",",Objinfoprm
+					SndEventTime(SndEventMax)=int(Objinfoprm(0))
+					SndEventID(SndEventMax)=int(Objinfoprm(1))
+					SndEventVol(SndEventMax)=double(Objinfoprm(2))/100.0
+					SndPlayFlag(SndEventMax)=0
+					SndEventMax++
+				swbreak
+			swend
+		loop
+
+		//BPM値をノーツに割り当て
+			dim SearchNoteID
+			repeat ObjMax
+				ObjBPM(SearchNoteID)=0.0
+				repeat BPMpointMax
+					if BPMTiming(cnt)<ObjTiming(SearchNoteID) {
+						ObjBPM(SearchNoteID)=BPMValue(cnt)
+					}
+				loop
+
+				SearchNoteID++
+			loop
+
+		//ノーツ位置を計算
+			dimtype ObjPosition,vartype("double")
+			dimtype TmpNotepos,vartype("double")
+			dimtype AlyNotepos,vartype("double")
+			repeat ObjMax
+				if cnt==0 {
+					ObjPosition(cnt)=TmpNotepos-(double(ObjTiming(cnt))*ObjBPM(cnt)/400.0)
+				} else {
+					ObjPosition(cnt)=TmpNotepos-(double(ObjTiming(cnt)-ObjTiming(cnt-1))*ObjBPM(cnt)/400.0)
+				}
+				TmpNotepos=ObjPosition(cnt)
+			loop
+
+		//キーサウンドの読み込み
+			dim UseDefaultKeySnd	//デフォルトのキーサウンドを使用するフラグ
+			exist"Data/mr/"+chartMetaInfo(META_RESID)+"/musicdata.pkg"
+			dim64 hSndDB:dim64 hsmpSndDB:dim keysndIndexID
+			sdim keysndBuf:dim hLoadCnt
+			if strsize!-1 {
+				binpkg_Load"Data/mr/"+chartMetaInfo(META_RESID)+"/musicdata.pkg"
+				repeat SoundDBMax
+					keysndIndexID(hLoadCnt)=binpkg_GetIndex(SoundDBFileName(hLoadCnt))
+					if keysndIndexID(hLoadCnt)!-1 {
+						;binpkg_extract SoundDBFileName(hLoadCnt),"Cache/"+SoundDBFileName(hLoadCnt)
+						binpkg_CopytoBuffer keysndBuf,keysndIndexID(hLoadCnt)
+						hsmpSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(keysndBuf),0,binpkg_GetFileLength(keysndIndexID(hLoadCnt)),32,0)
+						if hsmpSndDB(hLoadCnt)==0 :logmes""+SoundDBFileName(hLoadCnt)+"\nError Code : "+BASS_ErrorGetCode()
+						hSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndDB(hLoadCnt),TRUE)
+						cfunc64v BASS_ChannelSetAttribute,hSndDB(hLoadCnt),BASS_ATTRIB_VOL,d2f(0.7)
+						hLoadCnt++
+					}
+					if cnt\100==0 :DrawLoadScreen
+				loop
+				binpkg_Free
+			} else :UseDefaultKeySnd=TRUE
+
+		//BGM
+			if GetChartInfo(META_BGM)!"" {
+				exist"Data/mr/"+chartMetaInfo(META_RESID)+"/"+GetChartInfo(META_BGM)
+				sdim hBGMbuf,strsize
+				bload"Data/mr/"+chartMetaInfo(META_RESID)+"/"+GetChartInfo(META_BGM),hBGMbuf
+				dim64 hSndBGM:dim64 hsmpSndBGM
+				hsmpSndBGM=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(hBGMbuf),0,varsize(hBGMbuf),32,0)
+				hSndBGM=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndBGM,TRUE)
+			}
+
+		//スコア計算
+			dim ObjHitScore
+			ObjHitScore=10000000/ObjMax
+			dim BonusScore
+			BonusScore=10000000\ObjMax
+		
+		//ゲージの増加量を計算
+			ddim TotalGauge,1:ddim ObjHitGauge,1
+			if ObjMax<400 {
+				TotalGauge=double(ObjMax)*0.3+80.0
+			}
+			if ObjMax<=400&ObjMax<550 {
+				TotalGauge=double(ObjMax)*0.3+30.0
+			}
+			if ObjMax>=550 {
+				TotalGauge=double(ObjMax)*0.2+100.0
+			}
+			ObjHitGauge=TotalGauge/double(ObjMax)
+
+		//自己ベストデータを読み込み
+			sdim MybestRecordBuf
+			WebAPI_SyncRecord WebAPI_GetRecord(),GetChartInfo(META_UUID),MybestRecordBuf
+
+		//スコアグラフ生成
+			dim graphCurrent_score
+			dim graphTrainer_score
+			dim graphBest_score
+			dim graphTarget_score
+			dim graphCapture_objid
+			sdim graphBest_Decode,4*objmax
+			ConvHEXdec graphBest_Decode,MybestRecordBuf(ID_REC_SCORE_4BINHEX)
+			memexpand graphBest_Decode,4*ObjMax
+
+			//トレーナー
+			ddim MaxPfPoint,1
+			MaxPfPoint=GetPfPoint(int(GetChartInfo(META_LEVEL)),10000000,objmax,GetChartInfo(META_DIFFICULTY),0)
+			graphTrainer_level=limitf(double(MybestRecordBuf(ID_REC_AP))/MaxPfPoint*100.0+5.0,0.0,100.0)/100.0
+			switch TargetScoreRank@
+				case TARGET_SCORE_MAX:graphTarget_level=1.0:graphTarget_Desc="理論値スコア":swbreak
+				case TARGET_SCORE_EX:graphTarget_level=0.9:graphTarget_Desc="EXランクのスコア":swbreak
+				case TARGET_SCORE_SSS:graphTarget_level=0.866:graphTarget_Desc="SSSランクのスコア":swbreak
+				case TARGET_SCORE_SS:graphTarget_level=0.833:graphTarget_Desc="SSランクのスコア":swbreak
+				case TARGET_SCORE_S:graphTarget_level=0.8:graphTarget_Desc="Sランクのスコア":swbreak
+				case TARGET_SCORE_AAA:graphTarget_level=0.7:graphTarget_Desc="AAAランクのスコア":swbreak
+				case TARGET_SCORE_AA:graphTarget_level=0.6:graphTarget_Desc="AAランクのスコア":swbreak
+				case TARGET_SCORE_A:graphTarget_level=0.5:graphTarget_Desc="Aランクのスコア":swbreak
+				case TARGET_SCORE_B:graphTarget_level=0.4:graphTarget_Desc="Bランクのスコア":swbreak
+				case TARGET_SCORE_MYBEST:graphTarget_level=double(MybestRecordBuf(ID_REC_SCORE))/10000000.0:graphTarget_Desc="自己ベストのスコア":swbreak
+				case TARGET_SCORE_ONLINETOP:graphTarget_level=double(plitem_ir_score@_MusicSelect_(ChartItemID,ChartLevID,0))/10000000.0:graphTarget_Desc="歴代ベストのスコア":swbreak
+			swend
+			repeat ObjMax
+				graphTrainer_score(cnt)=int(double(ObjHitScore*cnt)*graphTrainer_level)+BonusScore
+				if int(MybestRecordBuf(ID_REC_SCORE))==0 {
+					graphBest_score(cnt)=0
+				} else {
+					graphBest_score(cnt)=limit(lpeek(graphBest_Decode,4*cnt),0,10000000)
+				}
+				graphTarget_score(cnt)=int(double(ObjHitScore*cnt)*graphTarget_level)+BonusScore
+				if cnt==0 :graphTrainer_score(cnt)-BonusScore:graphTarget_score(cnt)-BonusScore
+			loop
+
+		//ゲージ記録用のキャプチャー地点
+			dim gaugeCapture_flag,350
+			dim gaugeCapture_value,350
+			dim scoreCapture_flag,objmax
+			dim scoreCapture_value,objmax
+
+		//"譜面の配置"オプションの適用
+		dim ObjPlacement_map:ObjPlacement_map=0,1,2,3,4,5
+		switch ObjPlacement@
+			case OBJP_MIRROR:ObjPlacement_map=5,4,3,2,1,0:swbreak
+			case OBJP_S_MIRROR:ObjPlacement_map=5,1,2,3,4,0:swbreak
+			case OBJP_N_MIRROR:ObjPlacement_map=0,4,3,2,1,5:swbreak
+			case OBJP_H_MIRROR:ObjPlacement_map=0,2,1,4,3,5:swbreak
+			case OBJP_RANDOM
+				sdim tmpstr:tmpstr=GetRandomArrayMap(4)
+				ObjPlacement_map=0,1,2,3,4,5
+				repeat 4
+					ObjPlacement_map(1+cnt)=int(strmid(tmpstr,cnt,1))+1
+				loop
+			swbreak
+			case OBJP_A_RANDOM
+				sdim tmpstr:tmpstr=GetRandomArrayMap(6)
+				repeat 6
+					ObjPlacement_map(cnt)=int(strmid(tmpstr,cnt,1))
+				loop
+			swbreak
+		swend
+		repeat objmax
+			ObjLaneID(cnt)=ObjPlacement_map(ObjLaneID(cnt))
+		loop
+
+		//譜面のエラーをチェック
+		repeat objmax
+			tmpint(0)=objLaneID(cnt)
+			tmpint(1)=objtiming(cnt)
+			tmpint(2)=cnt
+			repeat objmax
+				if cnt==tmpint(2) :continue
+				if tmpint(0)==objLaneID(cnt)&tmpint(1)==objtiming(cnt) {
+					dialog"オブジェクトの重複を検出しました。\n\n発生オブジェクトID : "+cnt+"\nレーンID : "+objlaneid(cnt)+"\n発生タイミング : "+(objtiming(cnt)-PreTime-int(chartMetaInfo(META_TOTALOFFSET))),1,"警告"
+				}
+			loop
+		loop
+
+	return
+
+	//譜面ファイルのメタデータを取得
+	#defcfunc GetChartInfo int _id
+	return chartMetaInfo(_id)
+
+	//プレイ開始時の初期化処理
+	#deffunc StartGameplay
+
+		//変数初期化
+			dim ProgLongNoteID,6
+			repeat 6
+				ProgLongNoteID(cnt)=-1
+			loop
+			dim LaneEffMode,6
+			dim LaneBombFlag,6
+			dim ParticleEffFlag,6
+			dim ParticleEffCount,6
+			dim ParticleEffImg,6
+			dim bonusDispCount
+			dim bonusDispImg
+			ddim easeAddSpeedA
+			ddim easeAddSpeedB
+			dim easeAddSpeedCount
+			ddim easeAddSpeedRes
+			dim numExcellent
+			dim numGreat
+			dim numGood
+			dim numBad
+			dim numMiss
+			dim numEarly
+			dim numLate
+			dim numCombobreak
+			dim curCombo
+			dim MaxCombo
+			dim judgeSign
+			dim curScore
+			ddim curGauge,1
+			dim BGAplayflag
+			dim BGAgenflag
+			dim BGMplayflag
+			dim burstCount
+			ddim TotalRagMs,1
+			dim curCount
+			ddim curCount_f,1
+			dim avgOffset_time
+			dim avgOffset_prm
+			sdim curScoreRank
+			dim FinishFlag
+			dim FinishCount
+			dim SceneCount
+			dim JudgeAfCnt
+			dim ResJudge
+			dim easeScoreA
+			dim easeScoreB
+			dim easeScoreCount
+			ddim curPfPoint
+			ddim bonusPfPoint
+			dim BonusAddFlag
+			sdim tmpstr
+			burstCount=-1
+
+			easeAddSpeedA=AddSpeed@:easeAddSpeedB=AddSpeed@
+			if GaugeType@==GAUGE_EXPERT|GaugeType@==GAUGE_MADNESS :curGauge=100.0
+
+		//BGAファイルの処理
+			if GetChartInfo(META_BGA)!"" {
+				exist"Data/mr/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGA)
+				dim hdximg_gameplaybga
+				if strsize==-1 {
+					SetDXArchiveExtension"bin"
+					if GetMovieAlias(GetChartInfo(META_BGA))!-1 {
+						hdximg_gameplaybga=LoadGraph("Data/res_movie_p/"+BGAquality@+"_m"+GetMovieAlias(GetChartInfo(META_BGA))+".ogv")
+						BGAgenflag=TRUE
+					} else {
+						hdximg_gameplaybga=LoadGraph("Data/res_movie_p/"+BGAquality@+"_m"+GetChartInfo(META_BGA)+".ogv")
+						BGAgenflag=TRUE
+					}
+					PlayMovieToGraph hdximg_gameplaybga,DX_PLAYTYPE_LOOP
+				} else {
+					hdximg_gameplaybga=LoadGraph("Data/mr/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGA))
+					BGAgenflag=FALSE
+				}
+			}
+			if GetChartInfo(META_BGAIMAGE)!"" {
+				dim hdximg_gameplaybga
+				hdximg_gameplaybga=LoadGraph("Data/mr/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGAIMAGE))
+			}
+
+		//キャラクターバッファ
+			SetDrawScreen hdximg_char
+				ClearDrawScreen
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawExtendGraph 0,0,80,64,hCharImg@charicon(RegCharID@portalsync),TRUE
+
+		//カウンタ
+			stdCount=GetNowCount()
+	return
+
+	//プレイ画面の毎フレーム処理
+	#deffunc DrawGamePlay
+
+		//遅延補正
+			TotalRagMs+double(curCount)-curCount_f
+			curCount=GetNowCount()-stdCount;-TotalRagMs
+			curCount_f+1000.0/double(FPSvalue@)
+			curCount=int(curCount_f)
+
+		//キー判定
+			if KeyFlag@(confKeyCode@(KEYCONF_SPEEDUP_AD))==TRUE {
+				easeAddSpeedA=AddSpeed@:AddSpeed@+0.005:easeAddSpeedB=AddSpeed@
+				easeAddSpeedCount=0
+			}
+			if KeyFlag@(confKeyCode@(KEYCONF_SPEEDDOWN_AD))==TRUE {
+				easeAddSpeedA=AddSpeed@:AddSpeed@-0.005:easeAddSpeedB=AddSpeed@
+				easeAddSpeedCount=0
+			}
+			if bfKeyFlag@(confKeyCode@(KEYCONF_SPEEDUP))==FALSE&KeyFlag@(confKeyCode@(KEYCONF_SPEEDUP))==TRUE {
+				easeAddSpeedA=AddSpeed@:AddSpeed@-0.5:easeAddSpeedB=AddSpeed@
+				easeAddSpeedCount=0
+			}
+			if bfKeyFlag@(confKeyCode@(KEYCONF_SPEEDDOWN))==FALSE&KeyFlag@(confKeyCode@(KEYCONF_SPEEDDOWN))==TRUE {
+				easeAddSpeedA=AddSpeed@:AddSpeed@+0.5:easeAddSpeedB=AddSpeed@
+				easeAddSpeedCount=0
+			}
+			AddSpeed@=limitf(AddSpeed@,0.1,10.0)
+			easeAddSpeedB=limitf(easeAddSpeedB,0.1,10.0)
+
+			if KeyFlag@(confKeyCode@(KEYCONF_CANCEL))==TRUE&FinishFlag==FALSE {
+				FinishFlag=TRUE:FinishCount=0:curGauge=0.0
+				//未記録のスコアをまとめてキャプチャ
+				repeat ObjMax
+					if scoreCapture_flag(cnt)==FALSE {
+						scoreCapture_value(cnt)=curScore
+						scoreCapture_flag(cnt)=TRUE
+					}
+				loop
+			}
+
+		//判定処理
+			dim KeybtJudge,2,6
+			KeybtJudge(0,0)=bfKeyFlag@(confKeyCode@(KEYCONF_LSIDE))
+			KeybtJudge(1,0)=KeyFlag@(confKeyCode@(KEYCONF_LSIDE))
+			KeybtJudge(0,1)=bfKeyFlag@(confKeyCode@(KEYCONF_BUTTON_1))
+			KeybtJudge(1,1)=KeyFlag@(confKeyCode@(KEYCONF_BUTTON_1))
+			KeybtJudge(0,2)=bfKeyFlag@(confKeyCode@(KEYCONF_BUTTON_2))
+			KeybtJudge(1,2)=KeyFlag@(confKeyCode@(KEYCONF_BUTTON_2))
+			KeybtJudge(0,3)=bfKeyFlag@(confKeyCode@(KEYCONF_BUTTON_3))
+			KeybtJudge(1,3)=KeyFlag@(confKeyCode@(KEYCONF_BUTTON_3))
+			KeybtJudge(0,4)=bfKeyFlag@(confKeyCode@(KEYCONF_BUTTON_4))
+			KeybtJudge(1,4)=KeyFlag@(confKeyCode@(KEYCONF_BUTTON_4))
+			KeybtJudge(0,5)=bfKeyFlag@(confKeyCode@(KEYCONF_RSIDE))
+			KeybtJudge(1,5)=KeyFlag@(confKeyCode@(KEYCONF_RSIDE))
+
+		//一番近いノーツIDとその時間差を算出
+			repeat 6
+				NearNoteID(cnt)=-1
+				NearNoteGap(cnt)=-1
+				ProgLaneID=cnt
+				repeat ObjMax
+					if ObjJudgeFlag(cnt)==1 :continue
+					if ObjLaneID(cnt)!ProgLaneID :continue
+					if NearNoteGap(ProgLaneID)==-1 {
+						NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset@-ObjTiming(cnt))
+						NearNoteID(ProgLaneID)=cnt
+					} else {
+						if NearNoteGap(ProgLaneID)>abs(curCount+JudgeOffset@-ObjTiming(cnt)) {
+							NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset@-ObjTiming(cnt))
+							NearNoteID(ProgLaneID)=cnt
+						}
+					}
+				loop
+				//キーサウンドを割り当て
+				KeyAssignID(ProgLaneID)=NearNoteID(ProgLaneID)
+				//判定から除外
+				if NearNoteGap(ProgLaneID)>jWid_Miss {
+					NearNoteID(ProgLaneID)=-1
+				}
+			loop
+
+		//判定処理
+			repeat 6
+				ProgLaneID=cnt
+				if FinishFlag==TRUE :break	//終了済みなら判定をスキップ
+				if KeybtJudge(0,ProgLaneID)==0&KeybtJudge(1,ProgLaneID)==1 {
+					VisualBData(0)++
+					//レーンエフェクトの演出設定をリセット
+					LaneEffMode(ProgLaneID)=1
+					LaneEffCount(ProgLaneID)=0
+
+					if KeyAssignID(ProgLaneID)!-1 {
+						if ObjSoundID(KeyAssignID(ProgLaneID))!-1 {
+							cfunc64v BASS_ChannelSetPosition,hSndDB(ObjSoundID(KeyAssignID(ProgLaneID))),0,0,0
+							cfunc64v BASS_ChannelPlay,hSndDB(ObjSoundID(KeyAssignID(ProgLaneID)))
+						}
+					}
+					if UseDefaultKeySnd==TRUE {
+						PlaySE int(hbasschannel(sndDefaultAssign0+ProgLaneID)),0.5
+					}
+					if NearNoteID(ProgLaneID)!-1&AutoPlayFlag@==0 {
+						if ObjType(NearNoteID(ProgLaneID))==OBJ_SINGLENOTE|OBJ_holdSTART {
+							ObjJudgeProg
+							if ObjType(NearNoteID(ProgLaneID))==OBJ_holdSTART {
+								ProgLongNoteID(ProgLaneID)=NearNoteID(ProgLaneID)+1
+							}
+						}
+					}
+				}
+				if KeybtJudge(0,ProgLaneID)==1&KeybtJudge(1,ProgLaneID)==0 {
+					LaneEffMode(ProgLaneID)=3
+					LaneEffCount(ProgLaneID)=0
+
+					if ProgLongNoteID(ProgLaneID)!-1&AutoPlayFlag@==0 {
+						NearNoteID(ProgLaneID)=ProgLongNoteID(ProgLaneID)
+						NearNoteGap(ProgLaneID)=abs(curCount+JudgeOffset@-ObjTiming(NearNoteID(ProgLaneID)))
+						ObjJudgeProg
+							if ResJudge==jres_Unknown {
+								ResJudge=jres_Miss
+								UpdateJudgeValue ResJudge
+								ObjJudgeFlag(NearNoteID(ProgLaneID))=1
+								LaneBombFlag(ProgLaneID)=1
+								LaneBombCount(ProgLaneID)=0
+							}
+							ProgLongNoteID(ProgLaneID)=-1		//判定中のノーツIDを削除
+						}
+				}
+			loop
+
+		//背景画像
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(curCount-PreTime,1000)
+			if BGAgenflag==TRUE :SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			if GetChartInfo(META_BGA)=="*"&GetChartInfo(META_BGAIMAGE)=="" {
+				DrawGraph 0,0,hdximg(ibg_0),FALSE
+			} else {
+				if BGAgenflag==FALSE {
+					if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga:SetMovieVolumeToGraph 0,hdximg_gameplaybga
+				}
+				DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
+			}
+			if BGAblurlev@!0 {
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,100*BGAblurlev@
+			}
+
+		//BGM
+			if int(GetChartInfo(META_BGMOFFSET))<curCount-PreTime&BGMplayflag==FALSE :BGMplayflag=TRUE:cfunc64v BASS_ChannelPlay,hSndBGM
+
+		//レーン
+			//ぼかし
+				if LowQuaFlag@==FALSE {
+					GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),780,64,1140,864,780,64,DX_GRAPH_FILTER_GAUSS,32,6400
+					GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),662,64,772,864,662,64,DX_GRAPH_FILTER_GAUSS,32,6400
+					GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),1148,64,1258,864,1148,64,DX_GRAPH_FILTER_GAUSS,32,6400
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,100
+				} else :SetDrawBlendMode DX_BLENDMODE_ALPHA,150
+			//白背景
+				DrawBox 780,64,1140,864,GetColor(255,255,255),TRUE
+				DrawBox 662,64,772,864,GetColor(255,255,255),TRUE
+				DrawBox 1148,64,1258,864,GetColor(255,255,255),TRUE
+			//枠
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,50
+				repeat 4
+					DrawBox 780+90*cnt,64,780+90*(cnt+1),864,GetColor(0,0,0),FALSE
+				loop
+				DrawBox 662,64,772,864,GetColor(0,0,0),FALSE
+				DrawBox 1148,64,1258,864,GetColor(0,0,0),FALSE
+
+		//レーンエフェクト
+			repeat 6
+				if LaneEffMode(cnt)==0|FinishFlag==TRUE :continue
+					//押し始め
+					if LaneEffMode(cnt)==1 {
+						setease 100,256,ease_cubic_out
+						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(LaneEffCount(cnt),10)
+						if LaneEffCount(cnt)>10 :LaneEffMode(cnt)=2:LaneEffCount(cnt)=0
+					}
+					//継続
+					if LaneEffMode(cnt)==2 {
+						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					}
+					//離した
+					if LaneEffMode(cnt)==3 {
+						setease 256,0,ease_cubic_out
+						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(LaneEffCount(cnt),12)
+						if LaneEffCount(cnt)>12 :LaneEffMode(cnt)=0
+					}
+					if cnt==0|cnt==5 {
+						if cnt==0 :DrawExtendGraph 662,64,662+110,64+800,hdximg(ieff_lane),TRUE
+						if cnt==5 :DrawExtendGraph 1148,64,1148+110,64+800,hdximg(ieff_lane),TRUE
+					} else {
+						if cnt\2!0&FrameCount@>40 {
+							DrawGraph 780+(cnt-1)*90,64,hdximg(ieff_lane),TRUE
+						} else {
+							DrawGraph 780+(cnt-1)*90,64,hdximg(ieff_lane),TRUE
+						}
+					}
+
+				AddCount LaneEffCount(cnt)
+			loop
+
+		//スクロール速度
+			ddim ScrollSpeed,1
+			repeat BPMpointMax
+				if BPMTiming(cnt)<curCount {
+					ScrollSpeed=BPMValue(cnt)/400.0
+					CurBPM=BPMValue(cnt)
+				}
+			loop
+
+		//ノーツ
+			SetDrawBlendMode DX_BLENDMODE_NOBLEND,0
+			setease easeAddSpeedA,easeAddSpeedB,ease_cubic_out
+			easeAddSpeedRes=geteasef(easeAddSpeedCount,20)
+			AddCount easeAddSpeedCount
+			NoteHeight=32
+			repeat ObjMax
+				if ScrollSpeed!0.0&curCount>0 :ObjPosition(cnt)+(1000.0/double(FPSvalue@)*ScrollSpeed)
+				ObjDrawPos(cnt)=864+(ObjPosition(cnt)*easeAddSpeedRes)-DispOffset@
+				DrawPosY=ObjDrawPos(cnt)
+				if ObjType(cnt)==OBJ_holdSTART {
+					tmpholdStartID=cnt
+				}
+				if ObjType(cnt)==OBJ_SINGLENOTE {
+					if DrawPosY<0 :continue
+					if DrawPosY>BufHeight@ :continue
+				}
+				if ObjJudgeFlag(cnt)==TRUE :continue
+
+				//基本ノーツ画像
+					if DrawPosY>0&DrawPosY+NoteHeight<864 {
+						if ObjLaneID(cnt)\2!0 {
+							CopyMatImageHwnd=hdximg(inote_0)
+						} else {
+							CopyMatImageHwnd=hdximg(inote_0)
+						}
+						if ObjLaneID(cnt)==0|ObjLaneID(cnt)==5 {
+							if ObjLaneID(cnt)==0 :DrawGraph 662,DrawPosY,hdximg(inote_0),TRUE
+							if ObjLaneID(cnt)==5 :DrawGraph 1148,DrawPosY,hdximg(inote_0),TRUE
+						} else {
+							DrawGraph 780+(ObjLaneID(cnt)-1)*90,DrawPosY,CopyMatImageHwnd,TRUE
+						}
+					}
+
+				//ロングノーツ
+					if ObjType(cnt)==OBJ_holdEND {
+						tmpholdNoteHeight=ObjDrawPos(tmpholdStartID)-(DrawPosY+NoteHeight)
+						if DrawPosY+tmpholdNoteHeight+NoteHeight>864 :tmpholdNoteHeight=864-DrawPosY-NoteHeight
+						if ObjLaneID(cnt)==0|ObjLaneID(cnt)==5 {
+							if ObjLaneID(cnt)==0 :CopyMatImageHwnd=hdximg(ihold_0)
+							if ObjLaneID(cnt)==5 :CopyMatImageHwnd=hdximg(ihold_0)
+						} else {
+							if ObjLaneID(cnt)\2==0 {
+								CopyMatImageHwnd=hdximg(ihold_0)
+							} else {
+								CopyMatImageHwnd=hdximg(ihold_0)
+							}
+						}
+						//描画位置(x)
+						if ObjLaneID(cnt)==0|ObjLaneID(cnt)==5 {
+							if ObjLaneID(cnt)==0 :DrawPosX=662
+							if ObjLaneID(cnt)==5 :DrawPosX=1148
+						} else {
+							DrawPosX=780+(ObjLaneID(cnt)-1)*90
+						}
+						if tmpholdNoteHeight<1024 {
+							//素材より短いロングノーツ
+							DrawRectGraph DrawPosX,DrawPosY+NoteHeight,0,0,90,tmpholdNoteHeight,CopyMatImageHwnd,TRUE
+						} else {
+							//素材より長いロングノーツ
+							progObjID=cnt
+							repeat tmpholdNoteHeight/1024
+								DrawRectGraph DrawPosX,DrawPosY+1024*cnt+NoteHeight,0,0,90,1024,CopyMatImageHwnd,TRUE
+							loop
+							DrawRectGraph DrawPosX,DrawPosY+tmpholdNoteHeight/1024*1024+NoteHeight,0,0,90,tmpholdNoteHeight\1024,CopyMatImageHwnd,TRUE
+						}
+					}
+				loop
+
+		//判定文字
+			setease 150,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(JudgeAfCnt,5)
+			if JudgeAfCnt>20 {
+				setease 256,0,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(JudgeAfCnt-20,10)
+			}
+			setease 1.5,1,ease_cubic_out
+			JudgeresWidth=int(200.0*geteasef(JudgeAfCnt,6))
+			JudgeresHeight=int(50.0*geteasef(JudgeAfCnt,6))
+			JudgeresPosX=860+200/2-JudgeresWidth/2,860+200/2-JudgeresWidth/2+JudgeresWidth
+			JudgeresPosY=670+50/2-JudgeresHeight/2,670+50/2-JudgeresHeight/2+JudgeresHeight
+			switch ResJudge
+				case jres_Excellent	//Excellent
+					DrawExtendGraph JudgeresPosX(0),JudgeresPosY(0),JudgeresPosX(1),JudgeresPosY(1),hdximg(ijudge_excellent),TRUE
+				swbreak
+				case jres_Great	//Great
+					DrawExtendGraph JudgeresPosX(0),JudgeresPosY(0),JudgeresPosX(1),JudgeresPosY(1),hdximg(ijudge_great),TRUE
+				swbreak
+				case jres_Good		//Good
+					DrawExtendGraph JudgeresPosX(0),JudgeresPosY(0),JudgeresPosX(1),JudgeresPosY(1),hdximg(ijudge_good),TRUE
+				swbreak
+				case jres_Bad		//Bad
+					DrawExtendGraph JudgeresPosX(0),JudgeresPosY(0),JudgeresPosX(1),JudgeresPosY(1),hdximg(ijudge_bad),TRUE
+				swbreak
+				case jres_Miss		//Miss
+					DrawExtendGraph JudgeresPosX(0),JudgeresPosY(0),JudgeresPosX(1),JudgeresPosY(1),hdximg(ijudge_miss),TRUE
+				swbreak
+			swend
+
+		//バースト
+			if burstCount!-1&drawbonusFlag@==TRUE {
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 960-384/2,625-384/2,hdximg_arr_burst(burstCount),TRUE
+				if judgeAfCnt\2==0 :AddCount burstCount
+				if burstCount>15 :burstCount=-1
+			}
+
+		//コンボ
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,200
+			DrawStringXCenterToHandle 780,600,strf("%04d",curCombo),360,GetColor(40,40,40),hdxfont(fFAB50)
+
+		//判定バー
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,70
+			DrawBox 0,868,BufWidth@,868+3,$58EEE3,TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawBox 640,864,640+640,864+10,$58EEE3,TRUE
+
+		//上部パネル
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,0,hdximg(ibg_top),TRUE
+
+		//下部パネル
+			;SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,874,hdximg(ibg_bottom),TRUE
+			;SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			//平均オフセット
+				DrawStringToHandle 396,909,str(avgOffset_time/limit(avgOffset_prm,1)),GetColor(255,255,255),hdxfont(fSQNUM24)
+			//スコアランク
+				dim TheoScore:ddim ScoreRate,1
+				TheoScore=ObjHitScore*graphcapture_objid
+				if graphcapture_objid!0 :TheoScore+BonusScore
+				if TheoScore==0 :ScoreRate=100.0:else:ScoreRate=double(curScore)/double(TheoScore)*100.0
+				curScoreRank=GetScoreRank(ScoreRate)
+				DrawStringToHandle 436,974,curScoreRank,GetColor(255,255,255),hdxfont(fSQNUM24)
+			//最大コンボ
+				DrawStringToHandle 1596,909,strf("%04d",MaxCombo),GetColor(255,255,255),hdxfont(fSQNUM24)
+			//ノーツの速度
+				DrawStringToHandle 1556,974,strf("%.2f",AddSpeed@),GetColor(255,255,255),hdxfont(fSQNUM24)
+
+		//左パネル
+		if LowQuaFlag@==FALSE {
+			;SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,380,hdximg(ibg_playerdata),TRUE
+			;SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			//自己ベストスコア
+				DrawStringToHandle 140,652,strf("%08d",MybestRecordBuf(ID_REC_SCORE)),GetColor(0,0,0),hdxfont(fSQNUM24)
+				DrawStringToHandle 140,686,"S+ , 能力値:"+strf("%.2f",MybestRecordBuf(ID_REC_AP)),GetColor(0,0,0),hdxfont(fNSCJM12)
+			//目標スコア
+				DrawStringToHandle 140,752,strf("%08d",int(10000000.0*graphTarget_level)),GetColor(0,0,0),hdxfont(fSQNUM24)
+				DrawStringToHandle 140,786,graphTarget_Desc,GetColor(0,0,0),hdxfont(fNSCJM12)
+			//差分表示（自己ベスト）
+				;sdim tmpstr
+				if curScore-graphBest_score(graphCapture_objid)>=0 :tmpstr="+":else:tmpstr="-"
+				tmpstr+str(abs(curScore-graphBest_score(graphCapture_objid)))
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringXCenterToHandle 376,661,tmpstr,130,GetColor(10,10,10),hdxfont(fPS20)
+			//差分表示（目標スコア）
+				;sdim tmpstr
+				if curScore-graphTarget_score(graphCapture_objid)>=0 :tmpstr="+":else:tmpstr="-"
+				tmpstr+str(abs(curScore-graphTarget_score(graphCapture_objid)))
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringXCenterToHandle 376,768,tmpstr,130,GetColor(10,10,10),hdxfont(fPS20)
+		}
+
+		//キー
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			if KeybtJudge(1,0)==TRUE {
+				DrawGraph 682,886,hdximg(ichip_key_active),TRUE
+			} else {
+				DrawGraph 682,886,hdximg(ichip_Key),TRUE
+			}
+			repeat 4
+				if KeybtJudge(1,1+cnt)==TRUE {
+					DrawGraph 791+90*cnt,894,hdximg(ichip_key_active),TRUE
+				} else {
+					DrawGraph 791+90*cnt,894,hdximg(ichip_Key),TRUE
+				}
+			loop
+			if KeybtJudge(1,5)==TRUE {
+				DrawGraph 1168,886,hdximg(ichip_key_active),TRUE
+			} else {
+				DrawGraph 1168,886,hdximg(ichip_Key),TRUE
+			}
+
+		//曲情報
+			;SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,100,hdximg(ibg_songinfo),TRUE
+			//値
+			;SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawStringToHandle 40,128,GetChartInfo(META_TITLE),GetColor(10,10,10),hdxfont(fNSCJM32)
+			DrawStringToHandle 40,183,GetChartInfo(META_ARTIST),GetColor(30,30,30),hdxfont(fNSCJM20)
+			DrawStringToHandle 40,222,GetChartInfo(META_SOURCE),GetColor(50,50,50),hdxfont(fNSCJM16)
+			DrawStringToHandle 40,311,GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL),GetColor(240,240,240),hdxfont(fEOEXB20)
+			//位置
+			;SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				dim ChartSeekPos
+				ChartSeekPos=limit(int(double(curCount)/double(ObjTiming(ObjMax-1))*400.0),0,400)
+
+				//プレイの終了判定
+					if FinishFlag==FALSE {
+						FinishFlag=TRUE
+						repeat objmax
+							if objjudgeflag(cnt)==FALSE :FinishFlag=FALSE
+						loop
+					}
+					//終了時のムービー
+						if FinishFlag==TRUE&FinishCount==0 {
+							dim hFinishMovie:hFinishMovie=hdximg(istg_failed)
+							if GaugeType@==GAUGE_ASSIST|GaugeType@==GAUGE_NORMAL {	//通常ゲージ（加点方式）
+								if curGauge>70.0 :hFinishMovie=hdximg(istg_clear)
+							} else {
+								if curGauge>0.0 :hFinishMovie=hdximg(istg_clear)	//ハードゲージ（減点方式）
+							}
+							if numBad==0&numMiss==0 :hFinishMovie=hdximg(istg_fullcombo)	//フルコンボ
+							if numGreat==0&numGood==0&numBad==0&numMiss==0 :hFinishMovie=hdximg(istg_allex)		//ALL EXCELLENT
+							repeat objmax
+								if objjudgeflag(cnt)==FALSE :hFinishMovie=hdximg(istg_failed)	//途中でやめた
+							loop
+
+							//再生開始
+							SeekMovieToGraph hFinishMovie,0
+							PlayMovieToGraph hFinishMovie
+							switch hFinishMovie
+								case hdximg(istg_clear):PlaySE int(hbasschannel(sndClear)),0.7:swbreak
+								case hdximg(istg_fullcombo):PlaySE int(hbasschannel(sndClearEX)),0.7:swbreak
+								case hdximg(istg_allex):PlaySE int(hbasschannel(sndClearEX)),0.7:swbreak
+								case hdximg(istg_failed):PlaySE int(hbasschannel(sndFailed)),0.7:swbreak
+							swend
+						}
+					if FinishFlag==TRUE :AddCount FinishCount
+				DrawBox 40,280,40+ChartSeekPos,280+4,$2BB7E4,TRUE
+			;SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 40+ChartSeekPos-8,264,hdximg(icursor_Seek),TRUE
+
+		//ステータス
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+			DrawStringToHandle 24,1048,"SAPPHIRE",GetColor(230,230,230),hdxfont(fPS20)
+			DrawStringToHandle 160,1052,"Now playing "+GetChartInfo(META_ARTIST)+" - "+GetChartInfo(META_TITLE)+" ["+GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL)+"]",GetColor(210,210,210),hdxfont(fNSCJM16)
+
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
+			if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,10
+				DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
+				if GetMouseInput()&MOUSE_INPUT_LEFT {
+					goto*Exit@
+				}
+			}
+
+		//ノーツボム
+			repeat 6
+				if LaneBombFlag(cnt)==1 {
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					LaneBombCount(cnt)=limit(LaneBombCount(cnt),0,9)
+					if cnt==0|cnt==5 {
+						if cnt==0 :DrawGraph 662+110/2-192/2,864-192/2,hdximg_arr_bomb(LaneBombCount(cnt)),TRUE
+						if cnt==5 :DrawGraph 1148+110/2-192/2,864-192/2,hdximg_arr_bomb(LaneBombCount(cnt)),TRUE
+					} else {
+						DrawGraph 780+90*(cnt-1)+90/2-192/2,846-192/2,hdximg_arr_bomb(LaneBombCount(cnt)),TRUE
+					}
+					if LaneBombCount(cnt)>=9 :LaneBombFlag(cnt)=0:LaneBombCount(cnt)=0:else{
+						if judgeAfCnt\2==0:AddCount LaneBombCount(cnt)
+					}
+				}
+				if ParticleEffFlag(cnt)==1&LowQuaFlag@==FALSE {
+					dim EaseWidth:dim EaseHeight:dim EasePosX:dim EasePosY
+					setease 0.4,1,ease_cubic_out
+					EaseWidth=int(geteasef(ParticleEffCount(cnt),25)*640)
+					EaseHeight=int(geteasef(ParticleEffCount(cnt),25)*640)
+					setease 256,0,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(ParticleEffCount(cnt),25)
+					EasePosX=780+90*(cnt-1)+90/2-EaseWidth/2
+					if cnt==0 :EasePosX=662+110/2-EaseWidth/2
+					if cnt==5 :EasePosX=1148+110/2-EaseWidth/2
+					EasePosY=864-EaseHeight/2
+					DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ieff_particle_0+ParticleEffImg(cnt)),TRUE
+					if ParticleEffCount(cnt)>25 :ParticleEffFlag(cnt)=0:else:AddCount ParticleEffCount(cnt)
+				}
+			loop
+
+		//ボーナス表示
+			if bonusDispCount!-1&drawbonusFlag@==TRUE {
+				if bonusDispCount>15+FPSvalue@*2 {
+					setease 150,0,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(bonusDispCount-15-FPSvalue@*2,15)
+				} else {
+					setease 0,150,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(bonusDispCount,15)
+				}
+				setease 32,0,ease_cubic_out
+				DrawGraph 780,450+getease(bonusDispCount,15),bonusDispImg,TRUE
+				AddCount bonusDispCount
+				if bonusDispCount>15+FPSvalue@*2+15 :bonusDispCount=-1
+			}
+
+		//スコアグラフ
+		if LowQuaFlag@==FALSE {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1500,240,hdximg(ibg_scoregraph),TRUE
+
+			//暫定スコア
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,50
+			DrawExtendGraph 1553,740-int(double(10000000-(ObjHitScore*graphCapture_objid+BonusScore-curScore))/10000000.0*400.0),1553+80,740,hdximg(igraph_current),FALSE
+			DrawExtendGraph 1666,740-int(double(10000000.0*graphTrainer_level)/10000000.0*400.0),1666+50,740,hdximg(igraph_trainer),FALSE
+			DrawExtendGraph 1732,740-int(double(MybestRecordBuf(ID_REC_SCORE))/10000000.0*400.0),1732+50,740,hdximg(igraph_best),FALSE
+			DrawExtendGraph 1798,740-int(double(10000000.0*graphTarget_level)/10000000.0*400.0),1798+50,740,hdximg(igraph_target),FALSE
+
+			//確定スコア
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawExtendGraph 1553,740-int(double(curScore)/10000000.0*400.0),1553+80,740,hdximg(igraph_current),FALSE
+			DrawExtendGraph 1666,740-int(double(graphTrainer_score(graphCapture_objid))/10000000.0*400.0),1666+50,740,hdximg(igraph_trainer),FALSE
+			DrawExtendGraph 1732,740-int(double(graphBest_score(graphCapture_objid))/10000000.0*400.0),1732+50,740,hdximg(igraph_best),FALSE
+			DrawExtendGraph 1798,740-int(double(graphTarget_score(graphCapture_objid))/10000000.0*400.0),1798+50,740,hdximg(igraph_target),FALSE
+		}
+
+		//スコア
+			;SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1416,100,hdximg(ibg_score),TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			setease easeScoreA,easeScoreB,ease_linear
+			DrawStringToHandle 1580,124,strf("%08d",getease(easeScoreCount,FPSvalue@/2)),GetColor(0,0,0),hdxfont(fSQNUM40)
+			AddCount easeScoreCount
+			curPfPoint=GetPfPoint(int(GetChartInfo(META_LEVEL)),curScore,maxcombo,GetChartInfo(META_DIFFICULTY),bonusPfPoint)
+			DrawStringToHandle 1618,182,strf("%3.2f",curPfPoint),GetColor(30,30,30),hdxfont(fSQNUM16)
+
+		//プロフィール
+		if LowQuaFlag@==FALSE {
+			//アイコン
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 20,390,hdximg_char,TRUE
+			//名前
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				DrawStringToHandle 182,400,RegName@portalsync,GetColor(10,10,10),hdxfont(fNSCJM20)
+			//レベル
+				DrawStringToHandle 182,435,str(RegLev@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)
+			//称号
+				DrawStringToHandle 182,461,RegBadge@portalsync,GetColor(10,10,10),hdxfont(fNSCJM16)
+			//パートナーの名前
+				DrawStringToHandle 182,500,CharName@charicon(RegCharID@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)
+			//パートナーレベル
+				;DrawStringToHandle 182,526,str(CharLev@charicon(RegCharID@portalsync)),GetColor(10,10,10),hdxfont(fNSCJM16)
+			//総合能力値
+				DrawStringToHandle 182,564,strf("%.3f",RegPfPoint@portalsync),GetColor(10,10,10),hdxfont(fNSCJM16)
+		}
+
+		//ゲージ
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 600,300,hdximg(igauge_empty),TRUE
+			switch GaugeType@
+				case GAUGE_ASSIST
+					if curGauge>70.0 {
+						DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_assist_clear),TRUE,FALSE
+					} else {
+						DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_assist),TRUE,FALSE
+					}
+				swbreak
+				case GAUGE_NORMAL
+					if curGauge>70.0 {
+						DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_normal_clear),TRUE,FALSE
+					} else {
+						DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_normal),TRUE,FALSE
+					}
+				swbreak
+				case GAUGE_EXPERT
+					DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_expert),TRUE,FALSE
+				swbreak
+				case GAUGE_MADNESS
+					DrawRectGraph 600,300+500-int(curGauge)*5,0,500-int(curGauge)*5,40,int(curGauge)*5,hdximg(igauge_madness),TRUE,FALSE
+				swbreak
+			swend
+			DrawGraph 528,300+500-int(curGauge)*5-16,hdximg(igauge_value),TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawStringXCenterToHandle 528,300+500-int(curGauge)*5-9,""+str(int(curGauge))+"%",64,GetColor(255,255,255),hdxfont(fPS16)
+
+		//終了時のムービー
+			if FinishFlag==TRUE {
+				setease 0,200,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(FinishCount,10)
+				DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ADD,256
+				DrawGraph BufWidth@/2-1280/2,BufHeight@/2-720/2,hFinishMovie,TRUE
+			}
+
+		//暗転
+			if SceneCount<TransitionFrame+1 {
+				setease 256,0,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,TransitionFrame)
+				DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
+			}
+			if FinishFlag==TRUE {
+				setease 0,256,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(FinishCount-60*3,30)
+				DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
+				if FinishCount>60*4 {
+					InitGamePlayResources
+					SendRecordData
+					repeat SoundDBMax
+						cfunc64v BASS_ChannelStop,hSndDB(cnt)
+					loop
+					cfunc64v BASS_ChannelStop,hSndBGM(cnt)
+					/*
+					InitScene ID_MUSICSELECT
+					;LoadMusicSelectImages
+					;LoadMusicSelectSounds
+					InitMusicSelectFonts
+					IRsync
+					ScanAllPlaylist
+					SetFilterRefDB ID_CAT_ALL
+					DrawLoadScreen
+					wait
+					StartMusicSelect
+					*/
+					InitScene ID_RESULT
+					LoadResultFonts
+					StartResult ChartItemID,ChartLevID
+				}
+			}
+
+		//自動判定
+			repeat ObjMax
+				if ObjAutoFlag(cnt)==1 :continue
+				if ObjTiming(cnt)<curCount {
+					ObjAutoFlag(cnt)=1
+					ObjAutoJudgeID=cnt
+					if AutoPlayFlag@==1|(((ObjLaneID(cnt)==0)|(ObjLaneID(cnt)==5))&ObjPlacement@==OBJP_S_AUTO) {
+						ResJudge=jres_Excellent
+						numExcellent++
+						UpdateJudgeValue ResJudge
+						ObjJudgeFlag(cnt)=1
+						if ObjSoundID(cnt)!-1 {
+							cfunc64v BASS_ChannelSetPosition,hSndDB(ObjSoundID(cnt)),0,0,0
+							cfunc64v BASS_ChannelPlay,hSndDB(ObjSoundID(cnt))
+						}
+						if UseDefaultKeySnd==TRUE {
+							PlaySE int(hbasschannel(sndDefaultAssign0+ProgLaneID)),0.5
+						}
+						LaneBombFlag(ObjLaneID(cnt))=1
+						LaneBombCount(ObjLaneID(cnt))=0
+						LaneEffMode(ObjLaneID(cnt))=3
+						LaneEffCount(ObjLaneID(cnt))=0
+						ParticleEffFlag(ObjLaneID(cnt))=1
+						ParticleEffCount(ObjLaneID(cnt))=0
+						ParticleEffImg(objLaneID(cnt))=rnd(8)
+						JudgeAfCnt=0
+					}
+				}
+			loop
+
+		//見逃し判定
+			repeat ObjMax
+				if ObjJudgeFlag(cnt)==1 :continue
+				if curCount-ObjTiming(cnt)>jWid_Miss {
+					ResJudge=jres_Miss
+					UpdateJudgeValue ResJudge
+					ObjJudgeFlag(cnt)=1
+					JudgeSign=0
+					//終点判定
+					if ObjType(cnt)==OBJ_holdSTART {
+						ObjJudgeFlag(cnt+1)=1
+						UpdateJudgeValue ResJudge
+					}
+					curCombo=0
+					JudgeAfCnt=0
+				}
+			loop
+
+		//サウンドイベントの処理
+			dim LastPlaySndID
+			LastPlaySndID=-1
+			repeat SndEventMax
+				if SndPlayFlag(cnt)==0&curCount>SndEventTime(cnt)+PreTime+int(GetChartInfo(META_EVOFFSET))&SndEventID(cnt)!-1&length(hSndDB)>SndEventID(cnt) {
+					cfunc64v BASS_ChannelSetAttribute,hSndDB(SndEventID(cnt)),BASS_ATTRIB_VOL,d2f(SndEventVol(cnt)*0.8)
+					cfunc64v BASS_ChannelSetPosition,hSndDB(SndEventID(cnt)),0,0,0
+					cfunc64v BASS_ChannelPlay,hSndDB(SndEventID(cnt))
+					LastPlaySndID=SndEventID(cnt)
+					PlaySndCount++
+					SndPlayFlag(cnt)=1
+				}
+			loop
+
+		//グラフのキャプチャーIDを取得
+			repeat objmax
+				if objtiming(cnt)<curcount :graphcapture_objid=cnt
+			loop
+
+		//ゲージのキャプチャー
+			repeat 350
+				if curcount>objtiming(ObjMax-1)/350*cnt&gaugeCapture_flag(cnt)==FALSE {
+					gaugeCapture_value(cnt)=int(curGauge)
+					gaugeCapture_flag(cnt)=TRUE
+				}
+			loop
+
+		//スコアのキャプチャー
+			repeat ObjMax
+				if curcount>objtiming(cnt)&scoreCapture_flag(cnt)==FALSE {
+					scoreCapture_value(cnt)=curScore
+					scoreCapture_flag(cnt)=TRUE
+				}
+			loop
+
+		//カウンタ
+			AddCount JudgeAfCnt
+			AddCount SceneCount
+	return
+
+	//オブジェクトの判定処理
+	#deffunc ObjJudgeProg
+		ResJudge=jres_Unknown
+		if NearNoteGap(ProgLaneID)<=jWid_Miss		:ResJudge=jres_Miss		//MISS
+		if NearNoteGap(ProgLaneID)<=jWid_Bad		:ResJudge=jres_Bad		//GOOD
+		if NearNoteGap(ProgLaneID)<=jWid_Good		:ResJudge=jres_Good		//GREAT
+		if NearNoteGap(ProgLaneID)<=jWid_Great		:ResJudge=jres_Great	//PERFECT
+		if NearNoteGap(ProgLaneID)<=jWid_Excellent	:ResJudge=jres_Excellent	//PERFECT
+	
+		judgeSign=0
+		judgeAfCnt=0
+		if ResJudge!jres_Unknown {
+			ObjJudgeFlag(NearNoteID(ProgLaneID))=1
+			LaneBombFlag(ProgLaneID)=1
+			LaneBombCount(ProgLaneID)=0
+			ParticleEffFlag(ProgLaneID)=1
+			ParticleEffCount(ProgLaneID)=0
+			ParticleEffImg(ProgLaneID)=rnd(8)
+			if ResJudge!jres_Excellent {
+				if ObjTiming(NearNoteID(ProgLaneID))-(curCount+JudgeOffset@)>0 {
+					judgeSign=-1
+					numEarly++
+				} else {
+					judgeSign=1
+					numLate++
+				}
+			}
+			avgOffset_time+((curCount+JudgeOffset@)-ObjTiming(NearNoteID(ProgLaneID)))
+			avgOffset_prm++
+		}
+	
+		//コンボ&スコア処理
+		UpdateJudgeValue ResJudge
+	
+	return
+
+	//判定からスコア情報を更新する
+	#deffunc UpdateJudgeValue int _judgeres
+
+		easeScoreA=curScore
+		switch _judgeres
+			case jres_Excellent		//EXCELLENT判定
+				numExcellent++
+				curCombo++
+				if curCombo>MaxCombo :MaxCombo=curCombo
+				curScore+ObjHitScore
+				//ボーナススコアを加算
+				if BonusAddFlag==0 {
+					curScore+BonusScore
+					BonusAddFlag=1
+				}
+				curGauge+ObjHitGauge
+			swbreak
+			case jres_Great		//GREAT判定
+				numGreat++
+				curCombo++
+				if curCombo>MaxCombo :MaxCombo=curCombo
+				curScore+ObjHitScore/2
+				curGauge+ObjHitGauge/2.0
+			swbreak
+			case jres_Good			//GOOD判定
+				numGood++
+				curCombo++
+				if curCombo>MaxCombo :MaxCombo=curCombo
+				curScore+ObjHitScore/4
+			swbreak
+			case jres_Bad			//BAD判定
+				numBad++
+				numCombobreak++
+				curCombo=0
+
+				switch GaugeType@
+					case GAUGE_ASSIST:curGauge-1.0:swbreak
+					case GAUGE_NORMAL:curGauge-2.0:swbreak
+					case GAUGE_EXPERT:curGauge-4.0:swbreak
+					case GAUGE_MADNESS:curGauge-8.0:swbreak
+				swend
+			swbreak
+			case jres_Miss			//MISS判定
+				numMiss++
+				numCombobreak++
+				curCombo=0
+
+				switch GaugeType@
+					case GAUGE_ASSIST:curGauge-2.0:swbreak
+					case GAUGE_NORMAL:curGauge-4.0:swbreak
+					case GAUGE_EXPERT:curGauge-8.0:swbreak
+					case GAUGE_MADNESS:curGauge-16.0:swbreak
+				swend
+			swbreak
+		swend
+		easeScoreB=curScore
+		easeScoreCount=0
+		if curGauge>=100.0 :curGauge=100.0
+		if curGauge<0.0 :curGauge=0.0
+		if (GaugeType@==GAUGE_EXPERT|GaugeType@==GAUGE_MADNESS)&curGauge==0.0 {
+			FinishFlag=TRUE
+			//未記録のスコアをまとめてキャプチャ
+			repeat ObjMax
+				if scoreCapture_flag(cnt)==FALSE {
+					scoreCapture_value(cnt)=curScore
+					scoreCapture_flag(cnt)=TRUE
+				}
+			loop
+		}
+
+		//バースト発動条件
+			if curCombo!0 {
+				;if curCombo==50 :burstCount=0:bonusDispImg=hdximg(ieff_bonus_combo):bonusDispCount=0
+				if curCombo\100==0 :burstCount=0:bonusDispImg=hdximg(ieff_bonus_combo):bonusDispCount=0:bonusPfPoint+1.0
+			}
+			if burstCount==0&drawbonusFlag@==TRUE {
+				PlaySE int(hbasschannel(sndBurst)),0.6
+				PlaySE int(hbasschannel(vocBurst100+limit(curCombo/100\5,0,4))),0.5
+			}
+	return
+
+	#deffunc InitGamePlayResources
+		repeat SoundDBMax
+			cfunc64v BASS_SampleFree,hsmpSndDB(cnt)
+			cfunc64v BASS_ChannelFree,hSndDB(cnt)
+		loop
+		cfunc64v BASS_SampleFree,hsmpSndBGM
+		cfunc64v BASS_ChannelFree,hSndBGM
+		DeleteGraph hdximg_gameplaybga
+	return
+
+	#deffunc SendRecordData
+		//オートプレイの場合、スコア送信を無効化
+		;if AutoPlayFlag@ :return
+
+		//HTTPリクエストを作成
+
+			//リザルト用にバックアップ
+			dim OldCurScore:OldCurScore=curScore
+			dim OldMybestScore:OldMybestScore=int(MybestRecordBuf(ID_REC_SCORE))
+			ddim OldCurPfPoint,1:OldCurPfPoint=curPfPoint
+			ddim OldMybestPfPoint,1:OldMybestPfPoint=double(MybestRecordBuf(ID_REC_AP))
+			dim OldnumExcellent:OldnumExcellent=numExcellent
+			dim OldnumGreat:OldnumGreat=numGreat
+			dim OldnumGood:OldnumGood=numGood
+			dim OldnumBad:OldnumBad=numBad
+			dim OldnumMiss:OldnumMiss=numMiss
+			dim OldnumEarly:OldnumEarly=numEarly
+			dim OldnumLate:OldnumLate=numLate
+			dim Oldmaxcombo:Oldmaxcombo=maxcombo
+			sdim OldClearType
+
+			dim UpdateScoreFlag
+
+			//自己ベストと比較
+			if int(MybestRecordBuf(ID_REC_SCORE))>curScore {	//自己ベストの方が高い
+				curScore=int(MybestRecordBuf(ID_REC_SCORE))
+				numExcellent=int(MybestRecordBuf(ID_REC_EXCELLENT))
+				numGreat=int(MybestRecordBuf(ID_REC_GREAT))
+				numGood=int(MybestRecordBuf(ID_REC_GOOD))
+				numBad=int(MybestRecordBuf(ID_REC_BAD))
+				numMiss=int(MybestRecordBuf(ID_REC_MISS))
+				numEarly=int(MybestRecordBuf(ID_REC_EARLY))
+				numLate=int(MybestRecordBuf(ID_REC_LATE))
+				maxcombo=int(MybestRecordBuf(ID_REC_MAXCOMBO))
+			} else :UpdateScoreFlag=TRUE
+				sdim HTTPpostdata
+				HTTPpostdata+"key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendNewRecord")+"&"
+				HTTPpostdata+"id="+GetChartInfo(META_UUID)+"&"
+				HTTPpostdata+"name="+LoginUserInfo@(ID_NAME@)+"&"
+				HTTPpostdata+"score="+curScore+"&"
+				HTTPpostdata+"j_ex="+numExcellent+"&"
+				HTTPpostdata+"j_gr="+numGreat+"&"
+				HTTPpostdata+"j_go="+numGood+"&"
+				HTTPpostdata+"j_ba="+numBad+"&"
+				HTTPpostdata+"j_mi="+numMiss+"&"
+				HTTPpostdata+"j_ea="+numEarly+"&"
+				HTTPpostdata+"j_la="+numLate+"&"
+				HTTPpostdata+"maxcombo="+MaxCombo+"&"
+
+			//クリアの種類をグレード別で数値化
+				//自己ベスト
+				dim tmpint,2
+				switch MybestRecordBuf(ID_REC_CLEARTYPE)
+					case"FAILED":tmpint(0)=1:swbreak
+					case"ASSIST-CLEAR":tmpint(0)=2:swbreak
+					case"CLEAR":tmpint(0)=3:swbreak
+					case"EXPERT-CLEAR":tmpint(0)=4:swbreak
+					case"MADNESS-CLEAR":tmpint(0)=5:swbreak
+					case"FULLCOMBO":tmpint(0)=6:swbreak
+					case"ALL-EXCELLENT":tmpint(0)=7:swbreak
+				swend
+				//結果
+				;sdim tmpstr
+				tmpstr="FAILED"
+				if GaugeType@==GAUGE_ASSIST&curGauge>70.0 :tmpstr="ASSIST-CLEAR"
+				if GaugeType@==GAUGE_NORMAL&curGauge>70.0 :tmpstr="CLEAR"
+				if GaugeType@==GAUGE_EXPERT&curGauge>0.0 :tmpstr="EXPERT-CLEAR"
+				if GaugeType@==GAUGE_MADNESS&curGauge>0.0 :tmpstr="MADNESS-CLEAR"
+				if tmpstr!"FAILED"&(OldnumBad==0&OldnumMiss==0) :tmpstr="FULLCOMBO"
+				if (OldnumExcellent!0)&(OldnumGreat==0&OldnumGood==0&OldnumBad==0&OldnumMiss==0) :tmpstr="ALL-EXCELLENT"
+				OldClearType=tmpstr
+				switch tmpstr
+					case"FAILED":tmpint(1)=1:swbreak
+					case"ASSIST-CLEAR":tmpint(1)=2:swbreak
+					case"CLEAR":tmpint(1)=3:swbreak
+					case"EXPERT-CLEAR":tmpint(1)=4:swbreak
+					case"MADNESS-CLEAR":tmpint(1)=5:swbreak
+					case"FULLCOMBO":tmpint(1)=6:swbreak
+					case"ALL-EXCELLENT":tmpint(1)=7:swbreak
+				swend
+				//比較
+				if tmpint(0)<=tmpint(1) {
+					//結果の方が高い
+					switch tmpint(1)
+						case 0:MybestRecordBuf(ID_REC_CLEARTYPE)="":swbreak
+						case 1:MybestRecordBuf(ID_REC_CLEARTYPE)="FAILED":swbreak
+						case 2:MybestRecordBuf(ID_REC_CLEARTYPE)="ASSIST-CLEAR":swbreak
+						case 3:MybestRecordBuf(ID_REC_CLEARTYPE)="CLEAR":swbreak
+						case 4:MybestRecordBuf(ID_REC_CLEARTYPE)="EXPERT-CLEAR":swbreak
+						case 5:MybestRecordBuf(ID_REC_CLEARTYPE)="MADNESS-CLEAR":swbreak
+						case 6:MybestRecordBuf(ID_REC_CLEARTYPE)="FULLCOMBO":swbreak
+						case 7:MybestRecordBuf(ID_REC_CLEARTYPE)="ALL-EXCELLENT":swbreak
+					swend
+
+					//ゲージ記録
+					sdim src4BINHEX,350:sdim dest4BINHEX
+					repeat 350
+						poke src4BINHEX,cnt,gaugeCapture_value(cnt)
+					loop
+					ConvHEXenc dest4BINHEX,src4BINHEX,350
+					HTTPpostdata+"g64="+dest4BINHEX+"&"
+				} else {
+					//ゲージ記録
+					HTTPpostdata+"g64="+MybestRecordBuf(ID_REC_PACE_4BINHEX)+"&"
+				}
+
+			//クリアの種類
+			HTTPpostdata+"type="+MybestRecordBuf(ID_REC_CLEARTYPE)+"&"
+
+			//スコアのグラフ
+			if UpdateScoreFlag==FALSE {
+				HTTPpostdata+"s64="+MybestRecordBuf(ID_REC_SCORE_4BINHEX)+"&"
+			} else {
+				sdim src4BINHEX,4*objmax:sdim dest4BINHEX
+				repeat objmax
+					lpoke src4BINHEX,cnt*4,scoreCapture_value(cnt)
+				loop
+				ConvHEXenc dest4BINHEX,src4BINHEX,4*objmax
+				HTTPpostdata+"s64="+dest4BINHEX+"&"
+			}
+
+			//能力値
+			if double(MybestRecordBuf(ID_REC_AP))>curPfPoint {
+				HTTPpostdata+"ability="+MybestRecordBuf(ID_REC_AP)+"&"
+			} else {
+				HTTPpostdata+"ability="+curPfPoint+"&"
+			}
+
+			//自己ベストを更新している場合、送信
+			WebAPI_SendNewRecord HTTPpostdata
+			sdim HTTPpostdata
+
+			WebAPI_SendGlobalRanking GetChartInfo(META_UUID),curScore
+	return
+
+#global

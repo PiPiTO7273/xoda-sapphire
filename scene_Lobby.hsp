@@ -1,0 +1,381 @@
+
+#module _Lobby_
+
+	#enum ibg			=	0
+	#enum ibg_top
+	#enum iitem_freeplay
+	#enum iitem_challenge
+	#enum iitem_newsong
+	#enum iitem_library
+	#enum iitem_update
+	#enum iitem_store
+	#enum iitem_recommand
+	#enum iitem_tutorial
+	#enum iitem_clock
+	#enum iitem_review
+	#enum iitem_exit
+	#enum iitem_empty
+	#enum iwindow
+	#enum ibg_playerinfo
+
+	#enum fEOEXB16			=	0
+	#enum fEOEXB20
+	#enum fFAB50
+	#enum fNSCJM12
+	#enum fNSCJM15
+	#enum fNSCJM16
+	#enum fNSCJM20
+	#enum fNSCJM24
+	#enum fNSCJM32
+	#enum fPS14
+	#enum fPS16
+	#enum fPS18
+	#enum fPS20
+	#enum fPS24
+	#enum fPS80
+	#enum fSQNUM16
+	#enum fSQNUM24
+	#enum fSQNUM40
+
+	#deffunc LoadLobbyImages
+		DrawLoadScreen
+		dim hdximg
+		SetDXArchiveExtension"bin"
+		hdximg(ibg)=hdximg@(ibg_common_0)
+		hdximg(ibg_top)=LoadGraph("Data/bg_Lobby_Top.png")
+		hdximg(iitem_freeplay)=LoadGraph("Data/item_lobby_freeplay.png")
+		hdximg(iitem_challenge)=LoadGraph("Data/item_lobby_challenge.png")
+		hdximg(iitem_newsong)=LoadGraph("Data/item_lobby_newsong.png")
+		hdximg(iitem_library)=LoadGraph("Data/item_lobby_library.png")
+		hdximg(iitem_update)=LoadGraph("Data/item_lobby_update.png")
+		hdximg(iitem_store)=LoadGraph("Data/item_lobby_store.png")
+		hdximg(iitem_recommand)=LoadGraph("Data/item_lobby_recommand.png")
+		hdximg(iitem_tutorial)=LoadGraph("Data/item_lobby_tutorial.png")
+		hdximg(iitem_clock)=LoadGraph("Data/item_lobby_clock.png")
+		hdximg(iitem_review)=LoadGraph("Data/item_lobby_review.png")
+		hdximg(iitem_exit)=LoadGraph("Data/item_lobby_exit.png")
+		hdximg(iitem_empty)=LoadGraph("Data/item_lobby_empty.png")
+		hdximg(ibg_playerinfo)=LoadGraph("Data/bg_lobby_playerinfo.png")
+		hdximg(iwindow)=MakeScreen(1600,1284+100,TRUE)
+		return
+
+	//曲選択画面で使用するフォントの初期化
+	#deffunc InitLobbyFonts
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
+		hdxfont(fEOEXB20)=LoadFontDataToHandle("Data/eoexb20.bin")
+		hdxfont(fFAB50)=LoadFontDataToHandle("Data/fab50.bin")
+		hdxfont(fNSCJM12)=LoadFontDataToHandle("Data/nscjm12.bin")
+		hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
+		hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
+		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		hdxfont(fNSCJM24)=LoadFontDataToHandle("Data/nscjm24.bin")
+		hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
+		hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
+		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
+		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
+		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+		hdxfont(fPS24)=LoadFontDataToHandle("Data/ps24.bin")
+		hdxfont(fPS80)=LoadFontDataToHandle("Data/ps80.bin")
+		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
+		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
+
+		SetFontLineSpaceToHandle 26,hdxfont(fNSCJM20)
+	return
+
+	#deffunc StartLobby
+		dim SceneCount
+		dim RawWheelVal
+		dim WheelVal,4
+		dim ScrollEaseA,4
+		dim ScrollEaseB,4
+		dim OnScrollCount,4
+		dim RawWheelVal
+		dim bfRawWheelVal
+		dim RawWheelMove
+		dim PushButtonFlag
+		dim WindowScroll
+		dim ItemImgID
+		dim ItemDrawPosX
+		dim ItemDrawPosY
+		dim ItemWidth
+		dim ItemHeight
+		dim ItemLinked
+		dim bfActiveItemID
+		dim ActiveItemID
+		dim ActiveItemCount
+		dim DecideFlag
+		dim DecideCount
+
+		//項目ごとの位置やサイズなど
+		ItemImgID=iitem_freeplay,iitem_challenge,iitem_newsong,iitem_library,iitem_update,iitem_store,iitem_recommand,iitem_empty,iitem_empty,iitem_tutorial,iitem_clock,iitem_review,iitem_exit
+		ItemDrawPosX=0,710-160,1260-160,0,710-160,1260-160,0,710-160,1260-160,0,577-160,994-160,1410-160
+		ItemDrawPosY=0,0,0,612-264,612-264,612-264,960-264,960-264,960-264,1308-264,1308-264,1308-264,1308-264
+		ItemWidth=500,500,500,500,500,500,500,500,500,350,350,350,350
+		ItemHeight=308,308,308,308,308,308,308,308,308,240,240,240,240
+		ItemLinked=1,1,0,1,0,1,1,0,0,1,0,1,1
+		bfActiveItemID=-1
+		ActiveItemID=-1
+		PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+
+		//BGM再生
+		if BASS_ChannelIsActive(int(hcommonchannel@))!BASS_ACTIVE_PLAYING :PlaySE int(hcommonchannel@),0.65
+		return
+
+	#deffunc DrawLobby
+
+		//カーソル位置補正
+		dim CursorPosX:dim CursorPosY:dim MouseInput
+		MouseInput=GetMouseInput()
+		CursorPosX=int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@)))
+		CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
+		RawWheelVal=GetMouseWheelRotVol()
+		RawWheelMove=0
+		if RawWheelVal<0&bfRawWheelVal<0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if RawWheelVal>0&bfRawWheelVal>0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
+		bfRawWheelVal=RawWheelVal
+		PushButtonFlag=FALSE
+
+		//背景（動画）
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+		if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+
+		//項目更新
+			SetDrawScreen hdximg(iwindow)
+				ClearDrawScreen
+
+				/*DrawGraph 0,0,hdximg(iitem_freeplay),TRUE
+				DrawGraph 710-160,0,hdximg(iitem_challenge),TRUE
+				DrawGraph 1260-160,0,hdximg(iitem_newsong),TRUE
+				DrawGraph 0,612-264,hdximg(iitem_library),TRUE
+				DrawGraph 710-160,612-264,hdximg(iitem_update),TRUE
+				DrawGraph 1260-160,612-264,hdximg(iitem_store),TRUE
+				DrawGraph 0,960-264,hdximg(iitem_recommand),TRUE
+				DrawGraph 710-160,960-264,hdximg(iitem_empty),TRUE
+				DrawGraph 1260-160,960-264,hdximg(iitem_empty),TRUE
+				DrawGraph 0,1308-264,hdximg(iitem_tutorial),TRUE
+				DrawGraph 577-160,1308-264,hdximg(iitem_clock),TRUE
+				DrawGraph 994-160,1308-264,hdximg(iitem_review),TRUE
+				DrawGraph 1410-160,1308-264,hdximg(iitem_exit),TRUE*/
+
+				if DecideFlag==FALSE :ActiveItemID=-1
+				repeat length(ItemImgID)
+					//判定
+					if SceneCount<25+2*cnt+25|DecideFlag==TRUE :continue
+					if insquare(CursorPosX,CursorPosY,160+ItemDrawPosX(cnt),ItemDrawPosY(cnt)+WindowScroll,160+ItemDrawPosX(cnt)+ItemWidth(cnt),ItemDrawPosY(cnt)+ItemHeight(cnt)+WindowScroll) {
+						ActiveItemID=cnt
+						if bfActiveItemID!ActiveItemID {
+							ActiveItemCount=0
+							PlaySE int(hcommonsech@(sndCursor@)),0.35
+						}
+						if (MouseInput&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE&ItemLinked(ActiveItemID)==TRUE {
+							DecideCount=0:DecideFlag=TRUE
+							PlaySE int(hcommonsech@(sndDecide@)),1.0
+						}
+					}
+				loop
+				//項目
+				repeat length(ItemImgID)
+					//出現
+					setease 0.7,1,ease_cubic_out
+					EaseWidth=int(double(ItemWidth(cnt))*geteasef(SceneCount-40-2*cnt,25))
+					EaseHeight=int(double(ItemHeight(cnt))*geteasef(SceneCount-40-2*cnt,25))
+					setease 150,256,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-40-2*cnt,25)
+					if SceneCount<40+2*cnt+1 {
+						continue
+					}
+
+					//アクティブ
+					if (SceneCount>25+2*cnt)&ActiveItemID==cnt {
+						setease 1,0.95,ease_cubic_out
+						EaseWidth=int(double(ItemWidth(cnt))*geteasef(ActiveItemCount,8))
+						EaseHeight=int(double(ItemHeight(cnt))*geteasef(ActiveItemCount,8))
+						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+					}
+
+					//決定アクション後
+					if DecideFlag==TRUE {
+						setease 1,0.5,ease_cubic_out
+						EaseWidth=int(double(ItemWidth(cnt))*geteasef(DecideCount-2*cnt,25))
+						EaseHeight=int(double(ItemHeight(cnt))*geteasef(DecideCount-2*cnt,25))
+						setease 256,0,ease_cubic_out
+						SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount-2*cnt,25)
+					}
+
+					//描画
+					EasePosX=ItemDrawPosX(cnt)+ItemWidth(cnt)/2-EaseWidth/2
+					EasePosY=ItemDrawPosY(cnt)+ItemHeight(cnt)/2-EaseHeight/2
+					DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ItemImgID(cnt)),TRUE
+
+					if ItemImgID(cnt)==iitem_clock&SceneCount>25+2*cnt+25 {
+						//時計
+						DrawStringToHandle 607-160,1352-264,strf("%d:%02d",gettime(4),gettime(5)),Getcolor(0,0,0),hdxfont(fPS80)
+						DrawStringToHandle 607-160,1456-264,strf("%d/%d/%d",gettime(0),gettime(1),gettime(3))+" "+GetDaysoftheWeek(2),Getcolor(0,0,0),hdxfont(fPS24)
+						DrawStringToHandle 607-160,1488-264,GetGreetingWord(),Getcolor(0,0,0),hdxfont(fNSCJM20)
+					}
+				loop
+
+			SetDrawScreen hdximg@(iScene)
+
+		//項目描画
+
+			if RawWheelMove<0 {
+				ScrollEaseA=ScrollEaseB
+				ScrollEaseB-80
+				OnScrollCount=0
+			}
+			if RawWheelMove>0 {
+				ScrollEaseA=ScrollEaseB
+				ScrollEaseB+80
+				OnScrollCount=0
+			}
+			if 264+ScrollEaseB+1284+100<BufHeight@ :ScrollEaseB=-264-1284-100+BufHeight@
+			if ScrollEaseB>0 :ScrollEaseB=0
+
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			setease ScrollEaseA,ScrollEaseB,ease_cubic_out
+			WindowScroll=264+getease(OnScrollCount,10)
+			DrawGraph 160,WindowScroll,hdximg(iwindow),TRUE
+
+		//ナビゲーション&上部パネル
+		if DecideFlag==FALSE {
+			setease -232,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,getease(SceneCount,20),hdximg(ibg_top),TRUE
+		} else {
+			setease 0,-232,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 0,getease(DecideCount,20),hdximg(ibg_top),TRUE
+		}
+
+		//サーバー名
+		if SceneCount>20&DecideFlag==FALSE {
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-20,10)
+			DrawStringToHandle 190,155,LoginUserInfo@(ID_HOST@),Getcolor(0,0,0),hdxfont(fPS16)
+		}
+
+		//プレイヤー情報
+		if SceneCount-20>0&DecideFlag==FALSE {
+			setease -41-108,0,ease_cubic_out
+			EasePosY=getease(SceneCount-20,20)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1170,41+EasePosY,hdximg(ibg_playerinfo),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				//名前
+				DrawStringToHandle 1315,54+EasePosY,RegName@portalsync,Getcolor(0,0,0),hdxfont(fPS24)
+				//レベル
+				DrawStringToHandle 1315,86+EasePosY,"Lv. "+RegLev@portalsync,Getcolor(0,0,0),hdxfont(fPS16)
+				//総合能力値
+				DrawStringToHandle 1397,109+EasePosY,strf("%.2f",RegPfPoint@portalsync),Getcolor(0,0,0),hdxfont(fPS16)
+				//経験値
+				DrawStringToHandle 1450,86+EasePosY,"EXP "+RegEXP@portalsync+" / "+lpeek(expTablebuf@,RegLev@portalsync*4),Getcolor(0,0,0),hdxfont(fPS16)
+				DrawBox 1450,109+EasePosY,1450+int(100.0*(double(RegEXP@portalsync)/double(lpeek(expTablebuf@,RegLev@portalsync*4)))),109+8+EasePosY,$3FECF2,TRUE
+		}
+		if SceneCount-30>0&DecideFlag==FALSE {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			setease 0,125,ease_cubic_out:EaseWidth=getease(SceneCount-30,15)
+			setease 0,100,ease_cubic_out:EaseHeight=getease(SceneCount-30,15)
+			DrawExtendGraph 1170+125/2-EaseWidth/2,40+100/2-EaseHeight/2,1170+125/2+EaseWidth/2,40+100/2+EaseHeight/2,hCharImg@charicon(RegCharID@portalsync),TRUE
+		}
+
+		//ステータス
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+		DrawStringToHandle 24,1048,"SAPPHIRE - Lobby",GetColor(230,230,230),hdxfont(fPS20)
+		DrawStringToHandle 458,1050,"x"+NumTickets@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
+		DrawStringToHandle 670,1050,"x"+NumFragments@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
+		DrawStringToHandle 814,1050,str(NumLilly@portalsync)+" Lilly",Getcolor(255,255,255),hdxfont(fPS16)
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 300,1048,hdximg@(iStatus_Ticket),TRUE
+		DrawGraph 560,1048,hdximg@(iStatus_Fragment),TRUE
+		DrawGraph 780,1048,hdximg@(iStatus_Lilly),TRUE
+
+		DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
+		if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,10
+			DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
+			if GetMouseInput()&MOUSE_INPUT_LEFT {
+				goto*Exit@
+			}
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+
+		//コメント
+		if insquare(CursorPosX,CursorPosY,1635,57,1635+140,57+30) {
+			DrawGraph 1635,57,hdximg@_musicselect_(ilayer_playerinfo_button@_musicselect_),TRUE
+			if (MouseInput&MOUSE_INPUT_LEFT) {
+				OpenEditCommentDialog
+				SetDrawScreen hdximg(ilayer_all)
+			}
+		}
+
+		//プリローダー
+		if SceneCount>40 {
+			setease 400,0,ease_cubic_out
+			EaseWidth=getease(SceneCount-40,20)
+		} else :EaseWidth=400
+		if DecideFlag==TRUE {
+			setease 0,400,ease_cubic_out
+			EaseWidth=getease(DecideCount,20)
+		}
+		DrawExtendGraph BufWidth@/2-EaseWidth/2,BufHeight@/2-EaseWidth/2,BufWidth@/2+EaseWidth/2,BufHeight@/2+EaseWidth/2,hdximg_arr_preloader_2@(FrameCount@\74),TRUE
+
+		//ロード処理
+			if InitLoadFlag@==FALSE {
+				switch SceneCount-20
+					case 0:LoadMusicSelectImages:swbreak
+					case 1:LoadMusicSelectSounds:swbreak
+					case 2:LoadGamePlayImages:swbreak
+					case 3:LoadPartnerIcon:swbreak
+					case 4:InitGamePlaySounds:swbreak
+					case 5:LoadKeyConfigImages:swbreak
+					case 6:LoadResultImages:swbreak
+					case 7:LoadResultSounds:swbreak
+					case 8:LoadPartnerSelectImages:swbreak
+					case 9:LoadChallengeModeMap"Data/map-challenge.bin":swbreak
+					case 10:InitLoadFlag@=TRUE:swbreak
+				swend
+			}
+
+		//カウンタ
+		AddCount OnScrollCount
+		AddCount SceneCount
+		AddCount ActiveItemCount
+		AddCount DecideCount
+		bfActiveItemID=ActiveItemID
+
+		if SceneCount==10 :PlaySE int(hcommonsech@(vocLobby@)),1.0
+
+		//分散読み込み
+		if ActiveItemID==0&DecideCount==29 :PlaySE int(hcommonsech@(vocWait@)),1.0
+		if ActiveItemID==0&DecideCount==30 :IRsync
+		if ActiveItemID==0&DecideCount==31 :ScanAllPlaylist
+		if ActiveItemID==0&DecideCount==32 :SetFilterRefDB ID_CAT_ALL
+		if ActiveItemID==0&DecideCount==33 :InitMusicSelectFonts
+
+		//シーン移行処理
+		if DecideCount>25+2*length(ItemImgID)+1&DecideFlag==TRUE {
+			switch ActiveItemID
+				case 0
+					InitScene ID_MUSICSELECT
+					StartMusicSelect_WithoutDarkness
+				swbreak
+				case 12
+					goto*Exit@
+				swbreak
+				default
+					goto*Exit@
+				swbreak
+			swend
+		}
+
+		return
+
+#global

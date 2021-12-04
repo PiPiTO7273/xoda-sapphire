@@ -1,0 +1,397 @@
+
+#module _partnerselect_
+
+	#enum ibg		=	0
+	#enum ibg_window
+	#enum iicon_lock
+	#enum iicon_buy
+	#enum ilayer_button
+	#enum inav
+	#enum iicon_lilly
+	#enum ibg_playerinfo
+	#enum ilayer_all
+	#enum idialog_confirm
+	#enum idialog_process
+	#enum idialog_success
+	#enum idialog_error
+	#enum idialog_button
+
+	#enum fEOEXB16			=	0
+	#enum fEOEXB20
+	#enum fFAB50
+	#enum fNSCJM12
+	#enum fNSCJM15
+	#enum fNSCJM16
+	#enum fNSCJM20
+	#enum fNSCJM24
+	#enum fNSCJM32
+	#enum fPS14
+	#enum fPS16
+	#enum fPS18
+	#enum fPS20
+	#enum fPS24
+	#enum fSQNUM16
+	#enum fSQNUM24
+	#enum fSQNUM40
+
+	#enum ID_NODIALOG		=	0
+	#enum ID_CONFIRM
+	#enum ID_PROCESS
+	#enum ID_SUCCESS
+	#enum ID_ERROR
+	#enum ID_CONFIRM_CLOSE
+	#enum ID_PROCESS_CLOSE
+	#enum ID_SUCCESS_CLOSE
+	#enum ID_ERROR_CLOSE
+
+	#deffunc LoadPartnerSelectImages
+		;DrawLoadScreen
+		dim hdximg
+		SetDXArchiveExtension"bin"
+		hdximg(ibg)=hdximg@(ibg_common_0)
+		hdximg(ibg_window)=LoadGraph("Data/bg_partnerselect.png")
+		hdximg(iicon_lock)=LoadGraph("Data/Icon_Partner_Lock.png")
+		hdximg(iicon_buy)=LoadGraph("Data/Icon_Partner_Buy.png")
+		hdximg(ilayer_button)=LoadGraph("Data/layer_partnerselect_button.png")
+		hdximg(inav)=LoadGraph("Data/Nav_PartnerSelect.png")
+		hdximg(iicon_lilly)=LoadGraph("Data/Icon_Lilly_40x40.png")
+		hdximg(ibg_playerinfo)=LoadGraph("Data/bg_partnerselect_playerinfo.png")
+		hdximg(idialog_confirm)=LoadGraph("Data/layer_partnerselect_confirm.png")
+		hdximg(idialog_process)=LoadGraph("Data/layer_partnerselect_process.png")
+		hdximg(idialog_success)=LoadGraph("Data/layer_partnerselect_success.png")
+		hdximg(idialog_error)=LoadGraph("Data/layer_partnerselect_error.png")
+		hdximg(idialog_button)=LoadGraph("Data/layer_partnerselect_dialogbutton.png")
+		hdximg(ilayer_all)=MakeScreen(BufWidth@,BufHeight@,TRUE)
+	return
+
+	#deffunc LoadPartnerSelectFonts
+		;DrawLoadScreen
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
+		hdxfont(fEOEXB20)=LoadFontDataToHandle("Data/eoexb20.bin")
+		hdxfont(fFAB50)=LoadFontDataToHandle("Data/fab50.bin")
+		hdxfont(fNSCJM12)=LoadFontDataToHandle("Data/nscjm12.bin")
+		hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
+		hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
+		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		hdxfont(fNSCJM24)=LoadFontDataToHandle("Data/nscjm24.bin")
+		hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
+		hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
+		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
+		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
+		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+		hdxfont(fPS24)=LoadFontDataToHandle("Data/ps24.bin")
+		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
+		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
+
+		SetFontLineSpaceToHandle 20,hdxfont(fNSCJM16)
+	return
+
+	#deffunc StartPartnerSelect
+		dim DecideCount
+		dim SceneCount
+		dim DialogOpenID
+		dim DialogOpenFlag
+		dim DialogOpenCount
+		dim DialogResID
+		DecideCount=-1
+		DialogOpenID=ID_NODIALOG
+	return
+
+	#deffunc DrawPartnerSelect
+
+		//カーソル位置補正
+		dim CursorPosX:dim CursorPosY:dim MouseInput
+		MouseInput=GetMouseInput()
+		CursorPosX=int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@)))
+		CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
+
+		//背景（動画）
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+		if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+
+		SetDrawScreen hdximg(ilayer_all)
+		ClearDrawScreen
+
+		//背景
+		setease 1.2,1,ease_cubic_out
+		EaseWidth=int(double(1558)*geteasef(SceneCount,20))
+		EaseHeight=int(double(836)*geteasef(SceneCount,20))
+		EasePosX=181+1558/2-EaseWidth/2
+		EasePosY=164+836/2-EaseHeight/2
+		setease 150,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,15)
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_window),TRUE
+
+		//ナビゲーション
+		setease 150,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,25)
+		setease -128,0,ease_cubic_out
+		DrawGraph 48+getease(SceneCount,25),32,hdximg(inav),TRUE
+
+		//プレイヤー情報
+		setease 150,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,25)
+		setease 128,0,ease_cubic_out
+		DrawGraph 1170+getease(SceneCount,25),40,hdximg(ibg_playerinfo),TRUE
+
+		setease 0,256,ease_linear
+		EaseAlpha=getease(SceneCount-15,10)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+			DrawExtendGraph 1170,40,1170+125,40+100,hCharImg@charicon(RegCharID@portalsync),TRUE
+			DrawGraph 1630,70,hdximg(iicon_lilly),TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
+			//名前
+			DrawStringToHandle 1315,54,RegName@portalsync,Getcolor(0,0,0),hdxfont(fPS24)
+			//レベル
+			DrawStringToHandle 1315,86,"Lv. "+RegLev@portalsync,Getcolor(0,0,0),hdxfont(fPS16)
+			//総合能力値
+			DrawStringToHandle 1397,109,strf("%.2f",RegPfPoint@portalsync),Getcolor(0,0,0),hdxfont(fPS16)
+			//経験値
+			DrawStringToHandle 1450,86,"EXP "+RegEXP@portalsync+" / "+lpeek(expTablebuf@,RegLev@portalsync*4),Getcolor(0,0,0),hdxfont(fPS16)
+			DrawBox 1450,109,1450+int(100.0*(double(RegEXP@portalsync)/double(lpeek(expTablebuf@,RegLev@portalsync*4)))),109+8,$3FECF2,TRUE
+			//Lilly
+			DrawStringToHandle 1686,76,str(NumLilly@portalsync)+" Lilly 所持",0,hdxfont(fNSCJM20)
+
+		//パートナーアイコン
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		dim CharColumnID:dim CharLineID
+		repeat CharMax@charicon
+
+			setease 0,1,ease_cubic_out
+			EaseWidth=int(125.0*geteasef(SceneCount-15-cnt,15))
+			EaseHeight=int(100.0*geteasef(SceneCount-15-cnt,15))
+			EasePosX=856+145*CharColumnID+125/2-EaseWidth/2
+			EasePosY=324+111*CharLineID+100/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hCharImg@charicon(cnt),TRUE
+
+			//マウスホバー
+			if insquare(CursorPosX,CursorPosY,EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight)&DialogOpenID==ID_NODIALOG {
+				RegCharID@portalsync=cnt
+				if CharUnlockFlag@charicon(cnt)==FALSE {
+					DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iicon_buy),TRUE
+				}
+
+				DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ilayer_button),TRUE
+
+				if (MouseInput&MOUSE_INPUT_LEFT)&DecideCount==-1 {
+					//クリック
+					if CharUnlockFlag@charicon(cnt)==FALSE {
+						if NumLilly@portalsync<CharPrice@charicon(RegCharID@portalsync) {
+							PlaySE int(hcommonsech@(sndError@)),0.9
+							DialogOpenID=ID_ERROR:DialogOpenCount=0:DialogOpenFlag=0
+						} else {
+							PlaySE int(hcommonsech@(sndCursor@)),0.9
+							DialogOpenID=ID_CONFIRM:DialogOpenCount=0:DialogOpenFlag=0
+						}
+					} else {
+						PlaySE int(hcommonsech@(sndDecide@)),0.9
+						DecideCount=0
+					}
+				}
+			} else {
+				if CharUnlockFlag@charicon(cnt)==FALSE {
+					DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(iicon_lock),TRUE
+				}
+			}
+
+			CharColumnID++
+			if CharColumnID>=6 :CharColumnID=0:CharLineID++
+		loop
+
+		//プレビュー画像
+		if SceneCount>10 {
+			setease 100,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,20)
+			setease -128,0,ease_cubic_out
+			if CharUnlockFlag@charicon(RegCharID@portalsync) {
+				DrawGraph 181+getease(SceneCount-10,20),200,hCharFull@charicon(RegCharID@portalsync),TRUE
+			} else {
+				DrawGraph 181+getease(SceneCount-10,20),200,hCharSil@charicon(RegCharID@portalsync),TRUE
+			}
+		}
+
+		//パートナー情報
+		setease 0,256,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-10,15)
+			//名前
+			DrawStringToHandle 881,910,CharName@charicon(RegCharID@portalsync),$FFFFFF,hdxfont(fNSCJM32)
+			//読み
+			DrawStringToHandle 881,960,CharName_Eng@charicon(RegCharID@portalsync),$FFFFFF,hdxfont(fPS16)
+
+		//Lilly価格表示・パートナー決定
+		if CharUnlockFlag@charicon(RegCharID@portalsync) {
+			DrawStringToHandle 1430,930,"クリックでパートナーを決定します。",$00FFB9,hdxfont(fNSCJM16)
+		} else {
+			DrawGraph 1520,923,hdximg(iicon_lilly),TRUE
+			DrawStringToHandle 1575,928,str(CharPrice@charicon(RegCharID@portalsync)),$FFFFFF,hdxfont(fPS24)
+		}
+
+		SetDrawScreen hdximg@(iScene)
+
+		setease 1,1.2,ease_cubic_out
+		dim EasePosX:dim EasePosY:dim EaseWidth:dim EaseHeight
+		EaseWidth=int(double(BufWidth@)*geteasef(DecideCount+1,20))
+		EaseHeight=int(double(BufHeight@)*geteasef(DecideCount+1,20))
+		EasePosX=BufWidth@/2-EaseWidth/2:EasePosY=BufHeight@/2-EaseHeight/2
+		setease 256,0,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount+1,20)
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ilayer_all),TRUE
+
+		//ダイアログ
+		if DialogOpenID!ID_NODIALOG {
+			tmpint=0
+			switch DialogOpenID
+				case ID_CONFIRM:tmpint=hdximg(idialog_confirm):swbreak
+				case ID_PROCESS:tmpint=hdximg(idialog_process):swbreak
+				case ID_SUCCESS:tmpint=hdximg(idialog_success):swbreak
+				case ID_ERROR:tmpint=hdximg(idialog_error):swbreak
+			swend
+			if DialogOpenFlag==0 {
+				setease 0.7,1,ease_cubic_out
+				dim EasePosX:dim EasePosY:dim EaseWidth:dim EaseHeight
+				EaseWidth=int(double(720)*geteasef(DialogOpenCount,15))
+				EaseHeight=int(double(512)*geteasef(DialogOpenCount,15))
+				EasePosX=921+720/2-EaseWidth/2:EasePosY=344+512/2-EaseHeight/2
+				setease 100,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DialogOpenCount,15)
+			} else {
+				setease 1,0,ease_cubic_out
+				dim EasePosX:dim EasePosY:dim EaseWidth:dim EaseHeight
+				EaseWidth=int(double(720)*geteasef(DialogOpenCount,15))
+				EaseHeight=int(double(512)*geteasef(DialogOpenCount,15))
+				EasePosX=921+720/2-EaseWidth/2:EasePosY=344+512/2-EaseHeight/2
+				setease 256,0,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DialogOpenCount,15)
+			}
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,tmpint,TRUE
+
+			//ボタン判定
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(DialogOpenCount-10,10)
+			switch DialogOpenID
+				case ID_CONFIRM	//購入確認
+					if DialogOpenFlag==0 {
+						DrawStringToHandle 1300,581,str(NumLilly@portalsync)+" Lilly",0,hdxfont(fPS24)
+						DrawStringToHandle 1300,622,str(NumLilly@portalsync-CharPrice@charicon(RegCharID@portalsync))+" Lilly",$28B9A1,hdxfont(fPS24)
+						if insquare(CursorPosX,CursorPosY,1115,706,1115+150,706+40) {		//はい
+							DrawGraph 1115,706,hdximg(idialog_button),TRUE
+							if (MouseInput&MOUSE_INPUT_LEFT) {
+								PlaySE int(hcommonsech@(sndDecide@)),0.9
+								DialogOpenCount=0:DialogOpenFlag=1:DialogResID=ID_PROCESS
+							}
+						}
+						if insquare(CursorPosX,CursorPosY,1297,706,1297+150,706+40) {		//いいえ
+							DrawGraph 1297,706,hdximg(idialog_button),TRUE
+							if (MouseInput&MOUSE_INPUT_LEFT) {
+								PlaySE int(hcommonsech@(sndCancel@)),0.9
+								DialogOpenCount=0:DialogOpenFlag=1:DialogResID=ID_NODIALOG
+							}
+						}
+					}
+				swbreak
+				case ID_PROCESS	//処理中
+					if DialogOpenFlag==0&DialogOpenCount==16 {
+						NumLilly@portalsync-CharPrice@charicon(RegCharID@portalsync)
+						CharUnlockFlag@charicon(RegCharID@portalsync)=TRUE
+						SyncPartnerInfo
+						WebAPI_SendProfile"XODA.PARTNER.UNLOCK."+RegCharID@portalsync,"1"
+						DialogOpenCount=0:DialogOpenFlag=1:DialogResID=ID_SUCCESS
+					}
+				swbreak
+				case ID_ERROR		//購入エラー（残高不足）
+					if DialogOpenFlag==0 {
+						DrawStringToHandle 1330,581,str(CharPrice@charicon(RegCharID@portalsync))+" Lilly",0,hdxfont(fPS24)
+						DrawStringToHandle 1330,622,str((NumLilly@portalsync-CharPrice@charicon(RegCharID@portalsync))*-1)+" Lilly",$B92862,hdxfont(fPS24)
+					}
+					if insquare(CursorPosX,CursorPosY,1206,716,1206+150,716+40)&DialogOpenFlag==0 {		//OK
+						DrawGraph 1206,716,hdximg(idialog_button),TRUE
+						if (MouseInput&MOUSE_INPUT_LEFT) {
+							PlaySE int(hcommonsech@(sndCancel@)),0.9
+							DialogOpenCount=0:DialogOpenFlag=1:DialogResID=ID_NODIALOG
+						}
+					}
+				swbreak
+				case ID_SUCCESS	//完了
+					if DialogOpenFlag==0 {
+						DrawStringToHandle 1340,581,str(CharPrice@charicon(RegCharID@portalsync))+" Lilly",0,hdxfont(fPS24)
+						DrawStringToHandle 1340,620,CharName@charicon(RegCharID@portalsync),0,hdxfont(fNSCJM24)
+						if insquare(CursorPosX,CursorPosY,1206,706,1206+150,706+40) {
+							DrawGraph 1206,706,hdximg(idialog_button),TRUE
+							if (MouseInput&MOUSE_INPUT_LEFT) {
+								PlaySE int(hcommonsech@(sndDecide@)),0.9
+								PlaySE int(hcommonsech@(vocBuy@)),1.0
+								DialogOpenCount=0:DialogOpenFlag=1:DialogResID=ID_NODIALOG
+							}
+						}
+					}
+				swbreak
+			swend
+
+			if DialogOpenFlag==1&DialogOpenCount>15 {
+				DialogOpenID=DialogResID:DialogOpenCount=0:DialogOpenFlag=0
+			}
+
+			AddCount DialogOpenCount
+		}
+
+		//ステータス
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+		DrawStringToHandle 24,1048,"SAPPHIRE - Partner Select",GetColor(230,230,230),hdxfont(fPS20)
+		DrawStringToHandle 458,1050,"x"+NumTickets@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
+		DrawStringToHandle 670,1050,"x"+NumFragments@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
+		DrawStringToHandle 814,1050,str(NumLilly@portalsync)+" Lilly",Getcolor(255,255,255),hdxfont(fPS16)
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 300,1048,hdximg@(iStatus_Ticket),TRUE
+		DrawGraph 560,1048,hdximg@(iStatus_Fragment),TRUE
+		DrawGraph 780,1048,hdximg@(iStatus_Lilly),TRUE
+
+		DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
+		if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,10
+			DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
+			if GetMouseInput()&MOUSE_INPUT_LEFT {
+				goto*Exit@
+			}
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+
+		//プリローダー
+		if DecideCount!-1 {
+			setease 0,400,ease_cubic_out
+			EaseWidth=getease(DecideCount,20)
+		} else {
+			setease 400,0,ease_cubic_out
+			EaseWidth=getease(SceneCount-30,20)
+		}
+		DrawExtendGraph BufWidth@/2-EaseWidth/2,BufHeight@/2-EaseWidth/2,BufWidth@/2+EaseWidth/2,BufHeight@/2+EaseWidth/2,hdximg_arr_preloader_2@(FrameCount@\74),TRUE
+
+		AddCount SceneCount
+
+		if SceneCount==10 :PlaySE int(hcommonsech@(vocPartnerSelect@)),1.0
+		
+		if DecideCount!-1 :AddCount DecideCount
+		if DecideCount>20 {
+			//次へ
+			SyncPartnerInfo
+			InitScene ID_MUSICSELECT
+			;LoadMusicSelectImages
+			;LoadMusicSelectSounds
+			InitMusicSelectFonts
+			;IRsync
+			;ScanAllPlaylist
+			StartMusicSelect_WithoutDarkness
+		}
+	return
+
+	#deffunc SyncPartnerInfo
+		WebAPI_SendProfile"XODA.PARTNER",str(RegCharID@portalsync)
+		WebAPI_SendProfile"XODA.NUMLILLY",str(NumLilly@portalsync)
+		return
+
+#global

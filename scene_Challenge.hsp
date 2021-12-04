@@ -1,0 +1,7 @@
+
+#module _challenge_
+
+	#deffunc LoadChallengeImages
+		return
+
+#global

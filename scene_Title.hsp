@@ -1,0 +1,56 @@
+
+#module _title_
+
+#enum ibg		=	0
+
+#deffunc LoadTitleImages
+	dim hdximg
+	SetDXArchiveExtension"bin"
+	hdximg(ibg)=LoadGraph("Data/bg_title.mp4")
+	return
+
+#deffunc LoadTitleFonts
+	return
+
+#deffunc StartTitle
+	dim SceneCount
+	dim SceneTransCount:SceneTransCount=-1
+
+	PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+	return
+
+#deffunc DrawTitle
+
+	SetDrawMode DX_DRAWMODE_BILINEAR
+
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+
+		if GetMouseInput()&MOUSE_INPUT_LEFT&SceneTransCount==-1 {
+			SceneTransCount=0
+		}
+
+		if SceneCount<15 {
+			setease 256,0,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,15)
+			DrawBox 0,0,BufWidth@,BufHeight@,0,TRUE
+		}
+
+		if SceneTransCount!-1 {
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneTransCount,15)
+			DrawBox 0,0,BufWidth@,BufHeight@,0,TRUE
+		}
+		if SceneTransCount!-1 :AddCount SceneTransCount
+		if SceneTransCount>20 {
+			InitScene ID_LOBBY
+			LoadLobbyImages
+			InitLobbyFonts
+			StartLobby
+		}
+
+		AddCount SceneCount
+
+	return
+
+#global
