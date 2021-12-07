@@ -198,6 +198,13 @@
 		if gettime(4)>=19&gettime(4)<=23 :tmpstr="‚±‚ñ‚Î‚ñ‚Í"
 		if gettime(1)==1&gettime(3)==1 :tmpstr="‚ ‚¯‚Ü‚µ‚Ä‚¨‚ß‚Å‚Æ‚¤‚²‚´‚¢‚Ü‚·"
 		return tmpstr
+
+	#defcfunc GetCSVcolumn str _org,int _id,str _spt
+		sdim tmpstr
+		tmpstr=_org
+		split tmpstr,_spt,tmpstr
+		if length(tmpstr)<=_id :return""
+		return tmpstr(_id)
 #global
 InitIntArray
 InitStrArray

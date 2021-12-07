@@ -15,6 +15,8 @@
 		dim NumTickets@portalsync	//チャレンジチケットの所持数
 		dim NumLilly@portalsync		//Lilly(通貨単位)
 		dim PartnerCharID@portalsync	//パートナー
+		dim ChapterMapID@portalsync	//チャプターマップID
+		dim ChapterStepID@portalsync	//チャプターステップID
 
 		ddim AddSpeed@,1			//流れてくる音符の速さ
 		dim GaugeType@				//ゲージの種類
@@ -40,6 +42,8 @@
 		musicselect_LevelID@=0
 		NumFragments@portalsync=0
 		NumTickets@portalsync=0
+		ChapterMapID@portalsync=0
+		ChapterStepID@portalsync=0
 
 		AddSpeed@=1.0
 		GaugeType@=GAUGE_NORMAL
@@ -80,7 +84,7 @@
 	return
 
 	//WebAPIを初期化
-	#deffunc WebAPI_Init
+	/*#deffunc WebAPI_Init
 		if OfflineMode :return
 		newcom objVBsc,"ScriptControl"
 		objVBsc("Language")="VBScript"
@@ -114,6 +118,7 @@
 		strrep VBscript_res,AsciiCode_CR,""
 		strrep VBscript_res,"</br>","\n"
 	return VBscript_res
+	*/
 
 	//ユーザー情報を登録
 	#const global ID_HOST	0
@@ -132,7 +137,6 @@
 	//ユーザープロファイルを取得
 	#defcfunc WebAPI_GetProfile
 		sdim WebAPI_resraw
-		WebAPI_Init
 		WebAPI_resraw=WebAPI_Get("http://"+WebAPI_HostAddress+"/API-GetProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetProfile")+"&decode="+WebAPI_DecodeKey+"&id="+RegName@portalsync+"&password="+RegAuth@portalsync)
 		switch WebAPI_resraw
 			case"ERROR_AUTH_APIKEY"
@@ -154,10 +158,8 @@
 	#deffunc WebAPI_SyncProfile
 		sdim syncINIdata
 		syncINIdata=WebAPI_GetProfile()
-		if syncINIdata==""&OfflinePass==FALSE {
-			gosub*ExitProg@
+		if syncINIdata==""&OfflinePass@==FALSE {
 			ShowErrorMsg"ERROR_SVC_CONNECTION"
-			goto*Exit@
 		}
 
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LEVEL")=="" :syncINIdata+"XODA.LEVEL=1\n"
@@ -218,6 +220,12 @@
 
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.NUMLILLY")=="" :syncINIdata+"XODA.NUMLILLY=0\n"
 		NumLilly@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.NUMLILLY"))+ExtraLilly
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.CHAPTERMAPID")=="" :syncINIdata+"XODA.CHAPTERMAPID=0\n"
+		ChapterMapID@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.CHAPTERMAPID"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.CHAPTERSTEPID")=="" :syncINIdata+"XODA.CHAPTERSTEPID=0\n"
+		ChapterStepID@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.CHAPTERSTEPID"))
 	return
 
 	#deffunc GetPartnerCharUnlockData
@@ -256,7 +264,8 @@
 	#enum global ID_REC_DATE
 	#enum global ID_REC_AP
 	#defcfunc WebAPI_GetRecord
-		WebAPI_Init:CheckNetworkConnection
+		if OfflinePass@ :return""
+		CheckNetworkConnection
 	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-GetRecord.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetRecord")+"&name="+RegName@portalsync)
 	#deffunc WebAPI_SyncRecord str _raw,str _uuid,array _struct
 		sdim WebAPI_resraw
@@ -281,8 +290,9 @@
 
 	//スコアデータを送信
 	#deffunc WebAPI_SendNewRecord str _data
+		if OfflinePass@ :return
 		sdim WebAPI_resraw
-		WebAPI_Init:CheckNetworkConnection
+		CheckNetworkConnection
 		WebAPI_resraw=WebAPI_Post("http://"+WebAPI_HostAddress+"/API-SendNewRecord.php",_data)
 		switch WebAPI_resraw
 			case"ERROR_AUTH_APIKEY"
@@ -302,21 +312,25 @@
 
 	//世界ランキングを取得
 	#defcfunc WebAPI_GetGlobalRanking
-		WebAPI_Init:CheckNetworkConnection
+		if OfflinePass@ :return""
+		CheckNetworkConnection
 	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-GetGlobalRanking.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetGlobalRanking"))
 
 	//世界ランキングにスコアを送信
 	#deffunc WebAPI_SendGlobalRanking str _uuid,int _score
-		WebAPI_Init:CheckNetworkConnection
+		if OfflinePass@ :return""
+		CheckNetworkConnection
 	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-SendGlobalRanking.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendGlobalRanking")+"&name="+RegName@portalsync+"&id="+_uuid+"&score="+_score)
 
 	//プロフィールを保存
 	#deffunc WebAPI_SendProfile str _obj,str _val
-		WebAPI_Init:CheckNetworkConnection
+		if OfflinePass@ :return""
+		CheckNetworkConnection
 	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+RegName@portalsync+"&password="+RegAuth@portalsync+"&decode="+WebAPI_DecodeKey+"&object="+_obj+"&value="+_val)
 
 	//プロフィールをすべて保存
 	#deffunc SendAllProfile
+		if OfflinePass@ :return
 		WebAPI_SendProfile"XODA.LEVEL",str(RegLev@portalsync)
 		WebAPI_SendProfile"XODA.EXP",str(RegEXP@portalsync)
 		WebAPI_SendProfile"XODA.RATE",str(RegPfPoint@portalsync)
@@ -335,6 +349,8 @@
 		WebAPI_SendProfile"XODA.NUMFRAGMENTS",str(NumFragments@portalsync)
 		WebAPI_SendProfile"XODA.NUMTICKETS",str(NumTickets@portalsync)
 		WebAPI_SendProfile"XODA.NUMLILLY",str(NumLilly@portalsync)
+		WebAPI_SendProfile"XODA.CHAPTERMAPID",str(ChapterMapID@portalsync)
+		WebAPI_SendProfile"XODA.CHAPTERSTEPID",str(ChapterStepID@portalsync)
 	return
 
 	//接続ハッシュ取得
@@ -345,7 +361,6 @@
 	#deffunc CheckNetworkConnection
 		if WebAPI_Connection() :return
 		ShowErrorMsg"ERROR_SVC_CONNECTION"
-		goto*ExitProg@
 		return
 
 #global

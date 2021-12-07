@@ -29,4 +29,90 @@
 		RegBadge@portalsync=cnvatos(RegBadge@portalsync)
 	return
 
+	#deffunc OpenCommandMenu
+		SetDrawScreen DX_SCREEN_FRONT
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,120
+			DrawBox 0,0,DispWidth@,DispHeight@,0,TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,215
+			DrawBox 0,DispHeight@/2-128,DispWidth@,DispHeight@/2+128,0,TRUE
+
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			ChangeFont"Meiryo":SetFontSize 16:ChangeFontType DX_FONTTYPE_ANTIALIASING_4X4
+			DrawStringXCenter 0,DispHeight@/2-64,"Accepting commands ...",DispWidth@,$FFFFFF
+			DrawStringXCenter 0,DispHeight@/2+64,"ENTER : Run",DispWidth@,$2ECAD5
+			
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,100
+			DrawBox DispWidth@/2-256,DispHeight@/2,DispWidth@/2+256,DispHeight@/2+40,$FFFFFF,FALSE
+
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			SetKeyInputStringColor $FFFFFF,$444444,$00E9C8,$00B99F,$00E9C8,$00E9C8,$00E9C8,$FFFFFF,$00E9C8,$00E9C8
+			sdim acccmd,64
+			cfunc64v KeyInputString,DispWidth@/2-256+16,DispHeight@/2+10,64,varptr64(acccmd),FALSE
+
+			sdim acckey:sdim accprm
+			split acccmd,"=",acckey,accprm
+
+			switch getpath(acckey,16)
+				case"edit.challenge.stepid"
+					ChapterStepID@portalsync=int(accprm)
+				swbreak
+				case"edit.challenge.mapid"
+					ChapterMapID@portalsync=int(accprm)
+				swbreak
+				case"set.default.songunlock"
+					repeat int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))
+						tmpstr=GetINIvalue(coreBuf@_load_,"Playlist","ID."+cnt)
+						split tmpstr,",",tmpstr(1),tmpstr(2),tmpstr(3)
+						repeat 3
+							if tmpstr(cnt+1)!"*" {
+								RegChartUnlockFlag tmpstr(cnt+1),0
+							}
+						loop
+					loop
+				swbreak
+				case"set.unlimited.songunlock"
+					repeat int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))
+						tmpstr=GetINIvalue(coreBuf@_load_,"Playlist","ID."+cnt)
+						split tmpstr,",",tmpstr(1),tmpstr(2),tmpstr(3)
+						repeat 3
+							if tmpstr(cnt+1)!"*" {
+								RegChartUnlockFlag tmpstr(cnt+1),1
+							}
+						loop
+					loop
+				swbreak
+				case"edit.ticket"
+					NumTickets@portalsync=int(accprm)
+				swbreak
+				case"edit.fragments"
+					NumFragments@portalsync=int(accprm)
+				swbreak
+				case"edit.lilly"
+					NumLilly@portalsync=int(accprm)
+				swbreak
+				case"portal.sync"
+					SendAllProfile
+				swbreak
+				case"exit"
+					goto*Exit@
+				swbreak
+				case"open.url"
+					exec accprm,16
+				swbreak
+				case"open.app"
+					exec accprm,0
+				swbreak
+				case"set.default.partnerunlock"
+					repeat CharMax@charicon
+						CharUnlockFlag@charicon(cnt)=FALSE
+						WebAPI_SendProfile"XODA.PARTNER.UNLOCK."+cnt,"0"
+					loop
+				swbreak
+				case"set.drawdebugstring"
+					DebugStringFlag@=int(accprm)
+				swbreak
+			swend
+
+	return
+
 #global

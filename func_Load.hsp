@@ -41,6 +41,8 @@
 		DrawCursorFlag@=ConvStrToBool(GetINIvalue(coreBuf,"Graphics","Use.CustomCursor"))
 		sdim Acckey@
 		Acckey@=GetINIvalue(coreBuf,"Hash","acckey")
+		dim OfflinePass@
+		OfflinePass@=ConvStrToBool(GetINIvalue(coreBuf,"Auth","Offline.Mode"))
 
 	return
 
@@ -51,14 +53,15 @@
 		ChangeWindowMode FullScreenFlag@!1
 		SetWindowStyleMode 7
 		SetWindowSizeChangeEnableFlag TRUE,TRUE
-		SetGraphMode DispWidth@,DispHeight@,32
+		SetGraphMode DispWidth@,DispHeight@,32,60
 		SetAlwaysRunFlag TRUE
 		SetWaitVSyncFlag VsyncFlag@
-		SetMainWindowText"XODA SAPPHIRE"
+		SetMainWindowText"Now Loading..."
 		dxlib_Init
 		if stat==-1 {
 			dialog"グラフィック機能の初期化に失敗しました。"
 		}
+		SetMainWindowText"Sapphire"
 		;SetUseGDIFlag TRUE
 
 		//変数初期化
@@ -96,6 +99,7 @@
 		LoadBASSsample"Data/snd_error.wav",hcommonsech@(sndError@),hcommonsesmp@(sndError@),NULL
 		LoadBASSsample"Data/snd_notification.wav",hcommonsech@(sndNotification@),hcommonsesmp@(sndNotification@),NULL
 		LoadBASSsample"Data/snd_text.wav",hcommonsech@(sndText@),hcommonsesmp@(sndText@),NULL
+		LoadBASSsample"Data/snd_Movement.wav",hcommonsech@(sndMovement@),hcommonsesmp@(sndMovement@),NULL
 		LoadBASSsample"Data/voc_Lobby.wav",hcommonsech@(vocLobby@),hcommonsesmp@(vocLobby@),NULL
 		LoadBASSsample"Data/voc_PartnerSelect.wav",hcommonsech@(vocPartnerSelect@),hcommonsesmp@(vocPartnerSelect@),NULL
 		LoadBASSsample"Data/voc_Wait.wav",hcommonsech@(vocWait@),hcommonsesmp@(vocWait@),NULL
@@ -138,6 +142,9 @@
 		dim TotalScrollVal@
 		dim FPSawaitLoop@
 		dim InitLoadFlag@
+		dim FatalErrorFlag@
+		dim DebugStringFlag@
+		sdim ExtraPlayInfo@
 	return
 
 	//シーンを初期化
@@ -233,14 +240,18 @@
 		noteload _mapfile
 
 		if GetINIvalue(mapbuf,"","#SIGN")!hash_core :return -1
-		dim maxchapter,int(GetINIvalue(mapbuf,"","#MAX.CHAPTER"))
+		dim maxchapter@,int(GetINIvalue(mapbuf,"","#MAX.CHAPTER"))
 
-		sdim chapterName,64,maxchapter
-		sdim chapterAllRewards,128,maxchapter
+		sdim chapterName@,64,maxchapter@
+		sdim chapterAllRewards@,128,maxchapter@
 
-		dim stepType,maxchapter,10
-		sdim stepPrm,64,maxchapter,10
-		sdim stepDesc,64,maxchapter,10
+		dim stepType@,maxchapter@,10
+		sdim stepPrm@,64,maxchapter@,10
+		sdim stepDesc@,64,maxchapter@,10
+
+		sdim lib_missionuuid@
+		sdim lib_mapuuid@
+		dim lib_max
 
 		dim curprogChapterID
 		repeat notemax
@@ -249,17 +260,17 @@
 			split tmpstr,"=",INIkey,INIvalue
 
 			//チャプター定義
-			repeat maxchapter
+			repeat maxchapter@
 				if INIkey=="#CHAPTER."+(cnt+1)+".----" :curprogChapterID=cnt
 			loop
 
 			//チャプターの詳細
 			switch INIkey
 				case"#NAME"		//マップ名
-					chapterName(curprogChapterID)=INIvalue
+					chapterName@(curprogChapterID)=INIvalue
 				swbreak
 				case"#ALL.REWARDS"
-					chapterAllRewards(curprogChapterID)=INIvalue
+					chapterAllRewards@(curprogChapterID)=INIvalue
 				swbreak
 			swend
 
@@ -267,32 +278,47 @@
 			repeat 10
 				if INIkey=="#STEP."+cnt {
 					sdim stepinfo
-					split INIkey,".",stepinfo
+					split INIvalue,".",stepinfo
 					if stepinfo(0)=="REWARDS"&stepinfo(1)=="LILLY" {		//LILLY獲得
-						stepType(curprogChapterID,cnt)=ID_STEP_GETLILLY
-						stepPrm(curprogChapterID,cnt)=stepinfo(2)
+						stepType@(curprogChapterID,cnt)=ID_STEP_GETLILLY
+						stepPrm@(curprogChapterID,cnt)=stepinfo(2)
 					}
 					if stepinfo(0)=="REWARDS"&stepinfo(1)=="FRAGMENT" {		//音色の欠片
-						stepType(curprogChapterID,cnt)=ID_STEP_GETFRAGMENTS
-						stepPrm(curprogChapterID,cnt)=stepinfo(2)
+						stepType@(curprogChapterID,cnt)=ID_STEP_GETFRAGMENTS
+						stepPrm@(curprogChapterID,cnt)=stepinfo(2)
 					}
 					if stepinfo(0)=="FREE" {		//なし
-						stepType(curprogChapterID,cnt)=ID_STEP_FREE
+						stepType@(curprogChapterID,cnt)=ID_STEP_FREE
 					}
 					if stepinfo(0)=="MISSION" {	//ミッション
-						stepType(curprogChapterID,cnt)=ID_STEP_MISSION
-						stepPrm(curprogChapterID,cnt)=stepinfo(1)
-						stepDesc(curprogChapterID,cnt)=stepinfo(2)
+						stepType@(curprogChapterID,cnt)=ID_STEP_MISSION
+						stepPrm@(curprogChapterID,cnt)=stepinfo(1)
+						strrep stepinfo(2),"<br>","\n"
+						stepDesc@(curprogChapterID,cnt)=stepinfo(2)
 					}
 					if stepinfo(0)=="REWARDS"&stepinfo(1)=="MAP" {	//楽曲獲得
-						stepType(curprogChapterID,cnt)=ID_STEP_GETMAP
-						stepPrm(curprogChapterID,cnt)=stepinfo(2)
+						stepType@(curprogChapterID,cnt)=ID_STEP_GETMAP
+						stepPrm@(curprogChapterID,cnt)=stepinfo(2)
 					}
+				}
+				if INIkey=="#MAP.UUID" {
+					sdim uuidspt
+					split INIvalue,":",uuidspt
+					lib_missionuuid@(lib_max)=uuidspt(0)
+					lib_mapuuid@(lib_max)=uuidspt(1)
+					lib_max++
 				}
 			loop
 
 		loop
 
 	return
+
+	#defcfunc GetMapUUIDfromMissionUUID str _uuid
+		sdim tmpstr
+		repeat lib_max
+			if lib_missionuuid@(cnt)==_uuid :tmpstr=lib_mapuuid@(cnt):break
+		loop
+		return tmpstr
 
 #global

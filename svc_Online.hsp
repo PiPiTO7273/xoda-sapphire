@@ -1,12 +1,72 @@
 
 #module _online_
+
+	#enum ibg_layer		=	0
+
+	#enum fNSCJM20			=	0
+
 	#deffunc ShowErrorMsg str _code
+		FatalErrorFlag@=TRUE
+		InitScene ID_FATALERROR
+		StartError
+		sdim ErrorMsgBody
 		switch _code
-		case"ERROR_SVC_CONNECTION":dialog"Portalサーバーに接続できません。\n\"http://"+WebAPI_HostAddress@_sync_+"/connection.php\"にアクセスできませんでした。\n\n解決方法：\n・インターネット接続を確認する。\n・サーバーがメンテナンス中か確認する。\n・セキュリティソフトなどで接続がブロックされていないか確認する。\n\nエラーコード : ERROR_SVC_CONNECTION",1,"ネットワークエラー":swbreak
-		case"ERROR_AUTH_APIKEY":dialog"クライアントの認証に失敗しました。\nAPIキーの認証に失敗しました。\n\n解決方法：\n・最新バージョンに更新する。\n・サーバーがメンテナンス中か確認する。\n・クライアントを再インストールする。\n\nエラーコード : ERROR_AUTH_APIKEY",1,"認証エラー":swbreak
-		case"ERROR_AUTH_PASSWORD":dialog"パスワードの認証に失敗しました。\nPortalアカウントのパスワードが無効です。\n\n解決方法：\m・Portalアカウントから一度サインアウトし、もう一度サインインする。\n・サーバーがメンテナンス中か確認する。\n\nエラーコード : ERROR_AUTH_PASSWORD",1,"認証エラー":swbreak
-		case"ERROR_UNKNOWN_ID":dialog"クライアントのリクエストに無効なIDが指定されました。\n\n解決方法：\n・最新バージョンに更新する。\n・サーバーがメンテナンス中か確認する。\n\nエラーコード : ERROR_UNKNOWN_ID",1,"リクエストの送信エラー":swbreak
-		case"ERROR_UNKNOWN_PRM":dialog"クライアントのリクエストに無効なパラメータが指定されました。\n\n解決方法：\n・最新バージョンに更新する。\n・サーバーがメンテナンス中か確認する。\n\nエラーコード : ERROR_UNKNOWN_PRM",1,"リクエストの送信エラー":swbreak
+		case"ERROR_SVC_CONNECTION":ErrorMsgBody="Portalサーバーに接続できません。\n\"http://"+WebAPI_HostAddress@_sync_+"/connection.php\"にアクセスできませんでした。\n\n解決方法：\n・インターネット接続を確認する。\n・サーバーがメンテナンス中か確認する。\n・セキュリティソフトなどで接続がブロックされていないか確認する。\n\nエラーコード : ERROR_SVC_CONNECTION":swbreak
+		case"ERROR_AUTH_APIKEY":ErrorMsgBody="クライアントの認証に失敗しました。\nAPIキーの認証に失敗しました。\n\n解決方法：\n・最新バージョンに更新する。\n・サーバーがメンテナンス中か確認する。\n・クライアントを再インストールする。\n\nエラーコード : ERROR_AUTH_APIKEY":swbreak
+		case"ERROR_AUTH_PASSWORD":ErrorMsgBody="パスワードの認証に失敗しました。\nPortalアカウントのパスワードが無効です。\n\n解決方法：\m・Portalアカウントから一度サインアウトし、もう一度サインインする。\n・サーバーがメンテナンス中か確認する。\n\nエラーコード : ERROR_AUTH_PASSWORD":swbreak
+		case"ERROR_UNKNOWN_ID":ErrorMsgBody="クライアントのリクエストに無効なIDが指定されました。\n\n解決方法：\n・最新バージョンに更新する。\n・サーバーがメンテナンス中か確認する。\n\nエラーコード : ERROR_UNKNOWN_ID":swbreak
+		case"ERROR_UNKNOWN_PRM":ErrorMsgBody="クライアントのリクエストに無効なパラメータが指定されました。\n\n解決方法：\n・最新バージョンに更新する。\n・サーバーがメンテナンス中か確認する。\n\nエラーコード : ERROR_UNKNOWN_PRM":swbreak
 		swend
 	return
+
+	#deffunc LoadErrorImages
+		dim hdximg
+		hdximg(ibg_layer)=LoadGraph("Data/layer_error_bg.png")
+		return
+
+	#deffunc LoadErrorFonts
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		return
+
+	#deffunc StartError
+		BASS_Free
+		LoadErrorFonts
+		dim SceneCount
+		return
+
+	#deffunc DrawError
+
+		//カーソル位置補正
+		dim CursorPosX:dim CursorPosY:dim MouseInput
+		MouseInput=GetMouseInput()
+		CursorPosX=int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@)))
+		CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
+		RawWheelVal=GetMouseWheelRotVol()
+		RawWheelMove=0
+		if RawWheelVal<0&bfRawWheelVal<0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if RawWheelVal>0&bfRawWheelVal>0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
+		bfRawWheelVal=RawWheelVal
+		PushButtonFlag=FALSE
+
+		DrawCommonBackground FrameCount@
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 0,290,hdximg(ibg_layer),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawStringXYCenterToHandle 524+32,490,ErrorMsgBody,800,100,$FFFFFF,hdxfont(fNSCJM20)
+
+		if insquare(CursorPosX,CursorPosY,885,690,885+150,690+40) {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,15
+			DrawBox 885,690,885+150,690+40,$FFFFFF,TRUE
+			if GetMouseInput()&MOUSE_INPUT_LEFT {
+				dxlib_End
+				end
+			}
+		}
+
+		return
 #global

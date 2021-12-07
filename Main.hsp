@@ -9,6 +9,7 @@
 #include"mod_BinPkg.hsp"
 #include"mod_dxlibplus.hsp"
 #include"mod_4bithex.hsp"
+#include"mod_wininet64.hsp"
 #include"func_Default.hsp"
 #include"func_Load.hsp"
 #include"func_Sync.hsp"
@@ -23,6 +24,7 @@
 #include"scene_Result.hsp"
 #include"scene_KeyConfig.hsp"
 #include"scene_PartnerSelect.hsp"
+#include"scene_Challenge.hsp"
 
 #packopt hide 1
 
@@ -43,7 +45,7 @@
 
 	//セーブデータ同期
 		SetDefaultSaveData
-		WebAPI_Init
+		WebAPI_Init"puoro.ml"
 		sdim LoginUserInfo
 		LoginUserInfo(ID_HOST)="puoro.ml/apiv2"
 		LoginUserInfo(ID_NAME)=GetINIvalue(coreBuf@_load_,"Auth","Name")
@@ -58,6 +60,7 @@
 	DrawLoadScreen
 
 	LoadTitleImages
+	LoadErrorImages
 	LoadTitleFonts
 	InitScene ID_TITLE
 	StartTitle
@@ -87,6 +90,8 @@
 		case ID_KEYCONFIG:DrawKeyConfig:swbreak
 		case ID_RESULT:DrawResult:swbreak
 		case ID_PARTNERSELECT:DrawPartnerSelect:swbreak
+		case ID_CHALLENGE:DrawChallenge:swbreak
+		case ID_FATALERROR:DrawError:swbreak
 	swend
 
 	SetDrawScreen DX_SCREEN_BACK
@@ -114,16 +119,26 @@
 		bfCursorPosX@=CursorPosX@:bfCursorPosY@=CursorPosY@
 
 	//デバッグ文字列
-/*
+	if DebugStringFlag@ {
 		ChangeFont"MS GOTHIC":SetFontSize 16
 		ChangeFontType DX_FONTTYPE_NORMAL
-		DrawDebugString 0,0,"XODA Sapphire @debug"
+		DrawDebugString 0,0,"Sapphire @debug"
 		DrawDebugString 0,1,"HD "+BufWidth@+"x"+BufHeight@+" -> "+DispWidth@+"x"+DispHeight@
 		DrawDebugString 0,2,"Server : "+LoginUserInfo(ID_HOST)+" @\""+LoginUserInfo(ID_NAME)+"\" & \""+LoginUserInfo(ID_KEY)+"\""
 		DrawDebugString 0,4,"FPS="+double(curFPS@)
 		DrawDebugString 0,6,"C="+coreCount+" F="+FrameCount+" S="+SceneCount+" ,Level="+CounterLev@
-		DrawDebugString 0,7,"Cursor ("+CursorPosX+","+CursorPosY+") "+GetMouseWheelRotVol()		DrawDebugString 0,8,"auto="+AutoPlayFlag@
-*/
+		DrawDebugString 0,7,"Cursor ("+CursorPosX+","+CursorPosY+") "+GetMouseWheelRotVol()
+	}
+
+	//開発者用コマンド
+	if KeyFlag(KEY_INPUT_F11)==TRUE {
+		OpenCommandMenu
+	}
+
+	//エラー検出
+	if FatalErrorFlag@==TRUE {
+		curSceneID=ID_FATALERROR
+	}
 
 	coreCount++
 	AddCount FrameCount@
@@ -140,6 +155,7 @@
 *ExitProg
 	dxlib_End
 	BASS_Free
+	closeHttp
 	end
 *Exit
 	SendAllProfile

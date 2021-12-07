@@ -972,7 +972,7 @@
 				DrawBox 1450,109,1450+int(100.0*(double(RegEXP@portalsync)/double(lpeek(expTablebuf@,RegLev@portalsync*4)))),109+8,$3FECF2,TRUE
 
 			//コメント
-			if insquare(CursorPosX,CursorPosY,1635,57,1635+140,57+30) {
+			if insquare(CursorPosX,CursorPosY,1635,57,1635+140,57+30)&OptionWindowFlag==0 {
 				DrawGraph 1635,57,hdximg(ilayer_playerinfo_button),TRUE
 				if (MouseInput&MOUSE_INPUT_LEFT) {
 					OpenEditCommentDialog
@@ -980,7 +980,7 @@
 				}
 			}
 			//パートナー
-			if insquare(CursorPosX,CursorPosY,1635,95,1635+140,95+30) {
+			if insquare(CursorPosX,CursorPosY,1635,95,1635+140,95+30)&OptionWindowFlag==0 {
 				DrawGraph 1635,95,hdximg(ilayer_playerinfo_button),TRUE
 				if (MouseInput&MOUSE_INPUT_LEFT)&DecideCount==-1 {
 					PushButtonFlag=TRUE
@@ -1610,6 +1610,7 @@
 			//---debug---
 			PauseMovieToGraph hdximg(ibg_Load)
 			PauseMovieToGraph hdximg(ibg)
+			ExtraPlayInfo@="FREEPLAY,*"
 			InitScene ID_PLAY
 			InitGamePlayFonts
 			OpenChartFile"Data/map-"+plitem_UUID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))+".bin",ActiveColumnID(ID_SONGS),CurSelLev
@@ -1627,7 +1628,7 @@
 			SceneTransID=FALSE
 		}
 		if DecideCount>25&SceneTransID==ID_TRANS_BACKSCENE {
-			//パートナー選択
+			//戻る
 			;PauseMovieToGraph hdximg(ibg)
 			InitScene ID_LOBBY
 			InitLobbyFonts

@@ -59,7 +59,7 @@
 		hdximg(iwindow)=MakeScreen(1600,1284+100,TRUE)
 		return
 
-	//曲選択画面で使用するフォントの初期化
+	//使用するフォントの初期化
 	#deffunc InitLobbyFonts
 		InitFontToHandle
 		dim hdxfont
@@ -309,7 +309,6 @@
 
 		//コメント
 		if insquare(CursorPosX,CursorPosY,1635,57,1635+140,57+30) {
-			DrawGraph 1635,57,hdximg@_musicselect_(ilayer_playerinfo_button@_musicselect_),TRUE
 			if (MouseInput&MOUSE_INPUT_LEFT) {
 				OpenEditCommentDialog
 				SetDrawScreen hdximg(ilayer_all)
@@ -340,7 +339,8 @@
 					case 7:LoadResultSounds:swbreak
 					case 8:LoadPartnerSelectImages:swbreak
 					case 9:LoadChallengeModeMap"Data/map-challenge.bin":swbreak
-					case 10:InitLoadFlag@=TRUE:swbreak
+					case 10:LoadChallengeImages:swbreak
+					case 11:InitLoadFlag@=TRUE:swbreak
 				swend
 			}
 
@@ -366,6 +366,11 @@
 				case 0
 					InitScene ID_MUSICSELECT
 					StartMusicSelect_WithoutDarkness
+				swbreak
+				case 1
+					InitScene ID_CHALLENGE
+					InitChallengeFonts
+					StartChallenge
 				swbreak
 				case 12
 					goto*Exit@

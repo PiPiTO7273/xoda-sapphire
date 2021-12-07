@@ -1,7 +1,666 @@
 
 #module _challenge_
 
+	#enum ibg		=	0
+	#enum ibg_layer
+	#enum inav
+	#enum iwindow
+	#enum iyourpos
+	#enum iicon_mission
+	#enum istep
+	#enum iticketpay
+	#enum iticketpay_active
+	#enum iticketpay_confirm0
+	#enum iticketpay_confirm1
+	#enum iticketpay_confirm2
+	#enum iticketpay_info0
+	#enum iticketpay_info1
+	#enum iticketpay_error0
+	#enum iticketpay_error1
+	#enum istep_lilly
+	#enum istep_fragments
+	#enum istep_mission_desc
+	#enum iticketpay_button
+
+	#enum fEOEXB16			=	0
+	#enum fEOEXB20
+	#enum fEOEXB32
+	#enum fFAB50
+	#enum fNSCJM12
+	#enum fNSCJM15
+	#enum fNSCJM16
+	#enum fNSCJM20
+	#enum fNSCJM24
+	#enum fNSCJM32
+	#enum fPS14
+	#enum fPS16
+	#enum fPS18
+	#enum fPS20
+	#enum fPS24
+	#enum fPS80
+	#enum fSQNUM16
+	#enum fSQNUM24
+	#enum fSQNUM40
+
+	#enum ID_CONFIRM_0		=	1
+	#enum ID_CONFIRM_1
+	#enum ID_CONFIRM_2
+	#enum ID_INFO_0
+	#enum ID_INFO_1
+	#enum ID_ERROR_0
+	#enum ID_ERROR_1
+
 	#deffunc LoadChallengeImages
+		dim hdximg
+		SetDXArchiveExtension"bin"
+		hdximg(ibg)=hdximg@(ibg_common_0)
+		hdximg(ibg_layer)=LoadGraph("Data/bg_challenge.png")
+		hdximg(inav)=LoadGraph("Data/Nav_Challenge.png")
+		hdximg(iwindow)=LoadGraph("Data/layer_challenge_window.png")
+		hdximg(iyourpos)=LoadGraph("Data/layer_challenge_cursor.png")
+		hdximg(iicon_mission)=LoadGraph("Data/layer_challenge_mission_icon.png")
+		hdximg(istep)=LoadGraph("Data/layer_challenge_step.png")
+		hdximg(iticketpay)=LoadGraph("Data/layer_challenge_ticketpayments.png")
+		hdximg(iticketpay_active)=LoadGraph("Data/layer_challenge_ticketpayments_active.png")
+		hdximg(iticketpay_confirm0)=LoadGraph("Data/layer_challenge_ticketpayments_confirm_0.png")
+		hdximg(iticketpay_confirm1)=LoadGraph("Data/layer_challenge_ticketpayments_confirm_1.png")
+		hdximg(iticketpay_confirm2)=LoadGraph("Data/layer_challenge_ticketpayments_confirm_2.png")
+		hdximg(iticketpay_info0)=LoadGraph("Data/layer_challenge_ticketpayments_info_0.png")
+		hdximg(iticketpay_info1)=LoadGraph("Data/layer_challenge_ticketpayments_info_1.png")
+		hdximg(iticketpay_error0)=LoadGraph("Data/layer_challenge_ticketpayments_error_0.png")
+		hdximg(iticketpay_error1)=LoadGraph("Data/layer_challenge_ticketpayments_error_1.png")
+		hdximg(istep_lilly)=LoadGraph("Data/Icon_Lilly_40x40.png")
+		hdximg(istep_fragments)=LoadGraph("Data/Icon_Fragments_40x40.png")
+		hdximg(istep_mission_desc)=LoadGraph("Data/layer_challenge_missiondesc.png")
+		hdximg(iticketpay_button)=LoadGraph("Data/layer_challenge_confirm_button.png")
+		return
+
+	#deffunc InitChallengeFonts
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
+		hdxfont(fEOEXB20)=LoadFontDataToHandle("Data/eoexb20.bin")
+		hdxfont(fEOEXB32)=LoadFontDataToHandle("Data/eoexb32.bin")
+		hdxfont(fFAB50)=LoadFontDataToHandle("Data/fab50.bin")
+		hdxfont(fNSCJM12)=LoadFontDataToHandle("Data/nscjm12.bin")
+		hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
+		hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
+		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		hdxfont(fNSCJM24)=LoadFontDataToHandle("Data/nscjm24.bin")
+		hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
+		hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
+		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
+		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
+		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+		hdxfont(fPS24)=LoadFontDataToHandle("Data/ps24.bin")
+		hdxfont(fPS80)=LoadFontDataToHandle("Data/ps80.bin")
+		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
+		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
+
+		SetFontLineSpaceToHandle 26,hdxfont(fNSCJM20)
+	return
+
+	#deffunc StartChallenge
+		dim SceneCount
+		dim BackButtonEase
+		dim BackButtonHoverFlag
+		dim DecideCount
+		dim ChallengeStartFlag
+
+		//楽曲の報酬
+		dim tmpRewardsImg,10
+		sdim tmpRewardsTitle,64
+		repeat 10
+			if stepType@(ChapterMapID@portalsync,cnt)==ID_STEP_GETMAP {
+				exist"Data/map-"+stepPrm@(ChapterMapID@portalsync,cnt)+".bin"
+				sdim tmpstr,strsize
+				notesel tmpstr
+				noteload"Data/map-"+stepPrm@(ChapterMapID@portalsync,cnt)+".bin"
+				//曲名
+				tmpRewardsTitle(cnt)="楽曲「"+GetINIvalue(tmpstr,"Metadata","Title")+"」 難易度 "+GetINIvalue(tmpstr,"Metadata","Difficulty")
+
+				//ジャケット画像
+				exist"Data/mr/"+GetINIvalue(tmpstr,"Metadata","Resource")+"/img.png"
+				if strsize==-1 {
+					tmpRewardsImg(cnt)=LoadGraph("Data/Icon_Artwork_Dummy.png")
+				} else {
+					tmpRewardsImg(cnt)=LoadGraph("Data/mr/"+GetINIvalue(tmpstr,"Metadata","Resource")+"/img.png")
+				}
+				sdim tmpstr
+			}
+		loop
+
+		dim WindowID
+		dim WindowCount
+		dim bfMouseInput
+
+		dim stepEasePos,2
+		dim stepEaseCount
+		stepEaseCount=-1
+
+		DecideCount=-1
+
+		//BGM再生
+		if BASS_ChannelIsActive(int(hcommonchannel@))!BASS_ACTIVE_PLAYING :PlaySE int(hcommonchannel@),0.65
+		return
+
+	#deffunc DrawChallenge
+		//カーソル位置補正
+		dim CursorPosX:dim CursorPosY:dim MouseInput
+		MouseInput=GetMouseInput()
+		CursorPosX=int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@)))
+		CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
+		RawWheelVal=GetMouseWheelRotVol()
+		RawWheelMove=0
+		if RawWheelVal<0&bfRawWheelVal<0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if RawWheelVal>0&bfRawWheelVal>0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
+		bfRawWheelVal=RawWheelVal
+		PushButtonFlag=FALSE
+
+		//背景（動画）
+		if SceneCount<20|DecideCount>20 {
+			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+			DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+		} else {
+			DrawCommonBackground FrameCount@
+		}
+		if SceneCount==20 :PauseMovieToGraph hdximg(ibg)
+		if DecideCount==20 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+		if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+
+		//背景変更
+		setease 0,BufWidth@,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		if DecideCount==-1 {
+			if SceneCount<20 {
+				DrawBox 0,0,getease(SceneCount,20),BufHeight@,$FFFFFF,TRUE
+			} else {
+				DrawBox getease(SceneCount-20,20),0,BufWidth@,BufHeight@,$FFFFFF,TRUE
+			}
+		} else {
+			if DecideCount<20 {
+				DrawBox 0,0,getease(DecideCount,20),BufHeight@,$FFFFFF,TRUE
+			} else {
+				DrawBox getease(DecideCount-20,20),0,BufWidth@,BufHeight@,$FFFFFF,TRUE
+			}
+		}
+
+		//白背景
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		if DecideCount==-1 {
+			setease -BufWidth@,0,ease_cubic_out
+			DrawGraph getease(SceneCount-40,30),187,hdximg(ibg_layer),TRUE
+		} else {
+			setease 0,-BufWidth@,ease_cubic_out
+			DrawGraph getease(DecideCount,30),187,hdximg(ibg_layer),TRUE
+		}
+
+		//ナビゲーション
+		if DecideCount==-1 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,20)
+			setease -64,0,ease_cubic_out
+			DrawGraph 48+getease(SceneCount-10,20),32,hdximg(inav),TRUE
+		} else {
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,20)
+			setease -64,0,ease_cubic_out
+			DrawGraph 48+getease(DecideCount,20),32,hdximg(inav),TRUE
+		}
+
+		//チャプター
+		if DecideCount==-1 {
+			setease 0,258,ease_cubic_out
+			EaseHeight=getease(SceneCount-30,20)
+		} else {
+			setease 258,0,ease_cubic_out
+			EaseHeight=getease(DecideCount,20)
+		}
+		DrawExtendGraph 90,170+258/2-EaseHeight/2,990,170+258/2+EaseHeight/2,hdximg(iwindow),TRUE
+
+		if DecideCount==-1 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-50,20)
+			setease -50,0,ease_cubic_out
+			EasePosX=getease(SceneCount-50,20)
+			DrawStringToHandle 113+EasePosX,192,"CHAPTER "+(ChapterMapID@portalsync+1)+".",$000000,hdxfont(fEOEXB32)
+			DrawStringToHandle 440+EasePosX,192,chapterName@(ChapterMapID@portalsync),$000000,hdxfont(fNSCJM24)
+			DrawStringToHandle 133+EasePosX,276,"STEP "+(ChapterStepID@portalsync+1)+" / 10",$000000,hdxfont(fPS24)
+			DrawStringToHandle 311+EasePosX,276,"（コンプリートまであと"+(10-ChapterStepID@portalsync)+"ステップ）",$000000,hdxfont(fNSCJM20)
+			DrawStringToHandle 133+EasePosX,366,chapterAllRewards@(ChapterMapID@portalsync),$000000,hdxfont(fNSCJM20)
+		}
+
+		//ステータス
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+		DrawStringToHandle 458,1050,"x"+NumTickets@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
+		DrawStringToHandle 670,1050,"x"+NumFragments@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
+		DrawStringToHandle 814,1050,str(NumLilly@portalsync)+" Lilly",Getcolor(255,255,255),hdxfont(fPS16)
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 300,1048,hdximg@(iStatus_Ticket),TRUE
+		DrawGraph 560,1048,hdximg@(iStatus_Fragment),TRUE
+		DrawGraph 780,1048,hdximg@(iStatus_Lilly),TRUE
+
+		//ステップ
+		if SceneCount>50 {
+			repeat 10
+				//ステップアイコン
+				if DecideCount==-1 {
+					setease 0,256,ease_cubic_out
+					EaseAlpha=getease(SceneCount-50-cnt*6,20)
+				} else {
+					setease 256,0,ease_cubic_out
+					EaseAlpha=getease(DecideCount,20)
+				}
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+				setease 200,0,ease_cubic_out
+				DrawGraph 225+150*cnt,790-50*cnt+getease(SceneCount-50-cnt*6,20),hdximg(istep),TRUE
+
+				//報酬の詳細
+				if ChapterStepID@portalsync>cnt :continue
+
+				if DecideCount==-1 {
+					setease 0,256,ease_cubic_out
+					EaseAlpha=getease(SceneCount-70-cnt*6,20)
+				} else {
+					setease 256,0,ease_cubic_out
+					EaseAlpha=getease(DecideCount,20)
+				}
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+
+				if stepType@(ChapterMapID@portalsync,cnt)==ID_STEP_GETMAP {
+					setease 100,110,ease_linear+ease_loop
+					EaseWidth=getease(FrameCount@,30):EaseHeight=EaseWidth
+					DrawBox 235+150*cnt+100/2-EaseWidth/2-2,670-50*cnt+100/2-EaseHeight/2-2,235+150*cnt+100/2+EaseWidth/2+2,670-50*cnt+100/2+EaseHeight/2+2,$AAAAAA,TRUE
+					DrawExtendGraph 235+150*cnt+100/2-EaseWidth/2,670-50*cnt+100/2-EaseHeight/2,235+150*cnt+100/2+EaseWidth/2,670-50*cnt+100/2+EaseHeight/2,tmpRewardsImg(cnt),TRUE
+				}
+				if stepType@(ChapterMapID@portalsync,cnt)==ID_STEP_GETLILLY {
+					DrawGraph 265+150*cnt,794-50*cnt,hdximg(istep_lilly),TRUE
+
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
+					DrawStringXCenterToHandle 225+150*cnt,858-50*cnt,stepPrm@(ChapterMapID@portalsync,cnt)+" Lilly",120,$000000,hdxfont(fNSCJM16)
+				}
+				if stepType@(ChapterMapID@portalsync,cnt)==ID_STEP_GETFRAGMENTS {
+					DrawGraph 265+150*cnt,794-50*cnt,hdximg(istep_fragments),TRUE
+
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
+					DrawStringXCenterToHandle 225+150*cnt,858-50*cnt,"音色の欠片 x"+stepPrm@(ChapterMapID@portalsync,cnt),120,$000000,hdxfont(fNSCJM16)
+				}
+				if stepType@(ChapterMapID@portalsync,cnt)==ID_STEP_MISSION {
+					DrawGraph 285+150*cnt,868-50*cnt,hdximg(istep_mission_desc),TRUE
+
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
+					DrawStringToHandle 285+150*cnt+70,868-50*cnt,stepDesc@(ChapterMapID@portalsync,cnt),$000000,hdxfont(fNSCJM16)
+				}
+			loop
+		}
+
+		//カーソル
+		if SceneCount>70&DecideCount==-1&ChapterStepID@portalsync<10 {
+			setease 50,256,ease_linear+ease_loop
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-70,25)
+			DrawGraph 223+150*ChapterStepID@portalsync,590-50*ChapterStepID@portalsync,hdximg(iyourpos),TRUE
+
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-90,25)
+			if SceneCount<90+25 {
+				setease 3,1,ease_cubic_out
+				EaseWidth=int(125.0*geteasef(SceneCount-90,25))
+				EaseHeight=int(100.0*geteasef(SceneCount-90,25))
+			} else {
+				setease 1,1.1,ease_linear+ease_loop
+				EaseWidth=int(125.0*geteasef(SceneCount-90-25,25))
+				EaseHeight=int(100.0*geteasef(SceneCount-90-25,25))
+			}
+			EasePosX=223+150*ChapterStepID@portalsync+125/2-EaseWidth/2
+			setease -250,0,ease_cubic_out
+			EasePosY=650-50*ChapterStepID@portalsync+getease(SceneCount-90,25)+125/2-EaseHeight/2
+
+			setease stepEasePos(0),0,ease_linear
+			EasePosX+getease(stepEaseCount-25,75)
+			setease stepEasePos(1),0,ease_linear
+			EasePosY+getease(stepEaseCount-25,75)
+
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hCharImg@charicon(RegCharID@portalsync),TRUE
+		}
+
+		//ミッションマスのアイコン
+		if SceneCount>120&DecideCount==-1 {
+			setease 0,256,ease_linear+ease_loop
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-120,20)
+			repeat 10
+				if stepType@(ChapterMapID@portalsync,cnt)==ID_STEP_MISSION {
+					DrawGraph 253+150*cnt,718-50*cnt,hdximg(iicon_mission),TRUE
+				}
+			loop
+		}
+
+		//チケット支払い
+		if DecideCount==-1 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-40,20)
+			setease -128,0,ease_cubic_out
+			DrawGraph 1400+getease(SceneCount-40,20),710,hdximg(iticketpay),TRUE
+
+			//ボタンのアクティブエフェクト
+			if insquare(CursorPosX,CursorPosY,1440,724,1440+300,724+90)&WindowID==0 {
+				DrawGraph 1440,724,hdximg(iticketpay_active),TRUE
+				if DecideCount==-1&(MouseInput&MOUSE_INPUT_LEFT) {
+					PlaySE int(hcommonsech@(sndDecide@)),1.0
+					WindowCount=0
+					WindowID=ID_CONFIRM_0
+					if stepType@(ChapterMapID@portalsync,ChapterStepID@portalsync)==ID_STEP_MISSION :WindowID=ID_CONFIRM_1
+				}
+			}
+			if insquare(CursorPosX,CursorPosY,1440,826,1440+300,826+90)&WindowID==0 {
+				DrawGraph 1440,826,hdximg(iticketpay_active),TRUE
+				if DecideCount==-1&(MouseInput&MOUSE_INPUT_LEFT) {
+					WindowCount=0
+					if stepType@(ChapterMapID@portalsync,ChapterStepID@portalsync)==ID_STEP_MISSION {
+						PlaySE int(hcommonsech@(sndDecide@)),1.0
+						WindowID=ID_CONFIRM_2
+					} else {
+						PlaySE int(hcommonsech@(sndError@)),1.0
+						WindowID=ID_ERROR_0
+					}
+				}
+			}
+		} else {
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,20)
+			setease 0,-128,ease_cubic_out
+			DrawGraph 1400+getease(DecideCount,20),710,hdximg(iticketpay),TRUE
+		}
+
+		//確認ウィンドウ
+		if WindowID!0 {
+			if WindowID>0 {	//in
+				setease 0,500,ease_cubic_out
+				EaseHeight=getease(WindowCount,12)
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(WindowCount,20)
+			} else {			//out
+				setease 500,0,ease_cubic_out
+				EaseHeight=getease(WindowCount,12)
+				setease 256,0,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(WindowCount,20)
+				if WindowCount>20 :WindowID=0
+			}
+			DrawExtendGraph 0,BufHeight@/2-EaseHeight/2,BufWidth@,BufHeight@/2+EaseHeight/2,hdximg(iticketpay_confirm0+(abs(WindowID)-1)),TRUE
+		}
+
+		switch WindowID
+			case ID_CONFIRM_0		//チケットを消費して、次のステップへ進みますか？
+				if insquare(CursorPosX,CursorPosY,794,630,794+150,630+40) {
+					DrawGraph 794,630,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						if NumTickets@portalsync<1 {
+							PlaySE int(hcommonsech@(sndError@)),1.0
+							WindowID=ID_ERROR_1
+						} else {
+							PlaySE int(hcommonsech@(sndDecide@)),1.0
+							NumTickets@portalsync--
+							GoStepForward
+						}
+						WindowCount=0
+					}
+				}
+				if insquare(CursorPosX,CursorPosY,976,630,976+150,630+40) {
+					DrawGraph 976,630,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndCancel@)),1.0
+						WindowID*-1:WindowCount=0
+					}
+				}
+			swbreak
+			case ID_CONFIRM_1		//チケットを１枚消費して、以下のミッションに挑戦します。
+				if insquare(CursorPosX,CursorPosY,794,686,794+150,686+40) {
+					DrawGraph 794,686,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						if NumTickets@portalsync<1 {
+							PlaySE int(hcommonsech@(sndError@)),1.0
+							WindowID=ID_ERROR_1
+						} else {
+							PlaySE int(hcommonsech@(sndDecide@)),1.0
+							NumTickets@portalsync--
+							//開始
+							ChallengeStartFlag=TRUE
+							PushButtonFlag=TRUE
+							DecideCount=0
+							WindowID*-1
+						}
+						WindowCount=0
+					}
+				}
+				if insquare(CursorPosX,CursorPosY,976,686,976+150,686+40) {
+					DrawGraph 976,686,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndCancel@)),1.0
+						WindowID*-1:WindowCount=0
+					}
+				}
+
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(WindowCount-15,20)
+				setease -64,0,ease_cubic_out
+				DrawStringXCenterToHandle 524+32+getease(WindowCount-15,20),510,stepDesc@(ChapterMapID@portalsync,ChapterStepID@portalsync),800,$00FFCB,hdxfont(fNSCJM24)
+			swbreak
+			case ID_CONFIRM_2		//チケットを１０枚消費して、ミッションをスキップしますか？
+				if insquare(CursorPosX,CursorPosY,794,630,794+150,630+40) {
+					DrawGraph 794,630,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						if NumTickets@portalsync<10 {
+							PlaySE int(hcommonsech@(sndError@)),1.0
+							WindowID=ID_ERROR_1
+						} else {
+							PlaySE int(hcommonsech@(sndDecide@)),1.0
+							NumTickets@portalsync-10
+							GoStepForward
+						}
+					}
+				}
+				if insquare(CursorPosX,CursorPosY,976,630,976+150,630+40) {
+					DrawGraph 976,630,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndCancel@)),1.0
+						WindowID*-1:WindowCount=0
+					}
+				}
+			swbreak
+			case ID_ERROR_0		//現在のステップにミッションはありません。
+				if insquare(CursorPosX,CursorPosY,885,630,885+150,630+40) {
+					DrawGraph 885,630,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndCancel@)),1.0
+						WindowID*-1:WindowCount=0
+					}
+				}
+			swbreak
+			case ID_ERROR_1		//チケットが足りません。
+				if insquare(CursorPosX,CursorPosY,885,630,885+150,630+40) {
+					DrawGraph 885,630,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndCancel@)),1.0
+						WindowID*-1:WindowCount=0
+					}
+				}
+			swbreak
+			case ID_INFO_0			//報酬を獲得
+				if insquare(CursorPosX,CursorPosY,885,662,885+150,662+40) {
+					DrawGraph 794,666,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndCancel@)),1.0
+						WindowID*-1:WindowCount=0
+					}
+				}
+
+				if stepType@(ChapterMapID@portalsync,ChapterStepID@portalsync)==ID_STEP_GETFRAGMENTS {
+					tmpstr="音色の欠片 x"+stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync)
+				}
+				if stepType@(ChapterMapID@portalsync,ChapterStepID@portalsync)==ID_STEP_GETLILLY {
+					tmpstr=stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync)+" Lilly"
+				}
+				if stepType@(ChapterMapID@portalsync,ChapterStepID@portalsync)==ID_STEP_GETMAP {
+					tmpstr=tmpRewardsTitle(ChapterStepID@portalsync)
+				}
+
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(WindowCount-15,20)
+				setease -64,0,ease_cubic_out
+				DrawStringXCenterToHandle 524+32+getease(WindowCount-15,20),520,tmpstr,800,$00FFCB,hdxfont(fNSCJM24)
+			swbreak
+			case ID_INFO_1
+			swbreak
+		swend
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
+		if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,10
+			DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
+			if GetMouseInput()&MOUSE_INPUT_LEFT {
+				goto*Exit@
+			}
+		}
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+
+		//戻るボタン
+			//ホバーエフェクト
+			if BackButtonHoverFlag==FALSE&insquare(CursorPosX,CursorPosY,0,1000,240,1080)==TRUE {
+				BackButtonEase=-1
+			}
+			if BackButtonHoverFlag==TRUE&insquare(CursorPosX,CursorPosY,0,1000,240,1080)==FALSE {
+				BackButtonEase=1
+			}
+			if BackButtonEase<0 :BackButtonEase--
+			if BackButtonEase>0 :BackButtonEase++
+
+			//拡大縮小
+			if BackButtonEase>0 {
+				setease 1.2,1,ease_cubic_out
+			} else {
+				setease 1,1.2,ease_cubic_out
+			}
+			EaseWidth=int(240.0*geteasef(abs(BackButtonEase),10))
+			EaseHeight=int(80.0*geteasef(abs(BackButtonEase),10))
+			EasePosX=0:EasePosY=BufHeight@-EaseHeight
+
+			//フェードイン・フェードアウト
+			if SceneCount<20 {
+				setease -int(240.0*1.2),0,ease_cubic_out
+				EasePosX=getease(SceneCount,20)
+			}
+			if DecideCount!-1 {
+				setease 0,-int(240.0*1.2),ease_cubic_out
+				EasePosX=getease(DecideCount,20)
+			}
+
+			//描画
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg@(ibutton_backscene),TRUE
+
+			//戻るボタン判定
+			if insquare(CursorPosX,CursorPosY,0,1000,240,1080)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&DecideCount==-1 {
+				PushButtonFlag=TRUE
+				PlaySE int(hcommonsech@(sndDecide@)),1.0
+				DecideCount=0
+			}
+
+		BackButtonHoverFlag=insquare(CursorPosX,CursorPosY,0,1000,240,1080)
+
+		//プリローダー
+		if SceneCount>50 {
+			setease 400,0,ease_cubic_out
+			EaseWidth=getease(SceneCount-50,20)
+		} else :EaseWidth=400
+		if DecideCount!-1 {
+			setease 0,400,ease_cubic_out
+			EaseWidth=getease(DecideCount,20)
+		}
+		DrawExtendGraph BufWidth@/2-EaseWidth/2,BufHeight@/2-EaseWidth/2,BufWidth@/2+EaseWidth/2,BufHeight@/2+EaseWidth/2,hdximg_arr_preloader_2@(FrameCount@\74),TRUE
+
+		//チャレンジ開始時の暗転
+		if ChallengeStartFlag {
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(DecideCount-40,20-1)
+			DrawBox 0,0,BufWidth@,BufHeight@,0,TRUE
+		}
+
+		//シーン引き継ぎ
+		if GetCSVcolumn(ExtraPlayInfo@,0,",")=="CHALLENGE"&GetCSVcolumn(ExtraPlayInfo@,3,",")=="#t"&SceneCount==0 {
+			GoStepForward
+		}
+
+		AddCount SceneCount
+		if DecideCount!-1 :AddCount DecideCount
+		if DecideCount>60 {
+
+			repeat 10
+				DeleteGraph tmpRewardsImg(cnt)
+			loop
+
+			if ChallengeStartFlag {
+				SetOptionForMission
+				InitScene ID_PLAY
+				InitGamePlayFonts
+				ExtraPlayInfo@="CHALLENGE,"+ChapterMapID@portalsync+","+ChapterStepID@portalsync
+				OpenChartFile"Data/map-"+GetMapUUIDfromMissionUUID(stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync))+".bin",-1,-1
+				SetDrawScreen hdximg@(iScene)
+				ClearDrawScreen
+				cfunc64v BASS_ChannelPause,hcommonchannel@
+				StartGameplay
+			} else {
+				//戻る
+				;PauseMovieToGraph hdximg(ibg)
+				InitScene ID_LOBBY
+				InitLobbyFonts
+				StartLobby
+				SceneTransID=FALSE
+			}
+		}
+		if SceneCount>80 {
+			AddCount WindowCount
+			if WindowID==0&stepEaseCount!-1 :stepEaseCount++
+			if stepEaseCount==25 :PlaySE int(hcommonsech@(sndMovement@)),1.0
+			bfMouseInput=MouseInput
+		}
+
+		return
+
+	#deffunc GoStepForward
+		ChapterStepID@portalsync++
+		stepEasePos=-150,50:stepEaseCount=0
+		if ChapterStepID@portalsync==10 {
+			WindowID=ID_INFO_1
+		} else {
+			//報酬マスかどうか
+			WindowID*-1
+			if stepType@(ChapterMapID@portalsync,ChapterStepID@portalsync)==ID_STEP_GETFRAGMENTS {		//音色のかけら
+				NumFragments@portalsync+int(stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync))
+				WindowID=ID_INFO_0
+			}
+			if stepType@(ChapterMapID@portalsync,ChapterStepID@portalsync)==ID_STEP_GETLILLY {			//Lilly
+				NumLilly@portalsync+int(stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync))
+				WindowID=ID_INFO_0
+			}
+			if stepType@(ChapterMapID@portalsync,ChapterStepID@portalsync)==ID_STEP_GETMAP {			//楽曲
+				RegChartUnlockFlag stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync),TRUE
+				WindowID=ID_INFO_0
+			}
+		}
+		return
+
+	#deffunc SetOptionForMission
+		switch stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync)
+			case"ed278d27-4e77-d7c6-4388-60d501d81531"	//楽曲"進捗どうですか？"の難易度NORMALをクリア
+				ObjPlacement@=OBJP_NORMAL
+				GaugeType@=GAUGE_NORMAL
+			swbreak
+		swend
+		AutoPlayFlag@=FALSE
 		return
 
 #global

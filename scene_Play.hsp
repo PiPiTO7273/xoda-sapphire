@@ -8,6 +8,7 @@
 	#enum ibg_songinfo
 	#enum ibg_playerdata
 	#enum ibg_scoregraph
+	#enum ibg_scoregraph_challenge
 	#enum ibg_score
 	#enum ichip_key
 	#enum ichip_key_active
@@ -113,6 +114,7 @@
 		hdximg(ibg_songinfo)=LoadGraph("Data/bg_SongInfo.png")
 		hdximg(ibg_playerdata)=LoadGraph("Data/bg_playerdata.png")
 		hdximg(ibg_scoregraph)=LoadGraph("Data/bg_scoregraph.png")
+		hdximg(ibg_scoregraph_challenge)=LoadGraph("Data/bg_scoregraph_challenge.png")
 		hdximg(ibg_score)=LoadGraph("Data/bg_score.png")
 		hdximg(ichip_key)=LoadGraph("Data/chip_Key.png")
 		hdximg(ichip_key_active)=LoadGraph("Data/chip_key_active.png")
@@ -219,6 +221,10 @@
 		//パラメータ保管
 		dim ChartItemID:dim ChartLevID
 		ChartItemID=_itemid:ChartLevID=_levid
+
+		//チャレンジモードかどうか
+		dim ChallengeModeFlag
+		if GetCSVcolumn(ExtraPlayInfo@,0,",")=="CHALLENGE" :ChallengeModeFlag=TRUE
 
 		sdim chartFileName
 		chartFileName=_filename
@@ -444,47 +450,17 @@
 			}
 			ObjHitGauge=TotalGauge/double(ObjMax)
 
+		//グラフキャプチャー関連
+		dim graphCurrent_score
+		dim graphTrainer_score
+		dim graphBest_score
+		dim graphTarget_score
+		dim graphCapture_objid
+		sdim graphBest_Decode,4*objmax
+
 		//自己ベストデータを読み込み
 			sdim MybestRecordBuf
 			WebAPI_SyncRecord WebAPI_GetRecord(),GetChartInfo(META_UUID),MybestRecordBuf
-
-		//スコアグラフ生成
-			dim graphCurrent_score
-			dim graphTrainer_score
-			dim graphBest_score
-			dim graphTarget_score
-			dim graphCapture_objid
-			sdim graphBest_Decode,4*objmax
-			ConvHEXdec graphBest_Decode,MybestRecordBuf(ID_REC_SCORE_4BINHEX)
-			memexpand graphBest_Decode,4*ObjMax
-
-			//トレーナー
-			ddim MaxPfPoint,1
-			MaxPfPoint=GetPfPoint(int(GetChartInfo(META_LEVEL)),10000000,objmax,GetChartInfo(META_DIFFICULTY),0)
-			graphTrainer_level=limitf(double(MybestRecordBuf(ID_REC_AP))/MaxPfPoint*100.0+5.0,0.0,100.0)/100.0
-			switch TargetScoreRank@
-				case TARGET_SCORE_MAX:graphTarget_level=1.0:graphTarget_Desc="理論値スコア":swbreak
-				case TARGET_SCORE_EX:graphTarget_level=0.9:graphTarget_Desc="EXランクのスコア":swbreak
-				case TARGET_SCORE_SSS:graphTarget_level=0.866:graphTarget_Desc="SSSランクのスコア":swbreak
-				case TARGET_SCORE_SS:graphTarget_level=0.833:graphTarget_Desc="SSランクのスコア":swbreak
-				case TARGET_SCORE_S:graphTarget_level=0.8:graphTarget_Desc="Sランクのスコア":swbreak
-				case TARGET_SCORE_AAA:graphTarget_level=0.7:graphTarget_Desc="AAAランクのスコア":swbreak
-				case TARGET_SCORE_AA:graphTarget_level=0.6:graphTarget_Desc="AAランクのスコア":swbreak
-				case TARGET_SCORE_A:graphTarget_level=0.5:graphTarget_Desc="Aランクのスコア":swbreak
-				case TARGET_SCORE_B:graphTarget_level=0.4:graphTarget_Desc="Bランクのスコア":swbreak
-				case TARGET_SCORE_MYBEST:graphTarget_level=double(MybestRecordBuf(ID_REC_SCORE))/10000000.0:graphTarget_Desc="自己ベストのスコア":swbreak
-				case TARGET_SCORE_ONLINETOP:graphTarget_level=double(plitem_ir_score@_MusicSelect_(ChartItemID,ChartLevID,0))/10000000.0:graphTarget_Desc="歴代ベストのスコア":swbreak
-			swend
-			repeat ObjMax
-				graphTrainer_score(cnt)=int(double(ObjHitScore*cnt)*graphTrainer_level)+BonusScore
-				if int(MybestRecordBuf(ID_REC_SCORE))==0 {
-					graphBest_score(cnt)=0
-				} else {
-					graphBest_score(cnt)=limit(lpeek(graphBest_Decode,4*cnt),0,10000000)
-				}
-				graphTarget_score(cnt)=int(double(ObjHitScore*cnt)*graphTarget_level)+BonusScore
-				if cnt==0 :graphTrainer_score(cnt)-BonusScore:graphTarget_score(cnt)-BonusScore
-			loop
 
 		//ゲージ記録用のキャプチャー地点
 			dim gaugeCapture_flag,350
@@ -492,30 +468,64 @@
 			dim scoreCapture_flag,objmax
 			dim scoreCapture_value,objmax
 
-		//"譜面の配置"オプションの適用
-		dim ObjPlacement_map:ObjPlacement_map=0,1,2,3,4,5
-		switch ObjPlacement@
-			case OBJP_MIRROR:ObjPlacement_map=5,4,3,2,1,0:swbreak
-			case OBJP_S_MIRROR:ObjPlacement_map=5,1,2,3,4,0:swbreak
-			case OBJP_N_MIRROR:ObjPlacement_map=0,4,3,2,1,5:swbreak
-			case OBJP_H_MIRROR:ObjPlacement_map=0,2,1,4,3,5:swbreak
-			case OBJP_RANDOM
-				sdim tmpstr:tmpstr=GetRandomArrayMap(4)
-				ObjPlacement_map=0,1,2,3,4,5
-				repeat 4
-					ObjPlacement_map(1+cnt)=int(strmid(tmpstr,cnt,1))+1
+		if ChallengeModeFlag==FALSE {
+			//スコアグラフ生成
+				ConvHEXdec graphBest_Decode,MybestRecordBuf(ID_REC_SCORE_4BINHEX)
+				memexpand graphBest_Decode,4*ObjMax
+
+				//トレーナー
+				ddim MaxPfPoint,1
+				MaxPfPoint=GetPfPoint(int(GetChartInfo(META_LEVEL)),10000000,objmax,GetChartInfo(META_DIFFICULTY),0)
+				graphTrainer_level=limitf(double(MybestRecordBuf(ID_REC_AP))/MaxPfPoint*100.0+5.0,0.0,100.0)/100.0
+				switch TargetScoreRank@
+					case TARGET_SCORE_MAX:graphTarget_level=1.0:graphTarget_Desc="理論値スコア":swbreak
+					case TARGET_SCORE_EX:graphTarget_level=0.9:graphTarget_Desc="EXランクのスコア":swbreak
+					case TARGET_SCORE_SSS:graphTarget_level=0.866:graphTarget_Desc="SSSランクのスコア":swbreak
+					case TARGET_SCORE_SS:graphTarget_level=0.833:graphTarget_Desc="SSランクのスコア":swbreak
+					case TARGET_SCORE_S:graphTarget_level=0.8:graphTarget_Desc="Sランクのスコア":swbreak
+					case TARGET_SCORE_AAA:graphTarget_level=0.7:graphTarget_Desc="AAAランクのスコア":swbreak
+					case TARGET_SCORE_AA:graphTarget_level=0.6:graphTarget_Desc="AAランクのスコア":swbreak
+					case TARGET_SCORE_A:graphTarget_level=0.5:graphTarget_Desc="Aランクのスコア":swbreak
+					case TARGET_SCORE_B:graphTarget_level=0.4:graphTarget_Desc="Bランクのスコア":swbreak
+					case TARGET_SCORE_MYBEST:graphTarget_level=double(MybestRecordBuf(ID_REC_SCORE))/10000000.0:graphTarget_Desc="自己ベストのスコア":swbreak
+					case TARGET_SCORE_ONLINETOP:graphTarget_level=double(plitem_ir_score@_MusicSelect_(ChartItemID,ChartLevID,0))/10000000.0:graphTarget_Desc="歴代ベストのスコア":swbreak
+				swend
+				repeat ObjMax
+					graphTrainer_score(cnt)=int(double(ObjHitScore*cnt)*graphTrainer_level)+BonusScore
+					if int(MybestRecordBuf(ID_REC_SCORE))==0 {
+						graphBest_score(cnt)=0
+					} else {
+						graphBest_score(cnt)=limit(lpeek(graphBest_Decode,4*cnt),0,10000000)
+					}
+					graphTarget_score(cnt)=int(double(ObjHitScore*cnt)*graphTarget_level)+BonusScore
+					if cnt==0 :graphTrainer_score(cnt)-BonusScore:graphTarget_score(cnt)-BonusScore
 				loop
-			swbreak
-			case OBJP_A_RANDOM
-				sdim tmpstr:tmpstr=GetRandomArrayMap(6)
-				repeat 6
-					ObjPlacement_map(cnt)=int(strmid(tmpstr,cnt,1))
-				loop
-			swbreak
-		swend
-		repeat objmax
-			ObjLaneID(cnt)=ObjPlacement_map(ObjLaneID(cnt))
-		loop
+
+			//"譜面の配置"オプションの適用
+			dim ObjPlacement_map:ObjPlacement_map=0,1,2,3,4,5
+			switch ObjPlacement@
+				case OBJP_MIRROR:ObjPlacement_map=5,4,3,2,1,0:swbreak
+				case OBJP_S_MIRROR:ObjPlacement_map=5,1,2,3,4,0:swbreak
+				case OBJP_N_MIRROR:ObjPlacement_map=0,4,3,2,1,5:swbreak
+				case OBJP_H_MIRROR:ObjPlacement_map=0,2,1,4,3,5:swbreak
+				case OBJP_RANDOM
+					sdim tmpstr:tmpstr=GetRandomArrayMap(4)
+					ObjPlacement_map=0,1,2,3,4,5
+					repeat 4
+						ObjPlacement_map(1+cnt)=int(strmid(tmpstr,cnt,1))+1
+					loop
+				swbreak
+				case OBJP_A_RANDOM
+					sdim tmpstr:tmpstr=GetRandomArrayMap(6)
+					repeat 6
+						ObjPlacement_map(cnt)=int(strmid(tmpstr,cnt,1))
+					loop
+				swbreak
+			swend
+			repeat objmax
+				ObjLaneID(cnt)=ObjPlacement_map(ObjLaneID(cnt))
+			loop
+		}
 
 		//譜面のエラーをチェック
 		repeat objmax
@@ -986,21 +996,39 @@
 			//自己ベストスコア
 				DrawStringToHandle 140,652,strf("%08d",MybestRecordBuf(ID_REC_SCORE)),GetColor(0,0,0),hdxfont(fSQNUM24)
 				DrawStringToHandle 140,686,"S+ , 能力値:"+strf("%.2f",MybestRecordBuf(ID_REC_AP)),GetColor(0,0,0),hdxfont(fNSCJM12)
-			//目標スコア
-				DrawStringToHandle 140,752,strf("%08d",int(10000000.0*graphTarget_level)),GetColor(0,0,0),hdxfont(fSQNUM24)
-				DrawStringToHandle 140,786,graphTarget_Desc,GetColor(0,0,0),hdxfont(fNSCJM12)
-			//差分表示（自己ベスト）
-				;sdim tmpstr
-				if curScore-graphBest_score(graphCapture_objid)>=0 :tmpstr="+":else:tmpstr="-"
-				tmpstr+str(abs(curScore-graphBest_score(graphCapture_objid)))
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-				DrawStringXCenterToHandle 376,661,tmpstr,130,GetColor(10,10,10),hdxfont(fPS20)
-			//差分表示（目標スコア）
-				;sdim tmpstr
-				if curScore-graphTarget_score(graphCapture_objid)>=0 :tmpstr="+":else:tmpstr="-"
-				tmpstr+str(abs(curScore-graphTarget_score(graphCapture_objid)))
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-				DrawStringXCenterToHandle 376,768,tmpstr,130,GetColor(10,10,10),hdxfont(fPS20)
+
+				if ChallengeModeFlag==FALSE {
+					//差分表示（自己ベスト）
+					;sdim tmpstr
+					if curScore-graphBest_score(graphCapture_objid)>=0 :tmpstr="+":else:tmpstr="-"
+					tmpstr+str(abs(curScore-graphBest_score(graphCapture_objid)))
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+					DrawStringXCenterToHandle 376,661,tmpstr,130,GetColor(10,10,10),hdxfont(fPS20)
+
+					//目標スコア
+					DrawStringToHandle 140,752,strf("%08d",int(10000000.0*graphTarget_level)),GetColor(0,0,0),hdxfont(fSQNUM24)
+					DrawStringToHandle 140,786,graphTarget_Desc,GetColor(0,0,0),hdxfont(fNSCJM12)
+
+					//差分表示（目標スコア）
+					;sdim tmpstr
+					if curScore-graphTarget_score(graphCapture_objid)>=0 :tmpstr="+":else:tmpstr="-"
+					tmpstr+str(abs(curScore-graphTarget_score(graphCapture_objid)))
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+					DrawStringXCenterToHandle 376,768,tmpstr,130,GetColor(10,10,10),hdxfont(fPS20)
+				} else {
+					//差分表示（自己ベスト）
+					;sdim tmpstr
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+					DrawStringXCenterToHandle 376,661,"+********",130,GetColor(10,10,10),hdxfont(fPS20)
+
+					//目標スコア
+					DrawStringToHandle 140,752,"********",GetColor(0,0,0),hdxfont(fSQNUM24)
+
+					//差分表示（目標スコア）
+					;sdim tmpstr
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+					DrawStringXCenterToHandle 376,768,"+********",130,GetColor(10,10,10),hdxfont(fPS20)
+				}
 		}
 
 		//キー
@@ -1136,7 +1164,7 @@
 			}
 
 		//スコアグラフ
-		if LowQuaFlag@==FALSE {
+		if LowQuaFlag@==FALSE&ChallengeModeFlag==FALSE {
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 1500,240,hdximg(ibg_scoregraph),TRUE
 
@@ -1154,9 +1182,14 @@
 			DrawExtendGraph 1732,740-int(double(graphBest_score(graphCapture_objid))/10000000.0*400.0),1732+50,740,hdximg(igraph_best),FALSE
 			DrawExtendGraph 1798,740-int(double(graphTarget_score(graphCapture_objid))/10000000.0*400.0),1798+50,740,hdximg(igraph_target),FALSE
 		}
+		if ChallengeModeFlag {
+			setease 100,256,ease_linear+ease_loop
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount,60)
+			DrawGraph 1500,240,hdximg(ibg_scoregraph_challenge),TRUE
+		}
 
 		//スコア
-			;SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 1416,100,hdximg(ibg_score),TRUE
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 			setease easeScoreA,easeScoreB,ease_linear
@@ -1252,9 +1285,16 @@
 					wait
 					StartMusicSelect
 					*/
-					InitScene ID_RESULT
-					LoadResultFonts
-					StartResult ChartItemID,ChartLevID
+					if ChallengeModeFlag==FALSE {
+						InitScene ID_RESULT
+						LoadResultFonts
+						StartResult ChartItemID,ChartLevID
+					} else {
+						InitScene ID_CHALLENGE
+						InitChallengeFonts
+						StartChallenge
+						ExtraPlayInfo@+","+JudgeMissionResult()
+					}
 				}
 			}
 
@@ -1607,5 +1647,18 @@
 
 			WebAPI_SendGlobalRanking GetChartInfo(META_UUID),curScore
 	return
+
+	#defcfunc JudgeMissionResult
+		sdim MissionRes
+		switch stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync)
+			case"ed278d27-4e77-d7c6-4388-60d501d81531"	//楽曲"進捗どうですか？"の難易度NORMALをクリア
+				if GaugeType@==GAUGE_NORMAL&curGauge>70.0 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+		swend
+		return MissionRes
 
 #global
