@@ -43,6 +43,10 @@
 		Acckey@=GetINIvalue(coreBuf,"Hash","acckey")
 		dim OfflinePass@
 		OfflinePass@=ConvStrToBool(GetINIvalue(coreBuf,"Auth","Offline.Mode"))
+		sdim httpproxy@
+		httpproxy@=GetINIvalue(coreBuf,"Auth","Proxy")
+		sdim httphost@
+		httphost@=GetINIvalue(coreBuf,"Auth","Server")
 
 	return
 

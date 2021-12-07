@@ -45,9 +45,10 @@
 
 	//セーブデータ同期
 		SetDefaultSaveData
-		WebAPI_Init"puoro.ml"
+		WebAPI_Init geturl_server(httphost@),httpproxy@
 		sdim LoginUserInfo
-		LoginUserInfo(ID_HOST)="puoro.ml/apiv2"
+		LoginUserInfo(ID_HOST)=httphost@
+		strrep LoginUserInfo(ID_HOST),"http://","":strrep LoginUserInfo(ID_HOST),"https://",""
 		LoginUserInfo(ID_NAME)=GetINIvalue(coreBuf@_load_,"Auth","Name")
 		LoginUserInfo(ID_KEY)=GetINIvalue(coreBuf@_load_,"Auth","Password")
 		LoginUserInfo(ID_DECODE)=GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_0")

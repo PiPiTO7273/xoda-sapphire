@@ -16,7 +16,8 @@
 	bypass=s2
 return
 
-#deffunc WebAPI_Init str _url
+#deffunc WebAPI_Init str _url,str _proxy
+	sdim httpproxy:httpproxy=_proxy
 	return openHttp("puoro.sapphire/*",geturl_server(_url),80)
 
 #deffunc setHeader var v1, str s2
@@ -137,7 +138,7 @@ return
 	header+="Content-type: application/x-www-form-urlencoded\n\n"
 	sdim rhead,1024
 	sdim httpres, 1024*1024
-	setProxy "",""		//プロキシのアドレス:ポート , bypass
+	setProxy httpproxy,""		//プロキシのアドレス:ポート , bypass
 	setHeader header,""
 	;if openHttp("puoro.sapphire/*",geturl_server(_url),80)==0 {
 		if httpRequest(geturl_withoutserver(_url),dpost,1)==0 {
@@ -161,7 +162,7 @@ return httpres
 	header+="Content-type: application/x-www-form-urlencoded\n\n"
 	sdim rhead,1024
 	sdim httpres, 1024*1024
-	setProxy "",""		//プロキシのアドレス:ポート , bypass
+	setProxy httpproxy,""		//プロキシのアドレス:ポート , bypass
 	setHeader header,""
 	;if openHttp("puoro.sapphire/*",geturl_server(_url),80)==0 {
 		if httpRequest(geturl_withoutserver(_url),dpost,0)==0 {
