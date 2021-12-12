@@ -38,7 +38,6 @@
 	#enum fSQNUM40
 
 	#deffunc LoadLobbyImages
-		DrawLoadScreen
 		dim hdximg
 		SetDXArchiveExtension"bin"
 		hdximg(ibg)=hdximg@(ibg_common_0)
@@ -118,7 +117,7 @@
 		ItemLinked=1,1,0,1,0,1,1,0,0,1,0,1,1
 		bfActiveItemID=-1
 		ActiveItemID=-1
-		PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+		if cfunc64i(GetMovieStateToGraph,hdximg(ibg))==0 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
 
 		//BGMçƒê∂
 		if BASS_ChannelIsActive(int(hcommonchannel@))!BASS_ACTIVE_PLAYING :PlaySE int(hcommonchannel@),0.65
@@ -329,18 +328,19 @@
 		//ÉçÅ[Éhèàóù
 			if InitLoadFlag@==FALSE {
 				switch SceneCount-20
-					case 0:LoadMusicSelectImages:swbreak
-					case 1:LoadMusicSelectSounds:swbreak
-					case 2:LoadGamePlayImages:swbreak
-					case 3:LoadPartnerIcon:swbreak
-					case 4:InitGamePlaySounds:swbreak
-					case 5:LoadKeyConfigImages:swbreak
-					case 6:LoadResultImages:swbreak
-					case 7:LoadResultSounds:swbreak
-					case 8:LoadPartnerSelectImages:swbreak
-					case 9:LoadChallengeModeMap"Data/map-challenge.bin":swbreak
-					case 10:LoadChallengeImages:swbreak
-					case 11:InitLoadFlag@=TRUE:swbreak
+					case 0:WebAPI_SyncProfile:swbreak
+					case 1:LoadMusicSelectImages:swbreak
+					case 2:LoadMusicSelectSounds:swbreak
+					case 3:LoadGamePlayImages:swbreak
+					case 4:LoadPartnerIcon:swbreak
+					case 5:InitGamePlaySounds:swbreak
+					case 6:LoadKeyConfigImages:swbreak
+					case 7:LoadResultImages:swbreak
+					case 8:LoadResultSounds:swbreak
+					case 9:LoadPartnerSelectImages:swbreak
+					case 10:LoadChallengeModeMap"Data/map-challenge.bin":swbreak
+					case 11:LoadChallengeImages:swbreak
+					case 12:InitLoadFlag@=TRUE:swbreak
 				swend
 			}
 
@@ -376,7 +376,8 @@
 					goto*Exit@
 				swbreak
 				default
-					goto*Exit@
+					InitScene ID_DUMMY
+					StartDummy
 				swbreak
 			swend
 		}

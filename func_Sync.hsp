@@ -31,6 +31,10 @@
 		dim musicselect_ItemID@		//曲選択画面の項目ID
 		dim musicselect_LevelID@		//曲選択画面のレベル
 
+		dim WatchTutorial_MusicSelect_0@
+		dim WatchTutorial_MusicSelect_1@
+		dim WatchTutorial_Option@
+
 		AccessID@portalsync="*"
 		RegName@portalsync="******"
 		RegLev@portalsync=1
@@ -198,7 +202,7 @@
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.AUTOPLAY")=="" :syncINIdata+"XODA.OPTION.AUTOPLAY=0\n"
 		AutoPlayFlag@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.AUTOPLAY"))
 
-		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.BONUSFLAG")=="" :syncINIdata+"XODA.OPTION.BONUSFLAG=0\n"
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.BONUSFLAG")=="" :syncINIdata+"XODA.OPTION.BONUSFLAG=1\n"
 		drawbonusFlag@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.OPTION.BONUSFLAG"))
 
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.MUSICSELECT.CURSORID")=="" :syncINIdata+"XODA.MUSICSELECT.CURSORID=0\n"
@@ -226,6 +230,15 @@
 
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.CHAPTERSTEPID")=="" :syncINIdata+"XODA.CHAPTERSTEPID=0\n"
 		ChapterStepID@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.CHAPTERSTEPID"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.MUSICSELECT.0")=="" :syncINIdata+"XODA.WATCHTUTORIAL.MUSICSELECT.0=0\n"
+		WatchTutorial_MusicSelect_0@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.MUSICSELECT.0"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.MUSICSELECT.1")=="" :syncINIdata+"XODA.WATCHTUTORIAL.MUSICSELECT.1=0\n"
+		WatchTutorial_MusicSelect_1@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.MUSICSELECT.1"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.PLAYOPTION")=="" :syncINIdata+"XODA.WATCHTUTORIAL.PLAYOPTION=0\n"
+		WatchTutorial_Option@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.PLAYOPTION"))
 	return
 
 	#deffunc GetPartnerCharUnlockData
@@ -325,12 +338,15 @@
 	//プロフィールを保存
 	#deffunc WebAPI_SendProfile str _obj,str _val
 		if OfflinePass@ :return""
-		CheckNetworkConnection
 	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+RegName@portalsync+"&password="+RegAuth@portalsync+"&decode="+WebAPI_DecodeKey+"&object="+_obj+"&value="+_val)
 
 	//プロフィールをすべて保存
 	#deffunc SendAllProfile
 		if OfflinePass@ :return
+		if RegName@portalsync=="" :return
+		if RegAuth@portalsync=="" :return
+		if InitLoadFlag@==FALSE :return
+		CheckNetworkConnection
 		WebAPI_SendProfile"XODA.LEVEL",str(RegLev@portalsync)
 		WebAPI_SendProfile"XODA.EXP",str(RegEXP@portalsync)
 		WebAPI_SendProfile"XODA.RATE",str(RegPfPoint@portalsync)
@@ -351,6 +367,9 @@
 		WebAPI_SendProfile"XODA.NUMLILLY",str(NumLilly@portalsync)
 		WebAPI_SendProfile"XODA.CHAPTERMAPID",str(ChapterMapID@portalsync)
 		WebAPI_SendProfile"XODA.CHAPTERSTEPID",str(ChapterStepID@portalsync)
+		WebAPI_SendProfile"XODA.WATCHTUTORIAL.MUSICSELECT.0",str(WatchTutorial_MusicSelect_0@)
+		WebAPI_SendProfile"XODA.WATCHTUTORIAL.MUSICSELECT.1",str(WatchTutorial_MusicSelect_1@)
+		WebAPI_SendProfile"XODA.WATCHTUTORIAL.PLAYOPTION",str(WatchTutorial_Option@)
 	return
 
 	//接続ハッシュ取得

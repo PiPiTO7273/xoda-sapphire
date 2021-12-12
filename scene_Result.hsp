@@ -70,6 +70,7 @@
 		hdximg(inav)=LoadGraph("Data/Nav_Result.png")
 		hdximg(ilayer_button)=LoadGraph("Data/layer_result_button.png")
 		hdximg(ilayer_failed)=LoadGraph("Data/layer_result_failed.png")
+		hdximg(ilayer_assist)=LoadGraph("Data/layer_result_assist.png")
 		hdximg(ilayer_clear)=LoadGraph("Data/layer_result_clear.png")
 		hdximg(ilayer_expert)=LoadGraph("Data/layer_result_expert.png")
 		hdximg(ilayer_madness)=LoadGraph("Data/layer_result_madness.png")
@@ -146,34 +147,36 @@
 					ReceiveItemList="なし"
 				swbreak
 				case"ASSIST-CLEAR"
-					ReceiveItemList="音色の欠片x1\n100 Lilly"
+					ReceiveItemList="音色の欠片x1\n300 Lilly"
 					NumFragments@portalsync+1
-					NumLilly@portalsync+100
+					NumLilly@portalsync+300
 				swbreak
 				case"CLEAR"
-					ReceiveItemList="音色の欠片x2\n100 Lilly"
+					ReceiveItemList="音色の欠片x2\n300 Lilly"
 					NumFragments@portalsync+2
-					NumLilly@portalsync+100
+					NumLilly@portalsync+300
 				swbreak
 				case"EXPERT-CLEAR"
-					ReceiveItemList="音色の欠片x2\n200 Lilly"
+					ReceiveItemList="音色の欠片x2\n500 Lilly"
 					NumFragments@portalsync+2
-					NumLilly@portalsync+200
+					NumLilly@portalsync+500
 				swbreak
 				case"MADNESS-CLEAR"
-					ReceiveItemList="音色の欠片x3\n250 Lilly"
+					ReceiveItemList="音色の欠片x3\n500 Lilly"
 					NumFragments@portalsync+3
-					NumLilly@portalsync+250
+					NumLilly@portalsync+500
 				swbreak
 				case"FULLCOMBO"
-					ReceiveItemList="音色の欠片x4\nチャレンジチケットx1"
+					ReceiveItemList="音色の欠片x4、500Lilly\nチャレンジチケットx1"
 					NumFragments@portalsync+4
 					NumTickets@portalsync+1
+					NumLilly@portalsync+500
 				swbreak
 				case"ALL-EXCELLENT"
-					ReceiveItemList="音色の欠片x5\nチャレンジチケットx1"
+					ReceiveItemList="音色の欠片x5、600Lilly\nチャレンジチケットx1"
 					NumFragments@portalsync+5
 					NumTickets@portalsync+1
+					NumLilly@portalsync+600
 				swbreak
 			swend
 		//獲得経験値
@@ -405,6 +408,7 @@
 			//プレイヤー情報
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				DrawGraph 1170,41,hdximg(ibg_playerinfo),TRUE
+				DrawExtendGraph 1170,40,1170+125,40+100,hCharImg@charicon(RegCharID@portalsync),TRUE
 					SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 					//名前
 					DrawStringToHandle 1315,54,RegName@portalsync,Getcolor(0,0,0),hdxfont(fPS24)
@@ -483,6 +487,7 @@
 			}
 
 		//ボタンの当たり判定
+		if SceneCount>70 {
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,120
 			if insquare(CursorPosX,CursorPosY,1440,333,1440+256,333+50) {
 				//Twitterでシェア
@@ -527,6 +532,7 @@
 				OpenEditCommentDialog
 				SetDrawScreen hdximg(ilayer_all)
 			}
+		}
 
 		//暗転処理
 		if LevelupDispFlag==FALSE {

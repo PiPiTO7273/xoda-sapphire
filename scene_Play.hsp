@@ -47,6 +47,7 @@
 	#enum istg_fullcombo
 	#enum istg_allex
 	#enum istg_failed
+	#enum ihowtoplay
 
 	//DXライブラリフォントハンドル(gameplay)
 	#enum fEOEXB16			=	0
@@ -147,6 +148,8 @@
 		hdximg(istg_fullcombo)=LoadGraph("Data/res_stg/stg_FullCombo.ogv")
 		hdximg(istg_allex)=LoadGraph("Data/res_stg/stg_AllEx.ogv")
 		hdximg(istg_failed)=LoadGraph("Data/res_stg/stg_Failed.ogv")
+
+		hdximg(ihowtoplay)=LoadGraph("Data/layer_howtoplay.png")
 
 		dim hdximg_arr_bomb,10
 		cfunc64v LoadDivGraph,"Data/effect_bomb.png",10,5,2,192,192,varptr64(hdximg_arr_bomb)
@@ -600,10 +603,17 @@
 			ddim bonusPfPoint
 			dim BonusAddFlag
 			sdim tmpstr
+			dim DispHowToPlayFlag
 			burstCount=-1
 
 			easeAddSpeedA=AddSpeed@:easeAddSpeedB=AddSpeed@
 			if GaugeType@==GAUGE_EXPERT|GaugeType@==GAUGE_MADNESS :curGauge=100.0
+
+			//how to play
+			DispHowToPlayFlag=TRUE
+			repeat 14
+				if confKeyCode@(cnt)!confDefKeyCode@(cnt) :DispHowToPlayFlag=FALSE
+			loop
 
 		//BGAファイルの処理
 			if GetChartInfo(META_BGA)!"" {
@@ -641,6 +651,19 @@
 
 	//プレイ画面の毎フレーム処理
 	#deffunc DrawGamePlay
+
+		//カーソル位置補正
+			dim CursorPosX:dim CursorPosY:dim MouseInput
+			MouseInput=GetMouseInput()
+			CursorPosX=limit(int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@))),0,BufWidth@)
+			CursorPosY=limit(int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@))),0,BufHeight@)
+			RawWheelVal=GetMouseWheelRotVol()
+			RawWheelMove=0
+			if RawWheelVal<0&bfRawWheelVal<0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+			if RawWheelVal>0&bfRawWheelVal>0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+			if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
+			bfRawWheelVal=RawWheelVal
+			PushButtonFlag=FALSE
 
 		//遅延補正
 			TotalRagMs+double(curCount)-curCount_f
@@ -1246,6 +1269,20 @@
 			DrawGraph 528,300+500-int(curGauge)*5-16,hdximg(igauge_value),TRUE
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 			DrawStringXCenterToHandle 528,300+500-int(curGauge)*5-9,""+str(int(curGauge))+"%",64,GetColor(255,255,255),hdxfont(fPS16)
+
+		//遊び方
+		if curcount<PreTime-1000 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(curcount-100,400)
+			setease 64,0,ease_cubic_out
+			DrawGraph 680,380+getease(curcount-100,400),hdximg(ihowtoplay),TRUE
+		}
+		if curcount>=PreTime-1000 {
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(curcount-PreTime+1000,400)
+			setease 0,64,ease_cubic_out
+			DrawGraph 680,380+getease(curcount-PreTime+1000,400),hdximg(ihowtoplay),TRUE
+		}
 
 		//終了時のムービー
 			if FinishFlag==TRUE {

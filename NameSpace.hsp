@@ -12,6 +12,7 @@
 #enum global iStatus_Ticket
 #enum global iStatus_Lilly
 #enum global ishape_commonbg
+#enum global ibg_dummyscene
 
 //ÉVÅ[ÉìID
 #enum global ID_BOOT		=	0
@@ -24,6 +25,12 @@
 #enum global ID_RESULT
 #enum global ID_PARTNERSELECT
 #enum global ID_FATALERROR
+#enum global ID_SIGNIN
+#enum global ID_REGISTER
+#enum global ID_WELCOME0
+#enum global ID_WELCOME1
+#enum global ID_WELCOME2
+#enum global ID_DUMMY
 
 #enum sndCancel	=	0
 #enum sndChange_0

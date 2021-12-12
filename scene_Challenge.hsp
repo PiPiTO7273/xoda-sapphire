@@ -17,10 +17,13 @@
 	#enum iticketpay_info1
 	#enum iticketpay_error0
 	#enum iticketpay_error1
+	#enum iticketpay_error2
 	#enum istep_lilly
 	#enum istep_fragments
 	#enum istep_mission_desc
 	#enum iticketpay_button
+	#enum ibutton_changechapter
+	#enum ibutton_changechapter_active
 
 	#enum fEOEXB16			=	0
 	#enum fEOEXB20
@@ -49,6 +52,7 @@
 	#enum ID_INFO_1
 	#enum ID_ERROR_0
 	#enum ID_ERROR_1
+	#enum ID_ERROR_2
 
 	#deffunc LoadChallengeImages
 		dim hdximg
@@ -69,10 +73,13 @@
 		hdximg(iticketpay_info1)=LoadGraph("Data/layer_challenge_ticketpayments_info_1.png")
 		hdximg(iticketpay_error0)=LoadGraph("Data/layer_challenge_ticketpayments_error_0.png")
 		hdximg(iticketpay_error1)=LoadGraph("Data/layer_challenge_ticketpayments_error_1.png")
+		hdximg(iticketpay_error2)=LoadGraph("Data/layer_challenge_ticketpayments_error_2.png")
 		hdximg(istep_lilly)=LoadGraph("Data/Icon_Lilly_40x40.png")
 		hdximg(istep_fragments)=LoadGraph("Data/Icon_Fragments_40x40.png")
 		hdximg(istep_mission_desc)=LoadGraph("Data/layer_challenge_missiondesc.png")
 		hdximg(iticketpay_button)=LoadGraph("Data/layer_challenge_confirm_button.png")
+		hdximg(ibutton_changechapter)=LoadGraph("Data/layer_challenge_changechapter.png")
+		hdximg(ibutton_changechapter_active)=LoadGraph("Data/layer_challenge_changechapter_active.png")
 		return
 
 	#deffunc InitChallengeFonts
@@ -109,27 +116,7 @@
 		dim ChallengeStartFlag
 
 		//楽曲の報酬
-		dim tmpRewardsImg,10
-		sdim tmpRewardsTitle,64
-		repeat 10
-			if stepType@(ChapterMapID@portalsync,cnt)==ID_STEP_GETMAP {
-				exist"Data/map-"+stepPrm@(ChapterMapID@portalsync,cnt)+".bin"
-				sdim tmpstr,strsize
-				notesel tmpstr
-				noteload"Data/map-"+stepPrm@(ChapterMapID@portalsync,cnt)+".bin"
-				//曲名
-				tmpRewardsTitle(cnt)="楽曲「"+GetINIvalue(tmpstr,"Metadata","Title")+"」 難易度 "+GetINIvalue(tmpstr,"Metadata","Difficulty")
-
-				//ジャケット画像
-				exist"Data/mr/"+GetINIvalue(tmpstr,"Metadata","Resource")+"/img.png"
-				if strsize==-1 {
-					tmpRewardsImg(cnt)=LoadGraph("Data/Icon_Artwork_Dummy.png")
-				} else {
-					tmpRewardsImg(cnt)=LoadGraph("Data/mr/"+GetINIvalue(tmpstr,"Metadata","Resource")+"/img.png")
-				}
-				sdim tmpstr
-			}
-		loop
+		LoadRewardsMapImg
 
 		dim WindowID
 		dim WindowCount
@@ -346,18 +333,18 @@
 			DrawGraph 1400+getease(SceneCount-40,20),710,hdximg(iticketpay),TRUE
 
 			//ボタンのアクティブエフェクト
-			if insquare(CursorPosX,CursorPosY,1440,724,1440+300,724+90)&WindowID==0 {
+			if insquare(CursorPosX,CursorPosY,1440,724,1440+300,724+90)&WindowID==0&stepEaseCount==-1 {
 				DrawGraph 1440,724,hdximg(iticketpay_active),TRUE
-				if DecideCount==-1&(MouseInput&MOUSE_INPUT_LEFT) {
+				if (MouseInput&MOUSE_INPUT_LEFT) {
 					PlaySE int(hcommonsech@(sndDecide@)),1.0
 					WindowCount=0
 					WindowID=ID_CONFIRM_0
 					if stepType@(ChapterMapID@portalsync,ChapterStepID@portalsync)==ID_STEP_MISSION :WindowID=ID_CONFIRM_1
 				}
 			}
-			if insquare(CursorPosX,CursorPosY,1440,826,1440+300,826+90)&WindowID==0 {
+			if insquare(CursorPosX,CursorPosY,1440,826,1440+300,826+90)&WindowID==0&stepEaseCount==-1 {
 				DrawGraph 1440,826,hdximg(iticketpay_active),TRUE
-				if DecideCount==-1&(MouseInput&MOUSE_INPUT_LEFT) {
+				if (MouseInput&MOUSE_INPUT_LEFT) {
 					WindowCount=0
 					if stepType@(ChapterMapID@portalsync,ChapterStepID@portalsync)==ID_STEP_MISSION {
 						PlaySE int(hcommonsech@(sndDecide@)),1.0
@@ -374,6 +361,27 @@
 			setease 0,-128,ease_cubic_out
 			DrawGraph 1400+getease(DecideCount,20),710,hdximg(iticketpay),TRUE
 		}
+
+		//チャプター変更
+		/*if DecideCount==-1&SceneCount>50 {
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-50,10)
+			DrawGraph 90,448,hdximg(ibutton_changechapter),TRUE
+
+			//テキスト
+			setease 150,256,ease_linear+ease_loop
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-50,30)
+			DrawStringToHandle 322,456,"※チャプターの変更を行うとチケットを5枚消費します。",$28BDCE,hdxfont(fNSCJM16)
+
+			if insquare(CursorPosX,CursorPosY,90,448,90+200,448+40) {
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 90,448,hdximg(ibutton_changechapter_active),TRUE
+
+				if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+					//go
+				}
+			}
+		}*/
 
 		//確認ウィンドウ
 		if WindowID!0 {
@@ -488,9 +496,20 @@
 					}
 				}
 			swbreak
+			case ID_ERROR_2		//現在、プレイできるチャプターがありません。
+				if insquare(CursorPosX,CursorPosY,885,686,885+150,686+40) {
+					DrawGraph 885,686,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndCancel@)),1.0
+						WindowID*-1:WindowCount=0
+						PushButtonFlag=TRUE
+						DecideCount=0
+					}
+				}
+			swbreak
 			case ID_INFO_0			//報酬を獲得
 				if insquare(CursorPosX,CursorPosY,885,662,885+150,662+40) {
-					DrawGraph 794,666,hdximg(iticketpay_button),TRUE
+					DrawGraph 885,662,hdximg(iticketpay_button),TRUE
 					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
 						PlaySE int(hcommonsech@(sndCancel@)),1.0
 						WindowID*-1:WindowCount=0
@@ -513,6 +532,14 @@
 				DrawStringXCenterToHandle 524+32+getease(WindowCount-15,20),520,tmpstr,800,$00FFCB,hdxfont(fNSCJM24)
 			swbreak
 			case ID_INFO_1
+				if insquare(CursorPosX,CursorPosY,885,662,885+150,662+40) {
+					DrawGraph 885,662,hdximg(iticketpay_button),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndDecide@)),1.0
+						WindowCount=0
+						GoChapterForward
+					}
+				}
 			swbreak
 		swend
 
@@ -592,6 +619,12 @@
 		//シーン引き継ぎ
 		if GetCSVcolumn(ExtraPlayInfo@,0,",")=="CHALLENGE"&GetCSVcolumn(ExtraPlayInfo@,3,",")=="#t"&SceneCount==0 {
 			GoStepForward
+			ExtraPlayInfo@=""
+		}
+
+		//全クリ
+		if ChapterStepID@portalsync==10&SceneCount==0 {
+			GoChapterForward
 		}
 
 		AddCount SceneCount
@@ -625,9 +658,34 @@
 			AddCount WindowCount
 			if WindowID==0&stepEaseCount!-1 :stepEaseCount++
 			if stepEaseCount==25 :PlaySE int(hcommonsech@(sndMovement@)),1.0
+			if stepEaseCount>100 :stepEasePos=0,0:stepEaseCount=-1
 			bfMouseInput=MouseInput
 		}
 
+		return
+
+	#deffunc LoadRewardsMapImg
+		dim tmpRewardsImg,10
+		sdim tmpRewardsTitle,64
+		repeat 10
+			if stepType@(ChapterMapID@portalsync,cnt)==ID_STEP_GETMAP {
+				exist"Data/map-"+stepPrm@(ChapterMapID@portalsync,cnt)+".bin"
+				sdim tmpstr,strsize
+				notesel tmpstr
+				noteload"Data/map-"+stepPrm@(ChapterMapID@portalsync,cnt)+".bin"
+				//曲名
+				tmpRewardsTitle(cnt)="楽曲「"+GetINIvalue(tmpstr,"Metadata","Title")+"」 難易度 "+GetINIvalue(tmpstr,"Metadata","Difficulty")
+
+				//ジャケット画像
+				exist"Data/mr/"+GetINIvalue(tmpstr,"Metadata","Resource")+"/img.png"
+				if strsize==-1 {
+					tmpRewardsImg(cnt)=LoadGraph("Data/Icon_Artwork_Dummy.png")
+				} else {
+					tmpRewardsImg(cnt)=LoadGraph("Data/mr/"+GetINIvalue(tmpstr,"Metadata","Resource")+"/img.png")
+				}
+				sdim tmpstr
+			}
+		loop
 		return
 
 	#deffunc GoStepForward
@@ -650,6 +708,22 @@
 				RegChartUnlockFlag stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync),TRUE
 				WindowID=ID_INFO_0
 			}
+		}
+		return
+
+	#deffunc GoChapterForward
+		if ChapterMapID@portalsync+1>=maxchapter@ {
+			WindowID=ID_ERROR_2
+		} else {
+			ChapterMapID@portalsync++
+			ChapterStepID@portalsync=0
+			WindowID*-1
+
+			repeat 10
+				DeleteGraph tmpRewardsImg(cnt)
+			loop
+
+			LoadRewardsMapImg
 		}
 		return
 

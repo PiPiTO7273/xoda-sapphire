@@ -205,6 +205,58 @@
 		split tmpstr,_spt,tmpstr
 		if length(tmpstr)<=_id :return""
 		return tmpstr(_id)
+
+	#deffunc StartDummy
+		dim SceneCount
+		dim DecideCount
+		DecideCount=-1
+		return
+
+	#deffunc DrawDummy
+
+		//ƒJ[ƒ\ƒ‹ˆÊ’u•â³
+		dim MouseInput
+		MouseInput=GetMouseInput()
+
+		//”wŒi
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg@(ibg_common_0),FALSE
+
+		if SceneCount>10&DecideCount==-1 {
+			setease 50,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,25)
+			setease 1.2,1,ease_cubic_out
+			EaseWidth=int(1805.0*geteasef(SceneCount-10,25))
+			EaseHeight=int(800.0*geteasef(SceneCount-10,25))
+			EasePosX=0+1805/2-EaseWidth/2
+			EasePosY=140+800/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg@(ibg_dummyscene),TRUE
+		}
+		if DecideCount!-1 {
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,25)
+			setease 1,1.2,ease_cubic_out
+			EaseWidth=int(1805.0*geteasef(DecideCount,25))
+			EaseHeight=int(800.0*geteasef(DecideCount,25))
+			EasePosX=0+1805/2-EaseWidth/2
+			EasePosY=140+800/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg@(ibg_dummyscene),TRUE
+		}
+		if (MouseInput&MOUSE_INPUT_LEFT)&DecideCount==-1 {
+			PlaySE int(hcommonsech@(sndDecide@)),1.0
+			DecideCount=0
+		}
+		if DecideCount!-1 :AddCount DecideCount
+		if DecideCount>25 {
+			InitScene ID_LOBBY
+			LoadLobbyImages
+			InitLobbyFonts
+			StartLobby
+		}
+
+		AddCount SceneCount
+		
+		return
 #global
 InitIntArray
 InitStrArray

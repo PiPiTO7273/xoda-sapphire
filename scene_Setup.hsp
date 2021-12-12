@@ -1,0 +1,683 @@
+
+#module _setup_
+
+	#enum ibg				=	0
+	#enum ibg_signin_window
+	#enum ibg_register_window
+	#enum iinput_focus
+	#enum inav_signin
+	#enum inav_register
+	#enum ibutton_active
+	#enum ibg_welcome_0
+	#enum ibg_welcome_1
+	#enum ibg_welcome_2
+	#enum ilayer_welcome_1
+
+	#enum fEOEXB16			=	0
+	#enum fEOEXB20
+	#enum fEOEXB32
+	#enum fFAB50
+	#enum fNSCJM12
+	#enum fNSCJM15
+	#enum fNSCJM16
+	#enum fNSCJM20
+	#enum fNSCJM24
+	#enum fNSCJM32
+	#enum fPS14
+	#enum fPS16
+	#enum fPS18
+	#enum fPS20
+	#enum fPS24
+	#enum fPS80
+	#enum fSQNUM16
+	#enum fSQNUM24
+	#enum fSQNUM40
+
+	#deffunc LoadSigninImages
+		dim hdximg
+		hdximg(ibg)=hdximg@(ibg_common_0)
+		hdximg(ibg_signin_window)=LoadGraph("Data/bg_signin.png")
+		hdximg(ibg_register_window)=LoadGraph("Data/bg_register.png")
+		hdximg(iinput_focus)=LoadGraph("Data/layer_signin_focus.png")
+		hdximg(inav_signin)=LoadGraph("Data/Nav_Signin.png")
+		hdximg(inav_register)=LoadGraph("Data/Nav_Register.png")
+		hdximg(ibutton_active)=LoadGraph("Data/layer_setup_button.png")
+		hdximg(ibg_welcome_0)=LoadGraph("Data/bg_welcome_0.png")
+		hdximg(ibg_welcome_1)=LoadGraph("Data/bg_welcome_1.png")
+		hdximg(ibg_welcome_2)=LoadGraph("Data/bg_welcome_2.png")
+		hdximg(ilayer_welcome_1)=LoadGraph("Data/layer_welcome_1.png")
+		return
+
+	#deffunc LoadSigninFonts
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
+		hdxfont(fEOEXB20)=LoadFontDataToHandle("Data/eoexb20.bin")
+		hdxfont(fEOEXB32)=LoadFontDataToHandle("Data/eoexb32.bin")
+		hdxfont(fFAB50)=LoadFontDataToHandle("Data/fab50.bin")
+		hdxfont(fNSCJM12)=LoadFontDataToHandle("Data/nscjm12.bin")
+		hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
+		hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
+		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		hdxfont(fNSCJM24)=LoadFontDataToHandle("Data/nscjm24.bin")
+		hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
+		hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
+		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
+		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
+		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+		hdxfont(fPS24)=LoadFontDataToHandle("Data/ps24.bin")
+		hdxfont(fPS80)=LoadFontDataToHandle("Data/ps80.bin")
+		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
+		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
+		return
+
+	#deffunc StartSignin
+
+		dim SceneCount
+		dim InputBoxFocus
+		sdim InputBoxNewString
+		sdim InputBoxBuf
+		sdim InputBox_UserName
+		sdim InputBox_Password
+		InputBoxFocus=-1
+
+		dim DecideCount
+		DecideCount=-1
+
+		sdim ErrorMsg
+
+		if cfunc64i(GetMovieStateToGraph,hdximg(ibg))==0 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+		//BGM再生
+		if BASS_ChannelIsActive(int(hcommonchannel@))!BASS_ACTIVE_PLAYING :PlaySE int(hcommonchannel@),0.65
+
+		return
+
+	#deffunc DrawSignin
+
+		//カーソル位置補正
+		dim CursorPosX:dim CursorPosY:dim MouseInput
+		MouseInput=GetMouseInput()
+		CursorPosX=limit(int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@))),0,BufWidth@)
+		CursorPosY=limit(int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@))),0,BufHeight@)
+		RawWheelVal=GetMouseWheelRotVol()
+		RawWheelMove=0
+		if RawWheelVal<0&bfRawWheelVal<0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if RawWheelVal>0&bfRawWheelVal>0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
+		bfRawWheelVal=RawWheelVal
+		PushButtonFlag=FALSE
+
+		//文字列の取得
+		if DecideCount==-1 {
+			if KeyFlag@(KEY_INPUT_A)==TRUE&bfKeyFlag@(KEY_INPUT_A)==FALSE :InputBoxNewString+"A"
+			if KeyFlag@(KEY_INPUT_B)==TRUE&bfKeyFlag@(KEY_INPUT_B)==FALSE :InputBoxNewString+"B"
+			if KeyFlag@(KEY_INPUT_C)==TRUE&bfKeyFlag@(KEY_INPUT_C)==FALSE :InputBoxNewString+"C"
+			if KeyFlag@(KEY_INPUT_D)==TRUE&bfKeyFlag@(KEY_INPUT_D)==FALSE :InputBoxNewString+"D"
+			if KeyFlag@(KEY_INPUT_E)==TRUE&bfKeyFlag@(KEY_INPUT_E)==FALSE :InputBoxNewString+"E"
+			if KeyFlag@(KEY_INPUT_F)==TRUE&bfKeyFlag@(KEY_INPUT_F)==FALSE :InputBoxNewString+"F"
+			if KeyFlag@(KEY_INPUT_G)==TRUE&bfKeyFlag@(KEY_INPUT_G)==FALSE :InputBoxNewString+"G"
+			if KeyFlag@(KEY_INPUT_H)==TRUE&bfKeyFlag@(KEY_INPUT_H)==FALSE :InputBoxNewString+"H"
+			if KeyFlag@(KEY_INPUT_I)==TRUE&bfKeyFlag@(KEY_INPUT_I)==FALSE :InputBoxNewString+"I"
+			if KeyFlag@(KEY_INPUT_J)==TRUE&bfKeyFlag@(KEY_INPUT_J)==FALSE :InputBoxNewString+"J"
+			if KeyFlag@(KEY_INPUT_K)==TRUE&bfKeyFlag@(KEY_INPUT_K)==FALSE :InputBoxNewString+"K"
+			if KeyFlag@(KEY_INPUT_L)==TRUE&bfKeyFlag@(KEY_INPUT_L)==FALSE :InputBoxNewString+"L"
+			if KeyFlag@(KEY_INPUT_M)==TRUE&bfKeyFlag@(KEY_INPUT_M)==FALSE :InputBoxNewString+"M"
+			if KeyFlag@(KEY_INPUT_N)==TRUE&bfKeyFlag@(KEY_INPUT_N)==FALSE :InputBoxNewString+"N"
+			if KeyFlag@(KEY_INPUT_O)==TRUE&bfKeyFlag@(KEY_INPUT_O)==FALSE :InputBoxNewString+"O"
+			if KeyFlag@(KEY_INPUT_P)==TRUE&bfKeyFlag@(KEY_INPUT_P)==FALSE :InputBoxNewString+"P"
+			if KeyFlag@(KEY_INPUT_Q)==TRUE&bfKeyFlag@(KEY_INPUT_Q)==FALSE :InputBoxNewString+"Q"
+			if KeyFlag@(KEY_INPUT_R)==TRUE&bfKeyFlag@(KEY_INPUT_R)==FALSE :InputBoxNewString+"R"
+			if KeyFlag@(KEY_INPUT_S)==TRUE&bfKeyFlag@(KEY_INPUT_S)==FALSE :InputBoxNewString+"S"
+			if KeyFlag@(KEY_INPUT_T)==TRUE&bfKeyFlag@(KEY_INPUT_T)==FALSE :InputBoxNewString+"T"
+			if KeyFlag@(KEY_INPUT_U)==TRUE&bfKeyFlag@(KEY_INPUT_U)==FALSE :InputBoxNewString+"U"
+			if KeyFlag@(KEY_INPUT_V)==TRUE&bfKeyFlag@(KEY_INPUT_V)==FALSE :InputBoxNewString+"V"
+			if KeyFlag@(KEY_INPUT_W)==TRUE&bfKeyFlag@(KEY_INPUT_W)==FALSE :InputBoxNewString+"W"
+			if KeyFlag@(KEY_INPUT_X)==TRUE&bfKeyFlag@(KEY_INPUT_X)==FALSE :InputBoxNewString+"X"
+			if KeyFlag@(KEY_INPUT_Y)==TRUE&bfKeyFlag@(KEY_INPUT_Y)==FALSE :InputBoxNewString+"Y"
+			if KeyFlag@(KEY_INPUT_Z)==TRUE&bfKeyFlag@(KEY_INPUT_Z)==FALSE :InputBoxNewString+"Z"
+
+			if KeyFlag@(KEY_INPUT_LSHIFT)==FALSE&KeyFlag@(KEY_INPUT_RSHIFT)==FALSE {
+				InputBoxNewString=getpath(InputBoxNewString,16)
+			}
+
+			if KeyFlag@(KEY_INPUT_0)==TRUE&bfKeyFlag@(KEY_INPUT_0)==FALSE :InputBoxNewString+"0"
+			if KeyFlag@(KEY_INPUT_1)==TRUE&bfKeyFlag@(KEY_INPUT_1)==FALSE :InputBoxNewString+"1"
+			if KeyFlag@(KEY_INPUT_2)==TRUE&bfKeyFlag@(KEY_INPUT_2)==FALSE :InputBoxNewString+"2"
+			if KeyFlag@(KEY_INPUT_3)==TRUE&bfKeyFlag@(KEY_INPUT_3)==FALSE :InputBoxNewString+"3"
+			if KeyFlag@(KEY_INPUT_4)==TRUE&bfKeyFlag@(KEY_INPUT_4)==FALSE :InputBoxNewString+"4"
+			if KeyFlag@(KEY_INPUT_5)==TRUE&bfKeyFlag@(KEY_INPUT_5)==FALSE :InputBoxNewString+"5"
+			if KeyFlag@(KEY_INPUT_6)==TRUE&bfKeyFlag@(KEY_INPUT_6)==FALSE :InputBoxNewString+"6"
+			if KeyFlag@(KEY_INPUT_7)==TRUE&bfKeyFlag@(KEY_INPUT_7)==FALSE :InputBoxNewString+"7"
+			if KeyFlag@(KEY_INPUT_8)==TRUE&bfKeyFlag@(KEY_INPUT_8)==FALSE :InputBoxNewString+"8"
+			if KeyFlag@(KEY_INPUT_9)==TRUE&bfKeyFlag@(KEY_INPUT_9)==FALSE :InputBoxNewString+"9"
+
+			if KeyFlag@(KEY_INPUT_NUMPAD0)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD0)==FALSE :InputBoxNewString+"0"
+			if KeyFlag@(KEY_INPUT_NUMPAD1)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD1)==FALSE :InputBoxNewString+"1"
+			if KeyFlag@(KEY_INPUT_NUMPAD2)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD2)==FALSE :InputBoxNewString+"2"
+			if KeyFlag@(KEY_INPUT_NUMPAD3)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD3)==FALSE :InputBoxNewString+"3"
+			if KeyFlag@(KEY_INPUT_NUMPAD4)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD4)==FALSE :InputBoxNewString+"4"
+			if KeyFlag@(KEY_INPUT_NUMPAD5)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD5)==FALSE :InputBoxNewString+"5"
+			if KeyFlag@(KEY_INPUT_NUMPAD6)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD6)==FALSE :InputBoxNewString+"6"
+			if KeyFlag@(KEY_INPUT_NUMPAD7)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD7)==FALSE :InputBoxNewString+"7"
+			if KeyFlag@(KEY_INPUT_NUMPAD8)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD8)==FALSE :InputBoxNewString+"8"
+			if KeyFlag@(KEY_INPUT_NUMPAD9)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD9)==FALSE :InputBoxNewString+"9"
+
+			if KeyFlag@(KEY_INPUT_LSHIFT)==TRUE|KeyFlag@(KEY_INPUT_RSHIFT)==TRUE {
+				if InputBoxNewString=="1" :InputBoxNewString="!"
+			}
+		}
+
+		//背景
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+
+		if DecideCount==-1 {
+			setease -520-48,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 48+getease(SceneCount,25),32,hdximg(inav_signin),TRUE
+		} else {
+			setease 0,-520-48,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 48+getease(DecideCount,25),32,hdximg(inav_signin),TRUE
+		}
+
+		if SceneCount>10&DecideCount==-1 {
+			setease 50,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,25)
+			setease 1.2,1,ease_cubic_out
+			EaseWidth=int(1805.0*geteasef(SceneCount-10,25))
+			EaseHeight=int(800.0*geteasef(SceneCount-10,25))
+			EasePosX=0+1805/2-EaseWidth/2
+			EasePosY=184+800/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_signin_window),TRUE
+		}
+		if DecideCount!-1 {
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,25)
+			setease 1,1.2,ease_cubic_out
+			EaseWidth=int(1805.0*geteasef(DecideCount,25))
+			EaseHeight=int(800.0*geteasef(DecideCount,25))
+			EasePosX=0+1805/2-EaseWidth/2
+			EasePosY=184+800/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_signin_window),TRUE
+		}
+
+		if insquare(CursorPosX,CursorPosY,403,490,403+512,490+50)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+			InputBoxFocus=0
+			PlaySE int(hcommonsech@(sndCursor@)),1.0
+		}
+		if insquare(CursorPosX,CursorPosY,403,570,403+512,570+50)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+			InputBoxFocus=1
+			PlaySE int(hcommonsech@(sndCursor@)),1.0
+		}
+
+		if DecideCount==-1 {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			switch InputBoxFocus
+				case 0		//ユーザーID
+					InputBox_UserName+InputBoxNewString
+					DrawGraph 399,486,hdximg(iinput_focus),TRUE
+					if KeyFlag@(KEY_INPUT_BACK)==TRUE&bfKeyFlag@(KEY_INPUT_BACK)==FALSE :InputBox_UserName=strmid(InputBox_UserName,0,strlen(InputBox_UserName)-1)
+				swbreak
+				case 1		//パスワード
+					InputBox_Password+InputBoxNewString
+					DrawGraph 399,566,hdximg(iinput_focus),TRUE
+					if KeyFlag@(KEY_INPUT_BACK)==TRUE&bfKeyFlag@(KEY_INPUT_BACK)==FALSE :InputBox_Password=strmid(InputBox_Password,0,strlen(InputBox_Password)-1)
+				swbreak
+			swend
+			InputBoxNewString=""
+
+			//キー入力文字列のプレビュー
+			DrawStringToHandle 420,486+15,InputBox_UserName,$000000,hdxfont(fPS20)
+			repeat strlen(InputBox_Password)
+				DrawStringToHandle 420+24*cnt,566+15,"*",$000000,hdxfont(fSQNUM24)
+			loop
+
+			//エラー文字列
+			DrawStringToHandle 220,674,ErrorMsg,$FF0088,hdxfont(fNSCJM20)
+		}
+
+		//ステータス
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+
+		DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
+		if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,10
+			DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
+			if GetMouseInput()&MOUSE_INPUT_LEFT {
+				goto*Exit@
+			}
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+
+		//ボタン判定
+		if insquare(CursorPosX,CursorPosY,1080,515,1080+200,515+50)&DecideCount==-1&SceneCount>25 {
+			DrawGraph 1080,515,hdximg(ibutton_active),TRUE
+			if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+				PlaySE int(hcommonsech@(sndDecide@)),1.0
+				sdim ErrorMsg:sdim TestRequest
+				TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-GetProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetProfile")+"&decode="+WebAPI_DecodeKey@_sync_+"&id="+InputBox_UserName+"&password="+InputBox_Password)
+
+				if TestRequest=="ERROR_UNKNOWN_ID" :ErrorMsg="指定されたプレイヤーIDは存在しません。"
+				if TestRequest=="ERROR_AUTH_PASSWORD" :ErrorMsg="入力されたパスワードが違います。"
+				if InputBox_Password=="" :ErrorMsg="パスワードが入力されていません。"
+				if InputBox_UserName=="" :ErrorMsg="プレイヤーIDが入力されていません。"
+
+				if ErrorMsg=="" {
+					LoginUserInfo@(ID_NAME)=InputBox_UserName
+					RegName@portalsync=InputBox_UserName
+					LoginUserInfo@(ID_KEY)=InputBox_Password
+					RegAuth@portalsync=InputBox_Password
+					DecideCount=0
+				}
+			}
+		}
+
+		if insquare(CursorPosX,CursorPosY,760,723,760+200,723+50)&DecideCount==-1&SceneCount>25 {
+			DrawGraph 760,723,hdximg(ibutton_active),TRUE
+			if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+				PlaySE int(hcommonsech@(sndDecide@)),1.0
+				DecideCount=0
+			}
+		}
+
+		AddCount SceneCount
+		if DecideCount!-1 :AddCount DecideCount
+		if DecideCount>25 {
+			if LoginUserInfo@(ID_NAME)!""&LoginUserInfo@(ID_KEY)!"" {
+
+				//保存
+				EditCoreSettings"Auth","Name",RegName@portalsync
+				EditCoreSettings"Auth","Password",RegAuth@portalsync
+				SaveCoreSettings"core.ini"
+
+				sdim tmpstr
+				tmpstr=WebAPI_GetProfile()
+				if GetINIvalue(tmpstr,"SAVEDATA","XODA.NEWDATA")=="1" {
+					InitScene ID_WELCOME0
+					StartWelcome
+				} else {
+					InitScene ID_WELCOME2
+					StartWelcome
+				}
+			} else {
+				InitScene ID_REGISTER
+				StartRegister
+			}
+		}
+
+		bfMouseInput=MouseInput
+
+		return
+
+	#deffunc StartRegister
+
+		dim SceneCount
+		dim InputBoxFocus
+		sdim InputBoxNewString
+		sdim InputBoxBuf
+		sdim InputBox_UserName
+		sdim InputBox_Password
+		sdim InputBox_Password_confirm
+		sdim InputBox_Email
+		sdim InputBox_InviteCode
+		InputBoxFocus=-1
+
+		dim DecideCount
+		DecideCount=-1
+
+		sdim ErrorMsg
+
+		return
+
+	#deffunc DrawRegister
+
+		//カーソル位置補正
+		dim CursorPosX:dim CursorPosY:dim MouseInput
+		MouseInput=GetMouseInput()
+		CursorPosX=limit(int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@))),0,BufWidth@)
+		CursorPosY=limit(int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@))),0,BufHeight@)
+		RawWheelVal=GetMouseWheelRotVol()
+		RawWheelMove=0
+		if RawWheelVal<0&bfRawWheelVal<0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if RawWheelVal>0&bfRawWheelVal>0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
+		bfRawWheelVal=RawWheelVal
+		PushButtonFlag=FALSE
+
+		//文字列の取得
+		if DecideCount==-1 {
+			if KeyFlag@(KEY_INPUT_A)==TRUE&bfKeyFlag@(KEY_INPUT_A)==FALSE :InputBoxNewString+"A"
+			if KeyFlag@(KEY_INPUT_B)==TRUE&bfKeyFlag@(KEY_INPUT_B)==FALSE :InputBoxNewString+"B"
+			if KeyFlag@(KEY_INPUT_C)==TRUE&bfKeyFlag@(KEY_INPUT_C)==FALSE :InputBoxNewString+"C"
+			if KeyFlag@(KEY_INPUT_D)==TRUE&bfKeyFlag@(KEY_INPUT_D)==FALSE :InputBoxNewString+"D"
+			if KeyFlag@(KEY_INPUT_E)==TRUE&bfKeyFlag@(KEY_INPUT_E)==FALSE :InputBoxNewString+"E"
+			if KeyFlag@(KEY_INPUT_F)==TRUE&bfKeyFlag@(KEY_INPUT_F)==FALSE :InputBoxNewString+"F"
+			if KeyFlag@(KEY_INPUT_G)==TRUE&bfKeyFlag@(KEY_INPUT_G)==FALSE :InputBoxNewString+"G"
+			if KeyFlag@(KEY_INPUT_H)==TRUE&bfKeyFlag@(KEY_INPUT_H)==FALSE :InputBoxNewString+"H"
+			if KeyFlag@(KEY_INPUT_I)==TRUE&bfKeyFlag@(KEY_INPUT_I)==FALSE :InputBoxNewString+"I"
+			if KeyFlag@(KEY_INPUT_J)==TRUE&bfKeyFlag@(KEY_INPUT_J)==FALSE :InputBoxNewString+"J"
+			if KeyFlag@(KEY_INPUT_K)==TRUE&bfKeyFlag@(KEY_INPUT_K)==FALSE :InputBoxNewString+"K"
+			if KeyFlag@(KEY_INPUT_L)==TRUE&bfKeyFlag@(KEY_INPUT_L)==FALSE :InputBoxNewString+"L"
+			if KeyFlag@(KEY_INPUT_M)==TRUE&bfKeyFlag@(KEY_INPUT_M)==FALSE :InputBoxNewString+"M"
+			if KeyFlag@(KEY_INPUT_N)==TRUE&bfKeyFlag@(KEY_INPUT_N)==FALSE :InputBoxNewString+"N"
+			if KeyFlag@(KEY_INPUT_O)==TRUE&bfKeyFlag@(KEY_INPUT_O)==FALSE :InputBoxNewString+"O"
+			if KeyFlag@(KEY_INPUT_P)==TRUE&bfKeyFlag@(KEY_INPUT_P)==FALSE :InputBoxNewString+"P"
+			if KeyFlag@(KEY_INPUT_Q)==TRUE&bfKeyFlag@(KEY_INPUT_Q)==FALSE :InputBoxNewString+"Q"
+			if KeyFlag@(KEY_INPUT_R)==TRUE&bfKeyFlag@(KEY_INPUT_R)==FALSE :InputBoxNewString+"R"
+			if KeyFlag@(KEY_INPUT_S)==TRUE&bfKeyFlag@(KEY_INPUT_S)==FALSE :InputBoxNewString+"S"
+			if KeyFlag@(KEY_INPUT_T)==TRUE&bfKeyFlag@(KEY_INPUT_T)==FALSE :InputBoxNewString+"T"
+			if KeyFlag@(KEY_INPUT_U)==TRUE&bfKeyFlag@(KEY_INPUT_U)==FALSE :InputBoxNewString+"U"
+			if KeyFlag@(KEY_INPUT_V)==TRUE&bfKeyFlag@(KEY_INPUT_V)==FALSE :InputBoxNewString+"V"
+			if KeyFlag@(KEY_INPUT_W)==TRUE&bfKeyFlag@(KEY_INPUT_W)==FALSE :InputBoxNewString+"W"
+			if KeyFlag@(KEY_INPUT_X)==TRUE&bfKeyFlag@(KEY_INPUT_X)==FALSE :InputBoxNewString+"X"
+			if KeyFlag@(KEY_INPUT_Y)==TRUE&bfKeyFlag@(KEY_INPUT_Y)==FALSE :InputBoxNewString+"Y"
+			if KeyFlag@(KEY_INPUT_Z)==TRUE&bfKeyFlag@(KEY_INPUT_Z)==FALSE :InputBoxNewString+"Z"
+
+			if KeyFlag@(KEY_INPUT_LSHIFT)==FALSE&KeyFlag@(KEY_INPUT_RSHIFT)==FALSE {
+				InputBoxNewString=getpath(InputBoxNewString,16)
+			}
+
+			if KeyFlag@(KEY_INPUT_0)==TRUE&bfKeyFlag@(KEY_INPUT_0)==FALSE :InputBoxNewString+"0"
+			if KeyFlag@(KEY_INPUT_1)==TRUE&bfKeyFlag@(KEY_INPUT_1)==FALSE :InputBoxNewString+"1"
+			if KeyFlag@(KEY_INPUT_2)==TRUE&bfKeyFlag@(KEY_INPUT_2)==FALSE :InputBoxNewString+"2"
+			if KeyFlag@(KEY_INPUT_3)==TRUE&bfKeyFlag@(KEY_INPUT_3)==FALSE :InputBoxNewString+"3"
+			if KeyFlag@(KEY_INPUT_4)==TRUE&bfKeyFlag@(KEY_INPUT_4)==FALSE :InputBoxNewString+"4"
+			if KeyFlag@(KEY_INPUT_5)==TRUE&bfKeyFlag@(KEY_INPUT_5)==FALSE :InputBoxNewString+"5"
+			if KeyFlag@(KEY_INPUT_6)==TRUE&bfKeyFlag@(KEY_INPUT_6)==FALSE :InputBoxNewString+"6"
+			if KeyFlag@(KEY_INPUT_7)==TRUE&bfKeyFlag@(KEY_INPUT_7)==FALSE :InputBoxNewString+"7"
+			if KeyFlag@(KEY_INPUT_8)==TRUE&bfKeyFlag@(KEY_INPUT_8)==FALSE :InputBoxNewString+"8"
+			if KeyFlag@(KEY_INPUT_9)==TRUE&bfKeyFlag@(KEY_INPUT_9)==FALSE :InputBoxNewString+"9"
+
+			if KeyFlag@(KEY_INPUT_NUMPAD0)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD0)==FALSE :InputBoxNewString+"0"
+			if KeyFlag@(KEY_INPUT_NUMPAD1)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD1)==FALSE :InputBoxNewString+"1"
+			if KeyFlag@(KEY_INPUT_NUMPAD2)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD2)==FALSE :InputBoxNewString+"2"
+			if KeyFlag@(KEY_INPUT_NUMPAD3)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD3)==FALSE :InputBoxNewString+"3"
+			if KeyFlag@(KEY_INPUT_NUMPAD4)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD4)==FALSE :InputBoxNewString+"4"
+			if KeyFlag@(KEY_INPUT_NUMPAD5)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD5)==FALSE :InputBoxNewString+"5"
+			if KeyFlag@(KEY_INPUT_NUMPAD6)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD6)==FALSE :InputBoxNewString+"6"
+			if KeyFlag@(KEY_INPUT_NUMPAD7)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD7)==FALSE :InputBoxNewString+"7"
+			if KeyFlag@(KEY_INPUT_NUMPAD8)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD8)==FALSE :InputBoxNewString+"8"
+			if KeyFlag@(KEY_INPUT_NUMPAD9)==TRUE&bfKeyFlag@(KEY_INPUT_NUMPAD9)==FALSE :InputBoxNewString+"9"
+
+			if KeyFlag@(KEY_INPUT_AT)==TRUE&bfKeyFlag@(KEY_INPUT_AT)==FALSE :InputBoxNewString+"@"
+			if KeyFlag@(KEY_INPUT_PERIOD)==TRUE&bfKeyFlag@(KEY_INPUT_PERIOD)==FALSE :InputBoxNewString+"."
+
+			if KeyFlag@(KEY_INPUT_LSHIFT)==TRUE|KeyFlag@(KEY_INPUT_RSHIFT)==TRUE {
+				if InputBoxNewString=="1" :InputBoxNewString="!"
+			}
+		}
+
+		//背景
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+
+		if DecideCount==-1 {
+			setease -520-48,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 48+getease(SceneCount,25),32,hdximg(inav_register),TRUE
+		} else {
+			setease 0,-520-48,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 48+getease(DecideCount,25),32,hdximg(inav_register),TRUE
+		}
+
+		if SceneCount>10&DecideCount==-1 {
+			setease 50,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,25)
+			setease 1.2,1,ease_cubic_out
+			EaseWidth=int(1805.0*geteasef(SceneCount-10,25))
+			EaseHeight=int(800.0*geteasef(SceneCount-10,25))
+			EasePosX=0+1805/2-EaseWidth/2
+			EasePosY=184+800/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_register_window),TRUE
+		}
+		if DecideCount!-1 {
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,25)
+			setease 1,1.2,ease_cubic_out
+			EaseWidth=int(1805.0*geteasef(DecideCount,25))
+			EaseHeight=int(800.0*geteasef(DecideCount,25))
+			EasePosX=0+1805/2-EaseWidth/2
+			EasePosY=184+800/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_register_window),TRUE
+		}
+
+		if insquare(CursorPosX,CursorPosY,403,490,403+512,490+50)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+			InputBoxFocus=0
+			PlaySE int(hcommonsech@(sndCursor@)),1.0
+		}
+		if insquare(CursorPosX,CursorPosY,403,570,403+512,570+50)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+			InputBoxFocus=1
+			PlaySE int(hcommonsech@(sndCursor@)),1.0
+		}
+		if insquare(CursorPosX,CursorPosY,403,650,403+512,650+50)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+			InputBoxFocus=2
+			PlaySE int(hcommonsech@(sndCursor@)),1.0
+		}
+		if insquare(CursorPosX,CursorPosY,403,730,403+512,730+50)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+			InputBoxFocus=3
+			PlaySE int(hcommonsech@(sndCursor@)),1.0
+		}
+		if insquare(CursorPosX,CursorPosY,403,810,403+512,810+50)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+			InputBoxFocus=4
+			PlaySE int(hcommonsech@(sndCursor@)),1.0
+		}
+
+		if DecideCount==-1 {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			switch InputBoxFocus
+				case 0		//ユーザーID
+					InputBox_UserName+InputBoxNewString
+					if KeyFlag@(KEY_INPUT_BACK)==TRUE&bfKeyFlag@(KEY_INPUT_BACK)==FALSE :InputBox_UserName=strmid(InputBox_UserName,0,strlen(InputBox_UserName)-1)
+				swbreak
+				case 1		//パスワード
+					InputBox_Password+InputBoxNewString
+					if KeyFlag@(KEY_INPUT_BACK)==TRUE&bfKeyFlag@(KEY_INPUT_BACK)==FALSE :InputBox_Password=strmid(InputBox_Password,0,strlen(InputBox_Password)-1)
+				swbreak
+				case 2		//パスワード（確認）
+					InputBox_Password_confirm+InputBoxNewString
+					if KeyFlag@(KEY_INPUT_BACK)==TRUE&bfKeyFlag@(KEY_INPUT_BACK)==FALSE :InputBox_Password_confirm=strmid(InputBox_Password_confirm,0,strlen(InputBox_Password_confirm)-1)
+				swbreak
+				case 3		//メールアドレス
+					InputBox_Email+InputBoxNewString
+					if KeyFlag@(KEY_INPUT_BACK)==TRUE&bfKeyFlag@(KEY_INPUT_BACK)==FALSE :InputBox_Email=strmid(InputBox_Email,0,strlen(InputBox_Email)-1)
+				swbreak
+				case 4		//招待コード
+					InputBox_InviteCode+InputBoxNewString
+					if KeyFlag@(KEY_INPUT_BACK)==TRUE&bfKeyFlag@(KEY_INPUT_BACK)==FALSE :InputBox_InviteCode=strmid(InputBox_InviteCode,0,strlen(InputBox_InviteCode)-1)
+				swbreak
+			swend
+			if InputBoxFocus!-1 :DrawGraph 399,486+80*InputBoxFocus,hdximg(iinput_focus),TRUE
+			InputBoxNewString=""
+
+			//キー入力文字列のプレビュー
+			DrawStringToHandle 420,486+15,InputBox_UserName,$000000,hdxfont(fPS20)
+			repeat strlen(InputBox_Password)
+				DrawStringToHandle 420+24*cnt,486+80*1+15,"*",$000000,hdxfont(fSQNUM24)
+			loop
+			repeat strlen(InputBox_Password_confirm)
+				DrawStringToHandle 420+24*cnt,486+80*2+15,"*",$000000,hdxfont(fSQNUM24)
+			loop
+			DrawStringToHandle 420,486+80*3+15,InputBox_Email,$000000,hdxfont(fPS20)
+			DrawStringToHandle 420,486+80*4+15,InputBox_InviteCode,$000000,hdxfont(fPS20)
+
+			//エラー文字列
+			DrawStringToHandle 488,393,ErrorMsg,$FF0088,hdxfont(fNSCJM20)
+		}
+
+		//ボタン判定
+		if insquare(CursorPosX,CursorPosY,1080,515,1080+200,515+50)&DecideCount==-1&SceneCount>25 {
+			DrawGraph 1080,515,hdximg(ibutton_active),TRUE
+			if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+				PlaySE int(hcommonsech@(sndDecide@)),1.0
+				sdim ErrorMsg:sdim TestRequest
+
+				if InputBox_Password=="" :ErrorMsg="パスワードが入力されていません。"
+				if InputBox_UserName=="" :ErrorMsg="プレイヤーIDが入力されていません。"
+				if instr(InputBox_Password,0,"@")!-1 :ErrorMsg="パスワードに「@」は使用できません。"
+				if instr(InputBox_UserName,0,"@")!-1 :ErrorMsg="ユーザーIDに「@」は使用できません。"
+				if instr(InputBox_Password,0,".")!-1 :ErrorMsg="パスワードに「.」は使用できません。"
+				if instr(InputBox_UserName,0,".")!-1 :ErrorMsg="ユーザーIDに「.」は使用できません。"
+
+				if ErrorMsg=="" {
+					TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-RegisterUser.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_RegisterUser")+"&id="+InputBox_UserName+"&pass="+InputBox_Password+"&passconf="+InputBox_Password_confirm)
+					switch TestRequest
+						case"ERROR_ALREADYEXIST"
+							ErrorMsg="指定されたユーザーIDは既に存在します。"
+						swbreak
+						case"ERROR_NOTMATCH_PASSWORD"
+							ErrorMsg="パスワードが一致しません。"
+						swbreak
+						default
+							//メールアドレス
+							TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+InputBox_UserName+"&password="+InputBox_Password+"&decode="+WebAPI_DecodeKey@_sync_+"&object=EMAIL.ADDRESS&value="+InputBox_Email)
+							//招待コード
+							TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+InputBox_UserName+"&password="+InputBox_Password+"&decode="+WebAPI_DecodeKey@_sync_+"&object=INVITATION&value="+InputBox_InviteCode)
+							//初回プレイフラグ
+							TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+InputBox_UserName+"&password="+InputBox_Password+"&decode="+WebAPI_DecodeKey@_sync_+"&object=XODA.NEWDATA&value=1")
+
+							//プレゼント
+							TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+InputBox_UserName+"&password="+InputBox_Password+"&decode="+WebAPI_DecodeKey@_sync_+"&object=XODA.NUMLILLY&value=100")
+							TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+InputBox_UserName+"&password="+InputBox_Password+"&decode="+WebAPI_DecodeKey@_sync_+"&object=XODA.NUMFRAGMENTS&value=5")
+							if InputBox_InviteCode=="yoshihitoiscool" {
+								TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+InputBox_UserName+"&password="+InputBox_Password+"&decode="+WebAPI_DecodeKey@_sync_+"&object=XODA.NUMLILLY&value=2000")
+								TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+InputBox_UserName+"&password="+InputBox_Password+"&decode="+WebAPI_DecodeKey@_sync_+"&object=XODA.NUMFRAGMENTS&value=50")
+								TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+InputBox_UserName+"&password="+InputBox_Password+"&decode="+WebAPI_DecodeKey@_sync_+"&object=XODA.NUMTICKETS&value=100")
+							}
+						swbreak
+					swend
+				}
+				if ErrorMsg=="" {
+					//OK
+					DecideCount=0
+				}
+			}
+		}
+
+		if insquare(CursorPosX,CursorPosY,90,320,90+70,320+70)&DecideCount==-1&SceneCount>25 {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,30
+			DrawBox 90,320,90+70,320+70,$FFFFFF,TRUE
+			if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+				PlaySE int(hcommonsech@(sndDecide@)),1.0
+				DecideCount=0
+			}
+		}
+
+		//ステータス
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+
+		DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
+		if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,10
+			DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
+			if GetMouseInput()&MOUSE_INPUT_LEFT {
+				goto*Exit@
+			}
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+
+		AddCount SceneCount
+		if DecideCount!-1 :AddCount DecideCount
+		if DecideCount>25 {
+			if LoginUserInfo@(ID_NAME)!""&LoginUserInfo@(ID_KEY)!"" {
+				InitScene ID_SIGNIN
+				StartSignin
+			} else {
+				//back
+				InitScene ID_SIGNIN
+				StartSignin
+			}
+		}
+
+		bfMouseInput=MouseInput
+
+		return
+
+	#deffunc StartWelcome
+		dim SceneCount
+		dim DecideCount
+		DecideCount=-1
+		return
+
+	#deffunc DrawWelcome int _id
+
+		//カーソル位置補正
+		dim MouseInput
+		MouseInput=GetMouseInput()
+
+		//背景
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+
+		if SceneCount>10&DecideCount==-1 {
+			setease 50,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,25)
+			setease 1.2,1,ease_cubic_out
+			EaseWidth=int(1805.0*geteasef(SceneCount-10,25))
+			EaseHeight=int(800.0*geteasef(SceneCount-10,25))
+			EasePosX=0+1805/2-EaseWidth/2
+			EasePosY=140+800/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_welcome_0+_id),TRUE
+		}
+		if DecideCount!-1 {
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,25)
+			setease 1,1.2,ease_cubic_out
+			EaseWidth=int(1805.0*geteasef(DecideCount,25))
+			EaseHeight=int(800.0*geteasef(DecideCount,25))
+			EasePosX=0+1805/2-EaseWidth/2
+			EasePosY=140+800/2-EaseHeight/2
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_welcome_0+_id),TRUE
+		}
+
+		if _id==1&DecideCount==-1 {
+			setease 0,256,ease_linear+ease_loop
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-30,30)
+			DrawGraph 778,268,hdximg(ilayer_welcome_1),TRUE
+		}
+		if (MouseInput&MOUSE_INPUT_LEFT)&DecideCount==-1 {
+			PlaySE int(hcommonsech@(sndDecide@)),1.0
+			DecideCount=0
+		}
+
+		//ステータス
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+
+		DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
+		if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,10
+			DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
+			if GetMouseInput()&MOUSE_INPUT_LEFT {
+				goto*Exit@
+			}
+		}
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+
+		if DecideCount!-1 :AddCount DecideCount
+		if DecideCount>25 {
+			if _id==0 {
+				InitScene ID_WELCOME1
+				StartWelcome
+			}
+			if _id==1 {
+				InitScene ID_WELCOME2
+				StartWelcome
+			}
+			if _id==2 {
+				InitScene ID_LOBBY
+				LoadLobbyImages
+				InitLobbyFonts
+				StartLobby
+			}
+		}
+
+		AddCount SceneCount
+		
+		return
+
+#global

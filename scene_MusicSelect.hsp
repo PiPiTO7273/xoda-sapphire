@@ -86,6 +86,9 @@
 	#enum iIcon_Artwork_Locked
 	#enum ibutton_lilly
 	#enum ibutton_lilly_hover
+	#enum itutorial_window_0
+	#enum itutorial_window_1
+	#enum itutorial_option
 
 	//BASS Audio Libraryサンプル、チャンネルハンドル(musicselect)
 	#enum bgmMain	=	0
@@ -241,6 +244,9 @@
 		hdximg(ibutton_lilly)=LoadGraph("Data/layer_musicselect_button_lilly.png")
 		hdximg(ibutton_lilly_hover)=LoadGraph("Data/layer_musicselect_button_lilly_hover.png")
 		hdximg(ilillyerror_window)=LoadGraph("Data/layer_musicselect_lillyerror.png")
+		hdximg(itutorial_window_0)=LoadGraph("Data/guide_musicselect_0.png")
+		hdximg(itutorial_window_1)=LoadGraph("Data/guide_musicselect_1.png")
+		hdximg(itutorial_option)=LoadGraph("Data/guide_option.png")
 		hdximg(iwindow_category)=MakeScreen(450,811,TRUE)
 		hdximg(iwindow_songs)=MakeScreen(700,811,TRUE)
 		hdximg(iwindow_ranking)=MakeScreen(350,210,TRUE)
@@ -524,6 +530,9 @@
 			dim UnlockDialogCount
 			dim BackButtonEase
 			dim BackButtonHoverFlag
+			dim TutorialWindowID
+			dim TutorialWindowCount
+			TutorialWindowID=-1
 			DecideCount=-1
 
 		ActiveColumnID(ID_SONGS)=musicselect_ItemID@
@@ -535,6 +544,9 @@
 
 		//背景動画再生
 			if cfunc64i(GetMovieStateToGraph,hdximg(ibg))==0 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+
+		//チュートリアル
+			if WatchTutorial_MusicSelect_0@==FALSE|WatchTutorial_MusicSelect_1@==FALSE :TutorialWindowID=0
 	return
 
 	#deffunc StartMusicSelect_WithoutDarkness
@@ -557,6 +569,31 @@
 			if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
 			bfRawWheelVal=RawWheelVal
 			PushButtonFlag=FALSE
+
+		//チュートリアル判定
+			if TutorialWindowID!-1 {
+				if TutorialWindowCount>25 {
+					if TutorialWindowID==0&(MouseInput&MOUSE_INPUT_LEFT)&insquare(CursorPosX,CursorPosY,1620,951,1620+200,951+80) {
+						TutorialWindowID++
+						TutorialWindowCount=0
+					}
+					if TutorialWindowID==1&(MouseInput&MOUSE_INPUT_LEFT)&insquare(CursorPosX,CursorPosY,150,914,150+200,914+80) {
+						TutorialWindowID++
+						TutorialWindowCount=0
+					}
+					if TutorialWindowID==3&(MouseInput&MOUSE_INPUT_LEFT)&insquare(CursorPosX,CursorPosY,120,899,120+200,899+80) {
+						TutorialWindowID++
+						TutorialWindowCount=0
+					}
+				}
+				MouseInput=0
+			}
+
+		//チュートリアルを見る
+			if KeyFlag@(KEY_INPUT_F1)==TRUE&bfKeyFlag@(KEY_INPUT_F1)==FALSE {
+				TutorialWindowID=0
+				TutorialWindowCount=0
+			}
 
 		//戻るボタン判定
 			if insquare(CursorPosX,CursorPosY,0,1000,240,1080)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&DecideCount==-1 {
@@ -1019,6 +1056,9 @@
 						PushButtonFlag=TRUE
 						PlaySE int(hbasschannel(sndDecide)),1.0
 						OptionWindowFlag=1:OptionWindowCount=0
+						if WatchTutorial_Option@==FALSE {
+							TutorialWindowID=3:TutorialWindowCount=0
+						}
 					} else {
 						DrawGraph 1720,850,hdximg(ibutton_option_1),TRUE
 					}
@@ -1587,6 +1627,65 @@
 				swbreak
 			swend
 			AddCount OptionWindowCount
+
+		//チュートリアル
+		if TutorialWindowID!-1 {
+			if TutorialWindowID==0 {
+				setease 0,800,ease_linear
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,165,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(TutorialWindowCount,20)
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),1150,165,1150+770,165+916,1150,165,DX_GRAPH_FILTER_GAUSS,64,getease(TutorialWindowCount,20)
+				setease 0,256,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(TutorialWindowCount,20)
+				DrawGraph 0,0,hdximg(itutorial_window_0),TRUE
+				if insquare(CursorPosX,CursorPosY,1620,951,1620+200,951+80)&TutorialWindowCount>20 {
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,25
+					DrawBox 1620,951,1620+200,951+80,$FFFFFF,TRUE
+				}
+			}
+			if TutorialWindowID==1 {
+				setease 800,0,ease_linear
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,165,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(TutorialWindowCount,20)
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),1150,165,1150+770,165+916,1150,165,DX_GRAPH_FILTER_GAUSS,64,getease(TutorialWindowCount,20)
+				setease 0,800,ease_linear
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,1150,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(TutorialWindowCount,20)
+				setease 256,0,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(TutorialWindowCount,20)
+				DrawGraph 0,0,hdximg(itutorial_window_0),TRUE
+				setease 0,256,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(TutorialWindowCount-20,20)
+				DrawGraph 0,0,hdximg(itutorial_window_1),TRUE
+				if insquare(CursorPosX,CursorPosY,150,914,150+200,914+80)&TutorialWindowCount>40 {
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,25
+					DrawBox 150,914,150+200,914+80,$FFFFFF,TRUE
+				}
+			}
+			if TutorialWindowID==2 {
+				setease 256,0,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(TutorialWindowCount,20)
+				DrawGraph 0,0,hdximg(itutorial_window_1),TRUE
+				if TutorialWindowCount>25 :WatchTutorial_MusicSelect_0@=TRUE:WatchTutorial_MusicSelect_1@=TRUE:TutorialWindowID=-1
+			}
+			if TutorialWindowID==3 {
+				setease 0,800,ease_linear
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,1150,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(TutorialWindowCount,20)
+				setease 0,256,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(TutorialWindowCount,20)
+				DrawGraph 0,0,hdximg(itutorial_option),TRUE
+				if insquare(CursorPosX,CursorPosY,120,899,120+200,899+80)&TutorialWindowCount>40 {
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,25
+					DrawBox 120,899,120+200,899+80,$FFFFFF,TRUE
+				}
+			}
+			if TutorialWindowID==4 {
+				setease 800,0,ease_linear
+				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,1150,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(TutorialWindowCount,20)
+				setease 256,0,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(TutorialWindowCount,20)
+				DrawGraph 0,0,hdximg(itutorial_option),TRUE
+				if TutorialWindowCount>25 :WatchTutorial_Option@=TRUE:TutorialWindowID=-1
+			}
+			AddCount TutorialWindowCount
+		}
 
 		//他シーンへジャンプ
 		if JumpSceneFlag {

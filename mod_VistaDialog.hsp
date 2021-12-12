@@ -1,0 +1,201 @@
+
+#uselib "Comctl32.dll"
+#func global TaskDialogIndirect         "TaskDialogIndirect"    sptr,sptr,sptr,sptr
+#packopt hide 1
+
+#const global NULL                      $00000000
+#const global IDOK                      1
+#const global IDCANCEL                  2
+#const global IDABORT                   3
+#const global IDRETRY                   4
+#const global IDIGNORE                  5
+#const global IDYES                     6
+#const global IDNO                      7
+
+#const global TD_WARNING_ICON                       $0000FFFF   ;MAKEINTRESOURCEW(-1)
+#const global TD_ERROR_ICON                         $0000FFFE   ;MAKEINTRESOURCEW(-2)
+#const global TD_INFORMATION_ICON                   $0000FFFD   ;MAKEINTRESOURCEW(-3)
+#const global TD_SHIELD_ICON                        $0000FFFC   ;MAKEINTRESOURCEW(-4)
+
+#const global TDF_ENABLE_HYPERLINKS                 $00000001
+#const global TDF_USE_HICON_MAIN                    $00000002
+#const global TDF_USE_HICON_FOOTER                  $00000004
+#const global TDF_ALLOW_DIALOG_CANCELLATION         $00000008
+#const global TDF_USE_COMMAND_LINKS                 $00000010
+#const global TDF_USE_COMMAND_LINKS_NO_ICON         $00000020
+#const global TDF_EXPAND_FOOTER_AREA                $00000040
+#const global TDF_EXPANDED_BY_DEFAULT               $00000080
+#const global TDF_VERIFICATION_FLAG_CHECKED         $00000100
+#const global TDF_SHOW_PROGRESS_BAR                 $00000200
+#const global TDF_SHOW_MARQUEE_PROGRESS_BAR         $00000400
+#const global TDF_CALLBACK_TIMER                    $00000800
+#const global TDF_POSITION_RELATIVE_TO_WINDOW       $00001000
+#const global TDF_RTL_LAYOUT                        $00002000
+#const global TDF_NO_DEFAULT_RADIO_BUTTON           $00004000
+#const global TDF_CAN_BE_MINIMIZED                  $00008000
+#const global TDIF_SIZE_TO_CONTENT                  $01000000
+#const global TDF_SIZE_TO_CONTENT                   $01000000
+
+#const global TDCBF_OK_BUTTON                       $00000001
+#const global TDCBF_YES_BUTTON                      $00000002
+#const global TDCBF_NO_BUTTON                       $00000004
+#const global TDCBF_CANCEL_BUTTON                   $00000008
+#const global TDCBF_RETRY_BUTTON                    $00000010
+#const global TDCBF_CLOSE_BUTTON                    $00000020
+
+#enum global TDN_CREATED=0
+#enum global TDN_NAVIGATED
+#enum global TDN_BUTTON_CLICKED
+#enum global TDN_HYPERLINK_CLICKED
+#enum global TDN_TIMER
+#enum global TDN_DESTROYED
+#enum global TDN_RADIO_BUTTON_CLICKED
+#enum global TDN_DIALOG_CONSTRUCTED
+#enum global TDN_VERIFICATION_CLICKED
+#enum global TDN_HELP
+#enum global TDN_EXPANDO_BUTTON_CLICKED
+
+#enum global WM_USER=$400
+#enum global TDM_NAVIGATE_PAGE=(WM_USER+101)            ;WM_USER+101
+#enum global TDM_CLICK_BUTTON                           ;WM_USER+102
+#enum global TDM_SET_MARQUEE_PROGRESS_BAR               ;WM_USER+103
+#enum global TDM_SET_PROGRESS_BAR_STATE                 ;WM_USER+104
+#enum global TDM_SET_PROGRESS_BAR_RANGE                 ;WM_USER+105
+#enum global TDM_SET_PROGRESS_BAR_POS                   ;WM_USER+106
+#enum global TDM_SET_PROGRESS_BAR_MARQUEE               ;WM_USER+107
+#enum global TDM_SET_ELEMENT_TEXT                       ;WM_USER+108
+#enum global TDM_                                       ;WM_USER+109
+#enum global TDM_CLICK_RADIO_BUTTON                     ;WM_USER+110
+#enum global TDM_ENABLE_BUTTON                          ;WM_USER+111
+#enum global TDM_ENABLE_RADIO_BUTTON                    ;WM_USER+112
+#enum global TDM_CLICK_VERIFICATION                     ;WM_USER+113
+#enum global TDM_UPDATE_ELEMENT_TEXT                    ;WM_USER+114
+#enum global TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE    ;WM_USER+115
+#enum global TDM_UPDATE_ICON                            ;WM_USER+116
+
+#enum global TDE_CONTENT=0
+#enum global TDE_EXPANDED_INFORMATION
+#enum global TDE_FOOTER
+#enum global TDE_MAIN_INSTRUCTION
+
+#enum global TDIE_ICON_MAIN=0
+#enum global TDIE_ICON_FOOTER
+
+#enum global tdc_cbSize=0                       ;UINT
+#enum global tdc_hwndParent                     ;HWND
+#enum global tdc_hInstance                      ;HINSTANCE
+#enum global tdc_dwFlags                        ;TASKDIALOG_FLAGS
+#enum global tdc_dwCommonButtons                ;TASKDIALOG_COMMON_BUTTON_FLAGS
+#enum global tdc_pszWindowTitle                 ;PCWSTR
+#enum global tdc_hMainIcon                      ;union：HICON
+#enum global tdc_pszMainIcon=tdc_hMainIcon      ;union：PCWSTR
+#enum global tdc_pszMainInstruction             ;PCWSTR
+#enum global tdc_pszContent                     ;PCWSTR
+#enum global tdc_cButtons                       ;UINT
+#enum global tdc_pButtons                       ;const TASKDIALOG_BUTTON*
+#enum global tdc_nDefaultButton                 ;int
+#enum global tdc_cRadioButtons                  ;UINT
+#enum global tdc_pRadioButtons                  ;const TASKDIALOG_BUTTON*
+#enum global tdc_nDefaultRadioButton            ;int
+#enum global tdc_pszVerificationText            ;PCWSTR
+#enum global tdc_pszExpandedInformation         ;PCWSTR
+#enum global tdc_pszExpandedControlText         ;PCWSTR
+#enum global tdc_pszCollapsedControlText        ;PCWSTR
+#enum global tdc_hFooterIcon                    ;union：HICON
+#enum global tdc_pszFooterIcon=tdc_hFooterIcon  ;union：PCWSTR
+#enum global tdc_pszFooter                      ;PCWSTR
+#enum global tdc_pfCallback                     ;PFTASKDIALOGCALLBACK
+#enum global tdc_lpCallbackData                 ;LONG_PTR
+#enum global tdc_cxWidth                        ;UINT
+#enum global DIM_TASKDIALOGCONFIG
+#enum global SIZE_TASKDIALOGCONFIG=(DIM_TASKDIALOGCONFIG*4)
+
+#enum global tdb_nButtonID=0            ;int
+#enum global tdb_pszButtonText          ;PCWSTR
+#enum global DIM_TASKDIALOG_BUTTON
+#enum global SIZE_TASKDIALOG_BUTTON=(DIM_TASKDIALOG_BUTTON*4)
+
+#module
+#deffunc VistaDialog str _title_,str _main_,str _text_,str _foot_,int _id_,str _item_,int _icon1_,int _icon2_,\
+    local s0,local s1,local s2,local s3,local s4,\
+    local p0,local p1,local p2,local p3,local p4,\
+    local cSelect,local nLen,\
+    local pSelect,local nMax,\
+    local wSelect,local nResult,\
+    local config
+    ;行分割
+    p0=(_id_)
+    s0=(_item_)
+    split s0,"\n",s0:cSelect=stat
+    if(stat==0):return -1               ;選択枠のエラー
+    ;最大桁
+    nMax=0
+    repeat cSelect
+        nLen=strlen(s0.cnt)
+        if(nLen>nMax):nMax=nLen
+        if(nLen==0):cSelect=cnt:break
+    loop
+    if(nMax==0):return -2               ;サイズのエラー
+    ;選択枠
+    sdim wSelect,(nMax*2+2),cSelect
+    dim  pSelect,2,cSelect
+    repeat cSelect
+        cnvstow wSelect(cnt),s0(cnt)
+        pSelect(0,cnt)=p0
+        pSelect(1,cnt)=varptr(wSelect.cnt)
+        p0++
+    loop
+    ;ユニコード
+    p1=ConvToUnicode(s1,_title_)        ;タイトル文字列
+    p2=ConvToUnicode(s2,_main_)         ;メインのメッセージ
+    p3=ConvToUnicode(s3,_text_)         ;ガイドのメッセージ
+    p4=ConvToUnicode(s4,_foot_)         ;フッタのメッセージ
+    ;構造体
+    dim config,DIM_TASKDIALOGCONFIG
+    config.tdc_cbSize                   =SIZE_TASKDIALOGCONFIG
+    config.tdc_hwndParent               =hWnd
+    config.tdc_hInstance                =hInstance
+    config.tdc_dwFlags                  =(TDF_ALLOW_DIALOG_CANCELLATION|TDF_USE_COMMAND_LINKS|TDF_ENABLE_HYPERLINKS)
+    config.tdc_dwCommonButtons          =0                      ;使う場合(TDCBF_xxx)
+    config.tdc_pszWindowTitle           =p1                     ;タイトル文字列
+    config.tdc_hMainIcon                =GetIconID(_icon1_)     ;メインのアイコンID
+    config.tdc_pszMainInstruction       =p2                     ;メインのメッセージ
+    config.tdc_pszContent               =p3                     ;ガイドのメッセージ
+    config.tdc_cButtons                 =cSelect                ;使う場合(個数)
+    config.tdc_pButtons                 =varptr(pSelect)        ;使う場合(TASKDIALOG_BUTTON[])
+    config.tdc_nDefaultButton           =0                      ;使う場合(IDOK～IDNO)
+    config.tdc_cRadioButtons            =0                      ;使う場合(個数)
+    config.tdc_pRadioButtons            =NULL                   ;使う場合(TASKDIALOG_BUTTON[])
+    config.tdc_nDefaultRadioButton      =0                      ;使う場合(IDOK～IDNO)
+    config.tdc_pszVerificationText      =NULL                   ;使う場合(PCWSTR)
+    config.tdc_pszExpandedInformation   =NULL                   ;使う場合(PCWSTR)
+    config.tdc_pszExpandedControlText   =NULL                   ;使う場合(PCWSTR)
+    config.tdc_pszCollapsedControlText  =NULL                   ;使う場合(PCWSTR)
+    config.tdc_hFooterIcon              =GetIconID(_icon2_)     ;フッタのアイコンID
+    config.tdc_pszFooter                =p4                     ;フッタのメッセージ
+    config.tdc_pfCallback               =NULL                   ;コールバック関数(関数ポインタ)
+    config.tdc_lpCallbackData           =NULL                   ;コールバック関数(データ)
+    config.tdc_cxWidth                  =0                      ;ダイアログの横幅(0=自動調節)
+    ;表示
+    nResult=0
+    TaskDialogIndirect varptr(config),varptr(nResult),NULL,NULL
+    if(stat):return stat                ;エラー番号
+    return nResult                      ;選択ID番号
+
+#defcfunc ConvToUnicode var _s_,str _msg_
+    if(_msg_)=="":return NULL
+    ;初期化
+    sdim(_s_),strlen(_msg_)*2+2
+    ;変換
+    cnvstow(_s_),(_msg_)
+    return varptr(_s_)
+
+#defcfunc GetIconID int _icon_
+    if(_icon_)==0:return NULL
+    if(_icon_)==1:return TD_WARNING_ICON
+    if(_icon_)==2:return TD_ERROR_ICON
+    if(_icon_)==3:return TD_INFORMATION_ICON
+    if(_icon_)==4:return TD_SHIELD_ICON
+    return(_icon_)
+
+#global

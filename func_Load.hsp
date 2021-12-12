@@ -50,6 +50,19 @@
 
 	return
 
+	//起動設定を編集
+	#deffunc EditCoreSettings str _section,str _key,str _value
+		sdim tmpstr:tmpstr=GetINIvalue(coreBuf,_section,_key)
+		strrep coreBuf,"\n"+_key+"="+tmpstr+"\n","\n"+_key+"="+_value+"\n"
+		return
+
+	//起動設定を反映
+	#deffunc SaveCoreSettings str _filename
+		notesel coreBuf
+		notesave _filename
+		noteunsel
+		return
+
 	//DXライブラリを初期化
 	#deffunc InitDxlib
 		SetOutApplicationLogValidFlag 0
@@ -135,6 +148,7 @@
 		hdximg@(iStatus_Ticket)=LoadGraph("Data/Icon_Status_Ticket.png")
 		hdximg@(iStatus_Lilly)=LoadGraph("Data/Icon_Status_Lilly.png")
 		hdximg@(ishape_commonbg)=LoadGraph("Data/layer_common_bg.png")
+		hdximg@(ibg_dummyscene)=LoadGraph("Data/bg_Dummy.png")
 	return
 
 	//グローバル空間の変数を初期化
@@ -244,7 +258,8 @@
 		noteload _mapfile
 
 		if GetINIvalue(mapbuf,"","#SIGN")!hash_core :return -1
-		dim maxchapter@,int(GetINIvalue(mapbuf,"","#MAX.CHAPTER"))
+		dim maxchapter@
+		maxchapter@=int(GetINIvalue(mapbuf,"","#MAX.CHAPTER"))
 
 		sdim chapterName@,64,maxchapter@
 		sdim chapterAllRewards@,128,maxchapter@

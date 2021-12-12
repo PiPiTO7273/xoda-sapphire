@@ -25,6 +25,7 @@
 #include"scene_KeyConfig.hsp"
 #include"scene_PartnerSelect.hsp"
 #include"scene_Challenge.hsp"
+#include"scene_Setup.hsp"
 
 #packopt hide 1
 
@@ -56,12 +57,14 @@
 		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_2")
 		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_3")
 		RegLoginInfo LoginUserInfo
-		WebAPI_SyncProfile
+
+	CheckNetworkConnection
 
 	DrawLoadScreen
 
 	LoadTitleImages
 	LoadErrorImages
+
 	LoadTitleFonts
 	InitScene ID_TITLE
 	StartTitle
@@ -93,6 +96,12 @@
 		case ID_PARTNERSELECT:DrawPartnerSelect:swbreak
 		case ID_CHALLENGE:DrawChallenge:swbreak
 		case ID_FATALERROR:DrawError:swbreak
+		case ID_SIGNIN:DrawSignin:swbreak
+		case ID_REGISTER:DrawRegister:swbreak
+		case ID_WELCOME0:DrawWelcome 0:swbreak
+		case ID_WELCOME1:DrawWelcome 1:swbreak
+		case ID_WELCOME2:DrawWelcome 2:swbreak
+		case ID_DUMMY:DrawDummy:swbreak
 	swend
 
 	SetDrawScreen DX_SCREEN_BACK
