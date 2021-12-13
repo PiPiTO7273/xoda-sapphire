@@ -58,12 +58,13 @@
 		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_3")
 		RegLoginInfo LoginUserInfo
 
-	CheckNetworkConnection
+	;CheckNetworkConnection
 
 	DrawLoadScreen
 
 	LoadTitleImages
 	LoadErrorImages
+	LoadSigninImages
 
 	LoadTitleFonts
 	InitScene ID_TITLE

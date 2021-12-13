@@ -57,6 +57,7 @@
 	#enum fNSCJM15
 	#enum fNSCJM16
 	#enum fNSCJM20
+	#enum fNSCJM24
 	#enum fNSCJM32
 	#enum fPS14
 	#enum fPS16
@@ -179,6 +180,7 @@
 		hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
 		hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
 		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		hdxfont(fNSCJM24)=LoadFontDataToHandle("Data/nscjm24.bin")
 		hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
 		hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
 		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
@@ -443,13 +445,13 @@
 		//ゲージの増加量を計算
 			ddim TotalGauge,1:ddim ObjHitGauge,1
 			if ObjMax<400 {
-				TotalGauge=double(ObjMax)*0.3+80.0
+				TotalGauge=double(ObjMax)*0.55+100.0
 			}
 			if ObjMax<=400&ObjMax<550 {
-				TotalGauge=double(ObjMax)*0.3+30.0
+				TotalGauge=double(ObjMax)*0.4+70.0
 			}
 			if ObjMax>=550 {
-				TotalGauge=double(ObjMax)*0.2+100.0
+				TotalGauge=double(ObjMax)*0.25+80.0
 			}
 			ObjHitGauge=TotalGauge/double(ObjMax)
 
@@ -1079,7 +1081,11 @@
 			DrawGraph 0,100,hdximg(ibg_songinfo),TRUE
 			//値
 			;SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-			DrawStringToHandle 40,128,GetChartInfo(META_TITLE),GetColor(10,10,10),hdxfont(fNSCJM32)
+			if strlen(GetChartInfo(META_TITLE))>25 {
+				DrawStringToHandle 40,132,GetChartInfo(META_TITLE),GetColor(10,10,10),hdxfont(fNSCJM24)
+			} else {
+				DrawStringToHandle 40,128,GetChartInfo(META_TITLE),GetColor(10,10,10),hdxfont(fNSCJM32)
+			}
 			DrawStringToHandle 40,183,GetChartInfo(META_ARTIST),GetColor(30,30,30),hdxfont(fNSCJM20)
 			DrawStringToHandle 40,222,GetChartInfo(META_SOURCE),GetColor(50,50,50),hdxfont(fNSCJM16)
 			DrawStringToHandle 40,311,GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL),GetColor(240,240,240),hdxfont(fEOEXB20)
@@ -1552,7 +1558,7 @@
 
 	#deffunc SendRecordData
 		//オートプレイの場合、スコア送信を無効化
-		;if AutoPlayFlag@ :return
+		if AutoPlayFlag@ :return
 
 		//HTTPリクエストを作成
 

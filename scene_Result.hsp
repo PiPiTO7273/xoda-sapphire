@@ -140,67 +140,73 @@
 		//記録日時
 			sdim ResultRegDate
 			ResultRegDate=strf("%d年%d月%d日 %d時%02d分%02d秒",gettime(0),gettime(1),gettime(3),gettime(4),gettime(5),gettime(6))
-		//獲得アイテム
-			sdim ReceiveItemList
-			switch OldClearType@_play_
-				case"FAILED"
-					ReceiveItemList="なし"
-				swbreak
-				case"ASSIST-CLEAR"
-					ReceiveItemList="音色の欠片x1\n300 Lilly"
-					NumFragments@portalsync+1
-					NumLilly@portalsync+300
-				swbreak
-				case"CLEAR"
-					ReceiveItemList="音色の欠片x2\n300 Lilly"
-					NumFragments@portalsync+2
-					NumLilly@portalsync+300
-				swbreak
-				case"EXPERT-CLEAR"
-					ReceiveItemList="音色の欠片x2\n500 Lilly"
-					NumFragments@portalsync+2
-					NumLilly@portalsync+500
-				swbreak
-				case"MADNESS-CLEAR"
-					ReceiveItemList="音色の欠片x3\n500 Lilly"
-					NumFragments@portalsync+3
-					NumLilly@portalsync+500
-				swbreak
-				case"FULLCOMBO"
-					ReceiveItemList="音色の欠片x4、500Lilly\nチャレンジチケットx1"
-					NumFragments@portalsync+4
-					NumTickets@portalsync+1
-					NumLilly@portalsync+500
-				swbreak
-				case"ALL-EXCELLENT"
-					ReceiveItemList="音色の欠片x5、600Lilly\nチャレンジチケットx1"
-					NumFragments@portalsync+5
-					NumTickets@portalsync+1
-					NumLilly@portalsync+600
-				swbreak
-			swend
-		//獲得経験値
-			dim ReceiveEXP:ddim bonusEXP,1
-			switch OldClearType@_play_
-				case"FAILED":bonusEXP=0.0:swbreak			//FAILED x0.0
-				case"ASSIST-CLEAR":bonusEXP=0.5:swbreak		//ASSIST-CLEAR x0.5
-				case"CLEAR":bonusEXP=1.0:swbreak			//CLEAR x1.0
-				case"EXPERT-CLEAR":bonusEXP=1.1:swbreak 	//EXPERT-CLEAR x1.1
-				case"MADNESS-CLEAR":bonusEXP=1.2:swbreak	//MADNESS-CLEAR x1.2
-				case"FULLCOMBO":bonusEXP=1.4:swbreak		//FULLCOMBO x1.4
-				case"ALL-EXCELLENT":bonusEXP=1.5:swbreak	//ALL-EXCELLENT x1.5
-			swend
-			ReceiveEXP=int(double(int(30.0*(1.0+double(RegLev@portalsync)/10.0))+int(OldCurPfPoint@_play_))*bonusEXP);+/*debug*/1000
 
-		dim LevelupDispFlag
-		RegEXP@portalsync+ReceiveEXP
-		if RegEXP@portalsync>lpeek(expTablebuf@,RegLev@portalsync*4) {
-			//レベルアップ
-			RegLev@portalsync++
-			RegEXP@portalsync=0
-			SeekMovieToGraph hdximg(ibg_levelup)
-			PlayMovieToGraph hdximg(ibg_levelup)
-			LevelupDispFlag=TRUE
+		if AutoPlayFlag@==FALSE {
+			//獲得アイテム
+				sdim ReceiveItemList
+				switch OldClearType@_play_
+					case"FAILED"
+						ReceiveItemList="なし"
+					swbreak
+					case"ASSIST-CLEAR"
+						ReceiveItemList="音色の欠片x1\n300 Lilly"
+						NumFragments@portalsync+1
+						NumLilly@portalsync+300
+					swbreak
+					case"CLEAR"
+						ReceiveItemList="音色の欠片x2\n300 Lilly"
+						NumFragments@portalsync+2
+						NumLilly@portalsync+300
+					swbreak
+					case"EXPERT-CLEAR"
+						ReceiveItemList="音色の欠片x2\n500 Lilly"
+						NumFragments@portalsync+2
+						NumLilly@portalsync+500
+					swbreak
+					case"MADNESS-CLEAR"
+						ReceiveItemList="音色の欠片x3\n500 Lilly"
+						NumFragments@portalsync+3
+						NumLilly@portalsync+500
+					swbreak
+					case"FULLCOMBO"
+						ReceiveItemList="音色の欠片x4、500Lilly\nチャレンジチケットx1"
+						NumFragments@portalsync+4
+						NumTickets@portalsync+1
+						NumLilly@portalsync+500
+					swbreak
+					case"ALL-EXCELLENT"
+						ReceiveItemList="音色の欠片x5、600Lilly\nチャレンジチケットx1"
+						NumFragments@portalsync+5
+						NumTickets@portalsync+1
+						NumLilly@portalsync+600
+					swbreak
+				swend
+			//獲得経験値
+				dim ReceiveEXP:ddim bonusEXP,1
+				switch OldClearType@_play_
+					case"FAILED":bonusEXP=0.0:swbreak			//FAILED x0.0
+					case"ASSIST-CLEAR":bonusEXP=0.5:swbreak		//ASSIST-CLEAR x0.5
+					case"CLEAR":bonusEXP=1.0:swbreak			//CLEAR x1.0
+					case"EXPERT-CLEAR":bonusEXP=1.1:swbreak 	//EXPERT-CLEAR x1.1
+					case"MADNESS-CLEAR":bonusEXP=1.2:swbreak	//MADNESS-CLEAR x1.2
+					case"FULLCOMBO":bonusEXP=1.4:swbreak		//FULLCOMBO x1.4
+					case"ALL-EXCELLENT":bonusEXP=1.5:swbreak	//ALL-EXCELLENT x1.5
+				swend
+				ReceiveEXP=int(double(int(30.0*(1.0+double(RegLev@portalsync)/10.0))+int(OldCurPfPoint@_play_))*bonusEXP);+/*debug*/1000
+
+			dim LevelupDispFlag
+			RegEXP@portalsync+ReceiveEXP
+			if RegEXP@portalsync>lpeek(expTablebuf@,RegLev@portalsync*4) {
+				//レベルアップ
+				RegLev@portalsync++
+				RegEXP@portalsync=0
+				SeekMovieToGraph hdximg(ibg_levelup)
+				PlayMovieToGraph hdximg(ibg_levelup)
+				LevelupDispFlag=TRUE
+			}
+		} else {
+			sdim ReceiveItemList
+			ReceiveItemList="なし"
 		}
 
 		if OldClearType@_play_=="FAILED" {
@@ -258,6 +264,12 @@
 			setease -64,0,ease_cubic_out
 			//曲名
 				DrawStringXCenterToHandle 240+getease(SceneCount-30,15),626,plitem_Title@_musicselect_(ChartStruct.0,ChartStruct.1),350,$000000,hdxfont(fNSCJM24)
+				tmpstr=plitem_Title@_musicselect_(ChartStruct.0,ChartStruct.1)
+				if strlen(tmpstr)>25 {
+					DrawStringXCenterToHandle 240+getease(SceneCount-30,15),626,plitem_Title@_musicselect_(ChartStruct.0,ChartStruct.1),350,$000000,hdxfont(fNSCJM20)
+				} else {
+					DrawStringXCenterToHandle 240+getease(SceneCount-30,15),626,plitem_Title@_musicselect_(ChartStruct.0,ChartStruct.1),350,$000000,hdxfont(fNSCJM24)
+				}
 			//アーティスト名
 				DrawStringXCenterToHandle 240+getease(SceneCount-30,17),672,plitem_Artist@_musicselect_(ChartStruct.0,ChartStruct.1),350,$000000,hdxfont(fNSCJM16)
 			//難易度表記

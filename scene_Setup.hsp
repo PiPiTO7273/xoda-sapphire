@@ -634,7 +634,7 @@
 			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_welcome_0+_id),TRUE
 		}
 
-		if _id==1&DecideCount==-1 {
+		if _id==1&DecideCount==-1&SceneCount>30 {
 			setease 0,256,ease_linear+ease_loop
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-30,30)
 			DrawGraph 778,268,hdximg(ilayer_welcome_1),TRUE

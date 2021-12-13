@@ -153,7 +153,8 @@
 	#enum ID_CAT_TYPE_ASSIST
 
 	//ジャンプ先ID
-	#enum ID_TRANS_PLAY		=	0
+	#enum ID_TRANS_NULL		=	0
+	#enum ID_TRANS_PLAY
 	#enum ID_TRANS_PARTNERSELECT
 	#enum ID_TRANS_BACKSCENE
 
@@ -569,6 +570,11 @@
 			if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
 			bfRawWheelVal=RawWheelVal
 			PushButtonFlag=FALSE
+
+			if SceneTransID==ID_TRANS_PLAY {
+				//クリック無効化
+				MouseInput=0
+			}
 
 		//チュートリアル判定
 			if TutorialWindowID!-1 {
@@ -1400,7 +1406,12 @@
 				EasePosX=785
 				setease 0,256,ease_cubic_out
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(DecideCount-30,15)
-				DrawStringXCenterToHandle EasePosX,624,plitem_Title(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),350,GetColor(0,0,0),hdxfont(fNSCJM24)
+				tmpstr=plitem_Title(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
+				if strlen(tmpstr)>25 {
+					DrawStringXCenterToHandle EasePosX,624,tmpstr,352,GetColor(0,0,0),hdxfont(fNSCJM20)
+				} else {
+					DrawStringXCenterToHandle EasePosX,624,tmpstr,350,GetColor(0,0,0),hdxfont(fNSCJM24)
+				}
 				DrawStringXCenterToHandle EasePosX,674,plitem_Artist(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),350,Getcolor(10,10,10),hdxfont(fNSCJM16)
 
 				//難易度表記

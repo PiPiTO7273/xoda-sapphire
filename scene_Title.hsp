@@ -5,6 +5,7 @@
 #enum ilogo_0
 #enum ilogo_1
 #enum ilogo_2
+#enum ilogo_3
 
 #define logotime	4
 
@@ -12,9 +13,10 @@
 	dim hdximg
 	SetDXArchiveExtension"bin"
 	hdximg(ibg)=LoadGraph("Data/bg_title.mp4")
-	repeat 3
+	repeat 4
 		hdximg(ilogo_0+cnt)=LoadGraph("Data/common_title_"+cnt+".png")
 	loop
+	cfunc64v SetMovieVolumeToGraph,9500,hdximg(ibg)
 	return
 
 #deffunc LoadTitleFonts
@@ -46,14 +48,14 @@
 	SetDrawBlendMode DX_BLENDMODE_NOBLEND
 	DrawBox 0,0,BufWidth@,BufHeight@,$FFFFFF,TRUE
 
-	if SceneCount>60*logotime*3 {
+	if SceneCount>60*logotime*4 {
 		setease 0,256,ease_linear
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-60*logotime*3,30)
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-60*logotime*4,30)
 		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
 	}
 
 		//ロゴ
-		repeat 3
+		repeat 4
 			if SceneCount>60*logotime*cnt&SceneCount<60*logotime*(cnt+1) {
 				tmpscreencount=SceneCount-60*logotime*cnt
 				EaseAlpha=256
@@ -61,7 +63,7 @@
 					setease 0,256,ease_linear
 					EaseAlpha=getease(tmpscreencount,30)
 				}
-				if tmpscreencount>60*3-30 {
+				if tmpscreencount>60*logotime-30 {
 					setease 256,0,ease_linear
 					EaseAlpha=getease(tmpscreencount-60*logotime+30,30)
 				}
@@ -71,8 +73,9 @@
 		loop
 
 		if (GetMouseInput()&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE&SceneTransCount==-1 {
-			if SceneCount<60*logotime*3 {
-				SceneCount=limit(SceneCount+60*logotime,0,60*logotime*3)
+			PlaySE int(hcommonsech@(sndCursor@)),1.0
+			if SceneCount<60*logotime*4 {
+				SceneCount=limit(SceneCount+60*logotime,0,60*logotime*4)
 			} else {
 				SceneTransCount=0
 			}
@@ -88,14 +91,17 @@
 			setease 0,256,ease_linear
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneTransCount,15)
 			DrawBox 0,0,BufWidth@,BufHeight@,0,TRUE
+			setease 9500,8000,ease_linear
+			cfunc64v SetMovieVolumeToGraph,getease(SceneTransCount,15),hdximg(ibg)
 		}
 
 		if SceneTransCount!-1 :AddCount SceneTransCount
 		if SceneTransCount>20 {
 
+			PauseMovieToGraph hdximg(ibg)
+
 			if RegName@portalsync==""|RegAuth@portalsync=="" {
 				LoadSigninFonts
-				LoadSigninImages
 				StartSignin
 				InitScene ID_SIGNIN
 			} else {
@@ -106,7 +112,7 @@
 			}
 		}
 
-		if SceneCount==60*logotime*3 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+		if SceneCount==60*logotime*4+60 :PlayMovieToGraph hdximg(ibg),0
 
 		AddCount SceneCount
 
