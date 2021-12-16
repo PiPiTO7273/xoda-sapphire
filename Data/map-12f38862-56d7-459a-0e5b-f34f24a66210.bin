@@ -11,6 +11,7 @@ Artwork=img.png
 Default.BPM=146.000000
 Total.Offset=27
 Unlock=lilly:500
+Total.Notes=896
 
 [Sound]
 Sound.Set=0,ba11.wav

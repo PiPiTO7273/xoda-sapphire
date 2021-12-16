@@ -1,5 +1,16 @@
 
-#include"hsp3utf.as"
+#include"hspinet.as"
+#include"mod_BinPkg.hsp"
+
+#packopt hide 1
+
+#module
+	#deffunc UpdateScreenString str _msg
+		color 255,255,255:boxf
+		color 0,0,0:font"Yu Gothic UI",14
+		pos 20,30:mes _msg
+	return
+#global
 
 #module "inimodule"
 #uselib "kernel32"
@@ -44,44 +55,62 @@
 	return
 #global
 
+	screen 0,400,120
+	title"puoro. updater"
 
-#packopt hide 1
+	INIInit"core.ini"
+	dim curpatchver:curpatchver=int(INIGet("Launcher","Release"))
+	sdim launcherpath:launcherpath=INIGet("Common","Launcher")
 
-#include"mod_VistaDialog.hsp"
-gsel 0,-1
-dim PresetID
-INIinit"core.ini"
-VistaDialog"Sapphire - グラフィック設定","ゲームの画質設定を行います。","次のプリセットから環境に適した設定を選択してください。","処理落ちが発生すると、正常にプレイできなくなる可能性があります。",101,"標準画質設定(720p)\n低画質設定、最低限のエフェクト\n高画質設定(1080p)、最高クオリティの演出",0,1
-switch stat
-	case 101
-		INISet"Graphics","Display.Width","1280"
-		INISet"Graphics","Display.Height","720"
-		INISet"Graphics","Low.Quality","FALSE"
-		INISet"Graphics","Movie.Quality","mid"
-	swbreak
-	case 102
-		INISet"Graphics","Display.Width","1024"
-		INISet"Graphics","Display.Height","768"
-		INISet"Graphics","Low.Quality","TRUE"
-		INISet"Graphics","Movie.Quality","low"
-	swbreak
-	case 103
-		INISet"Graphics","Display.Width","1920"
-		INISet"Graphics","Display.Height","1080"
-		INISet"Graphics","Low.Quality","FALSE"
-		INISet"Graphics","Movie.Quality","high"
-	swbreak
-	case IDCANCEL:end:swbreak
-swend
-VistaDialog"Sapphire - グラフィック設定","ゲームの画質設定を行います。","画面モードを選択してください。","ウィンドウモードでプレイする場合、遅延や応答速度に影響する可能性があります。",101,"全画面モード\nウィンドウモード",0,1
-switch stat
-	case 101
-		INISet"Graphics","FullScreen","TRUE"
-	swbreak
-	case 102
-		INISet"Graphics","FullScreen","FALSE"
-	swbreak
-	case IDCANCEL:end:swbreak
-swend
-exec INIGet("Common","Game")
-end
+	netinit
+	pos 20,60:winobj"msctls_progress32","",,$50000000,360,24
+	hProgress=objinfo(stat,2)
+	UpdateScreenString"アップデートを確認中・・・"
+	sendmsg hProgress,$404,10
+	sendmsg hProgress,$405
+	wait 25
+
+	neturl"http://puoro.ml/apiv2/"
+	netrequest_get"core_Update.dat"
+	repeat
+		netexec res
+		if res:break
+		await
+	loop
+	sdim commonUpdateInfo
+	dim Latestversion
+	netgetv commonUpdateInfo
+	notesel commonUpdateInfo
+	sdim NoteLine
+	sendmsg hProgress,$404,80/notemax
+	repeat notemax
+		noteget NoteLine,cnt
+		sdim patchversion:sdim patchurl
+		split NoteLine,">>",patchversion,patchurl,patchaction,patchtarget
+		if int(patchversion)>curpatchver {
+			UpdateScreenString"アップデートをダウンロード中・・・"
+			//アップデート開始
+			if patchaction=="COPY" {
+				neturl getpath(patchurl,32)
+				netrequest_get getpath(patchurl,8)
+				repeat
+					netexec res
+					if res:break
+					await
+				loop
+				UpdateScreenString"アップデートを適用中・・・"
+				sdim binpkgraw,netgetv_size()
+				netgetv_data binpkgraw
+				bsave patchtarget,binpkgraw,netgetv_requestsize()
+			}
+		}
+		if Latestversion<patchversion :Latestversion=patchversion
+		sendmsg hProgress,$405
+	loop
+	sendmsg hProgress,$404,10
+	sendmsg hProgress,$405
+	UpdateScreenString"しばらくお待ちください・・・"
+	INISet"Launcher","Release",str(Latestversion)
+
+	exec INIGet("Common","Launcher")
+	end

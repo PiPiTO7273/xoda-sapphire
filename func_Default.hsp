@@ -15,7 +15,7 @@
 			if strmid(NoteLine,0,1)=="["&strmid(NoteLine,-1,1)=="]" {
 				curSection=NoteLine
 			}
-			if (getpath(curSection,16)==("["+getpath(_section,16)+"]"))|curSection=="" {
+			if getpath(curSection,16)=="["+getpath(_section,16)+"]"|curSection=="" {
 				sdim INIprm:split NoteLine,"=",INIprm
 				if getpath(INIprm(0),16)==getpath(_key,16) {
 					resValue=INIprm(1)
@@ -25,11 +25,6 @@
 		loop
 
 		noteunsel
-
-		;repeat varsize(resValue)
-		;	if peek(resValue,cnt)==10 :poke resValue,cnt,0
-		;	if peek(resValue,cnt)==13 :poke resValue,cnt,0
-		;loop
 		return resValue
 
 	#defcfunc ConvStrToBool str _in
@@ -260,3 +255,31 @@
 #global
 InitIntArray
 InitStrArray
+
+#module "inimodule"
+#uselib "kernel32"
+#cfunc WritePrivateProfileString "WritePrivateProfileStringA" sptr,sptr,sptr,sptr
+#cfunc GetPrivateProfileString "GetPrivateProfileStringA" sptr,sptr,sptr,sptr,sptr,sptr
+#cfunc GetFullPathName "GetFullPathNameA" sptr,sptr,sptr,sptr
+#define MAX_PATH 512
+#define NULL 0
+#define nSize 256
+;--------INIInit(INIモジュール初期化)---------
+;p1 INIファイルのパス
+#deffunc INIInit str inii_s
+	sdim INI_FileName,strlen(inii_s):INI_FileName=inii_s
+	sdim INI_LongName,MAX_PATH
+	exist inii_s:ini_filesize = strsize
+	inii_size = cfunc64i(GetFullPathName,varptr64(INI_FileName),MAX_PATH,varptr64(INI_LongName),NULL)
+	return inii_size
+;--------INISet(INIを書き換える)---------
+;p1 セクション名
+;p2 キー名（""でセクションを削除）
+;p3 書き換える文字列（""でキーを削除）
+#deffunc INISet str inis_section,str inis_key,str inis_str
+	sdim INI_Section,strlen(inis_section):INI_Section=inis_section
+	if (inis_key!=""){sdim INI_Key,strlen(inis_key):INI_Key=inis_key:INI_KeyPtr=varptr64(INI_Key)}else{INI_KeyPtr=NULL}
+	if (inis_str!=""){sdim INI_String,strlen(inis_str):INI_String=inis_str:INI_StringPtr=varptr64(INI_String)}else{INI_StringPtr=NULL}
+	cfunc64v WritePrivateProfileString,varptr64(INI_Section),INI_KeyPtr,INI_StringPtr,varptr64(INI_LongName)
+	return
+#global

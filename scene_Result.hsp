@@ -263,7 +263,7 @@
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
 			setease -64,0,ease_cubic_out
 			//‹È–¼
-				DrawStringXCenterToHandle 240+getease(SceneCount-30,15),626,plitem_Title@_musicselect_(ChartStruct.0,ChartStruct.1),350,$000000,hdxfont(fNSCJM24)
+				;DrawStringXCenterToHandle 240+getease(SceneCount-30,15),626,plitem_Title@_musicselect_(ChartStruct.0,ChartStruct.1),350,$000000,hdxfont(fNSCJM24)
 				tmpstr=plitem_Title@_musicselect_(ChartStruct.0,ChartStruct.1)
 				if strlen(tmpstr)>25 {
 					DrawStringXCenterToHandle 240+getease(SceneCount-30,15),626,plitem_Title@_musicselect_(ChartStruct.0,ChartStruct.1),350,$000000,hdxfont(fNSCJM20)

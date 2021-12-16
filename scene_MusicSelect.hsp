@@ -325,6 +325,7 @@
 			sdim plitem_Path,64,numitem,3
 			dim plitem_Level,numitem,3
 			dim plitem_artwork,numitem,3
+			sdim plitem_artworkpath,32,numitem,3
 			dim plitem_mybest_score,numitem,3
 			sdim plitem_mybest_rank,4,numitem,3
 			sdim plitem_mybest_rate,5,numitem,3
@@ -339,12 +340,17 @@
 			ddim plitem_defbpm,numitem,3
 			ddim plitem_pfpoint,numitem,3
 			dim plitem_totalnotes,numitem,3
+			sdim plitem_unlockrawdata,32,numitem,3
 			dim plitem_unlockflag,numitem,3
 			dim plitem_unlocklilly,numitem,3
 
 			ddim RegPfPoint@portalsync,1
 			ddim PfPointArr,10
 			dim PfPointArrMax
+
+			exist"Data/cache/music_playlist_meta.bin"
+			sdim metaCache,strsize
+			bload"Data/cache/music_playlist_meta.bin",metaCache
 
 			//解析
 			repeat numitem
@@ -362,22 +368,65 @@
 						sdim IRsyncstruct
 						WebAPI_SyncRecord IRsyncbuf,plitem_UUID(plitemid,pllevid),IRsyncstruct
 
-						//メタデータ取得
-						sdim tmpstr,strsize:bload plitem_Path(plitemid,pllevid),tmpstr
-						plitem_Title(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Title")
-						plitem_Artist(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Artist")
-						plitem_Source(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Source")
-						plitem_Level(plitemid,pllevid)=int(GetINIvalue(tmpstr,"Metadata","Level"))
-						plitem_resID(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Resource")
-						dim tmpint:tmpint=LoadGraph("Data/mr/"+plitem_resID(plitemid,pllevid)+"/"+GetINIvalue(tmpstr,"Metadata","Artwork"))
+						//メタデータをキャッシュから読み込み
+						if GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Flag")=="TRUE" {
+							plitem_Title(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Title")
+							plitem_Artist(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Artist")
+							plitem_Source(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Source")
+							plitem_Level(plitemid,pllevid)=int(GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Level"))
+							plitem_resID(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Resource")
+							plitem_defbpm(plitemid,pllevid)=double(GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Default.BPM"))
+							plitem_artworkpath(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Artwork")
+							plitem_unlockrawdata(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Unlock")
+						} else {
+							//譜面データからメタデータを読み込み
+							sdim tmpstr,strsize:bload plitem_Path(plitemid,pllevid),tmpstr
+							plitem_Title(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Title")
+							plitem_Artist(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Artist")
+							plitem_Source(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Source")
+							plitem_Level(plitemid,pllevid)=int(GetINIvalue(tmpstr,"Metadata","Level"))
+							plitem_resID(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Resource")
+							plitem_defbpm(plitemid,pllevid)=double(GetINIvalue(tmpstr,"Metadata","Default.BPM"))
+							plitem_artworkpath(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Artwork")
+							plitem_unlockrawdata(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Unlock")
+
+							//ノーツ数を取得
+							if GetINIvalue(tmpstr,"Metadata","Total.Notes")=="" {
+								notesel tmpstr
+								repeat notemax
+									noteget tmpstr(1),cnt
+									if strmid(tmpstr(1),0,5)=="Note." :plitem_totalnotes(plitemid,pllevid)++
+								loop
+								noteunsel
+								INIInit plitem_Path(plitemid,pllevid)
+								INISet"Metadata","Total.Notes",str(plitem_totalnotes(plitemid,pllevid))
+							} else {
+								plitem_totalnotes(plitemid,pllevid)=int(GetINIvalue(tmpstr,"Metadata","Total.Notes"))
+							}
+
+							//キャッシュに書き込み
+							INIInit"Data/cache/music_playlist_meta.bin"
+							INISet plitem_UUID(plitemid,pllevid),"Flag","TRUE"
+							INISet plitem_UUID(plitemid,pllevid),"Title",plitem_Title(plitemid,pllevid)
+							INISet plitem_UUID(plitemid,pllevid),"Artist",plitem_Artist(plitemid,pllevid)
+							INISet plitem_UUID(plitemid,pllevid),"Source",plitem_Source(plitemid,pllevid)
+							INISet plitem_UUID(plitemid,pllevid),"Level",str(plitem_Level(plitemid,pllevid))
+							INISet plitem_UUID(plitemid,pllevid),"Resource",plitem_resID(plitemid,pllevid)
+							INISet plitem_UUID(plitemid,pllevid),"Default.BPM",str(plitem_defbpm(plitemid,pllevid))
+							INISet plitem_UUID(plitemid,pllevid),"Artwork",plitem_artworkpath(plitemid,pllevid)
+							INISet plitem_UUID(plitemid,pllevid),"Unlock",plitem_unlockrawdata(plitemid,pllevid)
+							INISet plitem_UUID(plitemid,pllevid),"Total.Notes",str(plitem_totalnotes(plitemid,pllevid))
+
+						}
+
+						dim tmpint:tmpint=LoadGraph("Data/mr/"+plitem_resID(plitemid,pllevid)+"/"+plitem_artworkpath(plitemid,pllevid))
 						if tmpint<=0 :tmpint=hdximg(iIcon_Artwork_Dummy)
 						plitem_artwork(plitemid,pllevid)=tmpint
-						plitem_defbpm(plitemid,pllevid)=double(GetINIvalue(tmpstr,"Metadata","Default.BPM"))
 
 						//アンロック状況
 						plitem_unlockflag(plitemid,pllevid)=TRUE
 						plitem_unlocklilly(plitemid,pllevid)=0
-						tmpstr(1)=GetINIvalue(tmpstr,"Metadata","Unlock")
+						tmpstr(1)=plitem_unlockrawdata(plitemid,pllevid)
 						if tmpstr(1)!"" {
 							if tmpstr(1)=="{mission}" {
 								plitem_unlockflag(plitemid,pllevid)=FALSE
@@ -390,13 +439,6 @@
 							}
 						} else :plitem_unlockflag(plitemid,pllevid)=TRUE
 						if GetChartUnlockFlag(plitem_UUID(plitemid,pllevid))==1 :plitem_unlockflag(plitemid,pllevid)=TRUE
-
-						notesel tmpstr
-						repeat notemax
-							noteget tmpstr(1),cnt
-							if strmid(tmpstr(1),0,5)=="Note." :plitem_totalnotes(plitemid,pllevid)++
-						loop
-						noteunsel
 
 						//IR解析
 						plitem_mybest_score(plitemid,pllevid)=int(IRsyncstruct(ID_REC_SCORE))
@@ -441,6 +483,10 @@
 						PfPointArrMax++
 					}
 				loop
+
+				//DB出力
+				;INIInit"core.ini"
+				;INISet"Recommand","ID."+plitemid,plitem_Title(plitemid,0)+","+plitem_Artist(plitemid,0)
 			loop
 
 			//総合能力値の算出
@@ -1239,6 +1285,7 @@
 								PlaySE int(hcommonsech@(sndDecide@)),0.9
 								PlaySE int(hcommonsech@(vocBuy@)),1.0
 								NumLilly@portalsync-plitem_unlocklilly(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
+								librec_conslilly@+plitem_unlocklilly(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
 								plitem_unlockflag(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))=TRUE
 								RegChartUnlockFlag plitem_UUID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),TRUE
 								SongChangeCount=0
@@ -1717,7 +1764,9 @@
 
 		//決定
 		if DecideCount>10+25+60*3&SceneTransID==ID_TRANS_PLAY {
-			//---debug---
+			//カウンタ
+			librec_PlayCount@++
+
 			PauseMovieToGraph hdximg(ibg_Load)
 			PauseMovieToGraph hdximg(ibg)
 			ExtraPlayInfo@="FREEPLAY,*"

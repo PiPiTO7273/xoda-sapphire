@@ -1,0 +1,249 @@
+[9e914d55-30f9-c12a-0a0b-993c1513f65a]
+Title=初音ミクの激唱
+Artist=cosMo＠暴走P
+Source=Vocaloid Collection
+Level=5
+Resource=1b6082bf-1993-a864-46f6-91226f918d17
+Default.BPM=200.000000
+Artwork=img.png
+Total.Notes=722
+Flag=TRUE
+[4ee04725-f056-a73e-dfd2-dec615cef9c5]
+Title=初音ミクの激唱
+Artist=cosMo＠暴走P
+Source=Vocaloid Collection
+Level=10
+Resource=1b6082bf-1993-a864-46f6-91226f918d17
+Default.BPM=200.000000
+Artwork=img.png
+Unlock=lilly:500
+Total.Notes=1068
+Flag=TRUE
+[386388ca-36f9-2021-7eaf-e85dc065db01]
+Title=初音ミクの激唱
+Artist=cosMo＠暴走P
+Source=Vocaloid Collection
+Level=12
+Resource=1b6082bf-1993-a864-46f6-91226f918d17
+Default.BPM=200.000000
+Artwork=img.png
+Unlock={mission}
+Total.Notes=1664
+Flag=TRUE
+[b799196e-406a-76b9-e50e-19c48164a1cb]
+Title=進捗どうですか？
+Artist=IOSYS
+Source=はいぱぁ電波これくしょん！ フリーダム★東方編
+Level=4
+Resource=eb17a019-6076-7729-fbde-66f25dfdc27f
+Default.BPM=199.000000
+Artwork=img.png
+Total.Notes=354
+Flag=TRUE
+[12209680-d01a-e3e2-320e-9ecd12859844]
+Title=進捗どうですか？
+Artist=IOSYS
+Source=はいぱぁ電波これくしょん！ フリーダム★東方編
+Level=9
+Resource=eb17a019-6076-7729-fbde-66f25dfdc27f
+Default.BPM=199.000000
+Artwork=img.png
+Unlock=lilly:200
+Total.Notes=774
+Flag=TRUE
+[459b6b22-7a70-1af8-3541-cc452b29e718]
+Title=進捗どうですか？
+Artist=IOSYS
+Source=はいぱぁ電波これくしょん！ フリーダム★東方編
+Level=12
+Resource=eb17a019-6076-7729-fbde-66f25dfdc27f
+Default.BPM=199.000000
+Artwork=img.png
+Unlock={mission}
+Total.Notes=1293
+Flag=TRUE
+[dce336ed-5dcb-3805-f9f0-61f1eb716f33]
+Title=Lapis
+Artist=SHIKI
+Source=THE BMS OF FIGHTERS 2008 - Resurrection -
+Level=3
+Resource=b9e99b2b-3849-6c05-676e-9183ec5324d2
+Default.BPM=146.000000
+Artwork=img.png
+Total.Notes=275
+Flag=TRUE
+[1910cd72-b594-cf10-4875-801b722daebe]
+Title=Lapis
+Artist=SHIKI
+Source=THE BMS OF FIGHTERS 2008 - Resurrection -
+Level=8
+Resource=b9e99b2b-3849-6c05-676e-9183ec5324d2
+Default.BPM=146.000000
+Artwork=img.png
+Total.Notes=602
+Flag=TRUE
+[12f38862-56d7-459a-0e5b-f34f24a66210]
+Title=Lapis
+Artist=SHIKI
+Source=THE BMS OF FIGHTERS 2008 - Resurrection -
+Level=11
+Resource=b9e99b2b-3849-6c05-676e-9183ec5324d2
+Default.BPM=146.000000
+Artwork=img.png
+Unlock=lilly:500
+Total.Notes=896
+Flag=TRUE
+[e7361242-1f4c-ffc3-67d6-9003c7e6cc6a]
+Title=メテオライト
+Artist=Yunomi feat.初音ミク
+Source=ゆざめレーベル - yuzame label -
+Level=1
+Resource=67151c91-e044-5354-f2cb-a83fd3fdda2e
+Default.BPM=85.000000
+Artwork=img.png
+Total.Notes=262
+Flag=TRUE
+[758459a4-0319-579e-6cf1-7b21a37cec92]
+Title=メテオライト
+Artist=Yunomi feat.初音ミク
+Source=ゆざめレーベル - yuzame label -
+Level=6
+Resource=67151c91-e044-5354-f2cb-a83fd3fdda2e
+Default.BPM=85.000000
+Artwork=img.png
+Total.Notes=864
+Flag=TRUE
+[fb47965c-0334-e598-a6bd-37d7173252e3]
+Title=メテオライト
+Artist=Yunomi feat.初音ミク
+Source=ゆざめレーベル - yuzame label -
+Level=9
+Resource=67151c91-e044-5354-f2cb-a83fd3fdda2e
+Default.BPM=85.000000
+Artwork=img.png
+Total.Notes=1437
+Flag=TRUE
+[cd2037a3-9b33-36a8-412e-624e52cd3ba2]
+Title=IKAROS
+Artist=ETIA. feat. Jenga
+Source=THE BMS OF FIGHTERS ULTIMATE 2016 - Legendary Again -
+Level=3
+Resource=67f0ad1c-0535-912c-b08a-0208fbb152a3
+Default.BPM=175.000000
+Artwork=img.png
+Total.Notes=278
+Flag=TRUE
+[05192b33-5c78-09f9-ae89-99269495f995]
+Title=IKAROS
+Artist=ETIA. feat. Jenga
+Source=THE BMS OF FIGHTERS ULTIMATE 2016 - Legendary Again -
+Level=8
+Resource=67f0ad1c-0535-912c-b08a-0208fbb152a3
+Default.BPM=175.000000
+Artwork=img.png
+Total.Notes=742
+Flag=TRUE
+[caf7101e-9592-753c-b7d9-209eb1f2ebe4]
+Title=IKAROS
+Artist=ETIA. feat. Jenga
+Source=THE BMS OF FIGHTERS ULTIMATE 2016 - Legendary Again -
+Level=11
+Resource=67f0ad1c-0535-912c-b08a-0208fbb152a3
+Default.BPM=175.000000
+Artwork=img.png
+Unlock=lilly:1000
+Total.Notes=1166
+Flag=TRUE
+[0cdaf088-caa9-db1c-d47c-2bbad453c480]
+Title=Break Through Myself
+Artist=DJ Myosuke & Laur feat. Risa Yuzuki
+Source=HARDCORE TANO*C
+Level=2
+Resource=2bbff7aa-2267-d2e6-1249-8dc22f755def
+Default.BPM=200.000000
+Artwork=img.png
+Unlock=lilly:100
+Total.Notes=397
+Flag=TRUE
+[98b0147e-830f-db89-6f3d-b79afb7d7e40]
+Title=Break Through Myself
+Artist=DJ Myosuke & Laur feat. Risa Yuzuki
+Source=HARDCORE TANO*C
+Level=9
+Resource=2bbff7aa-2267-d2e6-1249-8dc22f755def
+Default.BPM=200.000000
+Artwork=img.png
+Unlock={mission}
+Total.Notes=809
+Flag=TRUE
+[53dbeb27-d57f-0cd4-6655-c9892ccd1a39]
+Title=Break Through Myself
+Artist=DJ Myosuke & Laur feat. Risa Yuzuki
+Source=HARDCORE TANO*C
+Level=12
+Resource=2bbff7aa-2267-d2e6-1249-8dc22f755def
+Default.BPM=200.000000
+Artwork=img.png
+Unlock={mission}
+Total.Notes=1446
+Flag=TRUE
+[9ac465a0-3df5-1d7f-4277-67fa9b781b34]
+Title=Chronomia
+Artist=Lime
+Source=BOFU2016
+Level=2
+Resource=d506ad24-67a7-90ca-d65b-85ec338fd537
+Default.BPM=227.000000
+Artwork=img.png
+Total.Notes=204
+Flag=TRUE
+[7c91a55e-5a61-0ce2-0518-6c914d1f483c]
+Title=Chronomia
+Artist=Lime
+Source=BOFU2016
+Level=5
+Resource=d506ad24-67a7-90ca-d65b-85ec338fd537
+Default.BPM=227.000000
+Artwork=img.png
+Total.Notes=525
+Flag=TRUE
+[76af826d-01ef-182e-be25-2700d5ca72bf]
+Title=Chronomia
+Artist=Lime
+Source=BOFU2016
+Level=11
+Resource=d506ad24-67a7-90ca-d65b-85ec338fd537
+Default.BPM=227.000000
+Artwork=img.png
+Total.Notes=1045
+Flag=TRUE
+[e5273ae0-b5ea-f7db-7812-4b15056548be]
+Title=インドア系ならトラックメイカー
+Artist=Yunomi & nicamoq
+Source=ゆのもきゅ
+Level=1
+Resource=3bc26d6a-ac66-e716-d1b8-08041be3de02
+Default.BPM=128.000000
+Artwork=img.png
+Total.Notes=626
+Flag=TRUE
+[4146a72d-c5ad-dccc-36e0-6a41f47b49d2]
+Title=インドア系ならトラックメイカー
+Artist=Yunomi & nicamoq
+Source=ゆのもきゅ
+Level=6
+Resource=3bc26d6a-ac66-e716-d1b8-08041be3de02
+Default.BPM=128.000000
+Artwork=img.png
+Total.Notes=972
+Flag=TRUE
+[4f358caa-d90a-650e-eb37-41add8ab80cf]
+Title=インドア系ならトラックメイカー
+Artist=Yunomi & nicamoq
+Source=ゆのもきゅ
+Level=10
+Resource=3bc26d6a-ac66-e716-d1b8-08041be3de02
+Default.BPM=128.000000
+Artwork=img.png
+Total.Notes=1600
+Flag=TRUE

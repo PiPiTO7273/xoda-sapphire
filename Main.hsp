@@ -16,7 +16,6 @@
 #include"func_Background.hsp"
 #include"svc_Layer.hsp"
 #include"svc_Online.hsp"
-#include"scene_Launcher.hsp"
 #include"scene_Title.hsp"
 #include"scene_Lobby.hsp"
 #include"scene_MusicSelect.hsp"
@@ -69,7 +68,6 @@
 	LoadTitleFonts
 	InitScene ID_TITLE
 	StartTitle
-
 *MainLoop
 
 	ProcessMessage
@@ -163,11 +161,9 @@
 
 	goto*MainLoop
 
-*ExitProg
+*Exit
 	dxlib_End
 	BASS_Free
+	SendAllProfile
 	closeHttp
 	end
-*Exit
-	SendAllProfile
-	goto*ExitProg

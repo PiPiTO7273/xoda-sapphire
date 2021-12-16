@@ -296,6 +296,7 @@
 				case ID_PROCESS	//èàóùíÜ
 					if DialogOpenFlag==0&DialogOpenCount==16 {
 						NumLilly@portalsync-CharPrice@charicon(RegCharID@portalsync)
+						librec_conslilly@+CharPrice@charicon(RegCharID@portalsync)
 						CharUnlockFlag@charicon(RegCharID@portalsync)=TRUE
 						SyncPartnerInfo
 						WebAPI_SendProfile"XODA.PARTNER.UNLOCK."+RegCharID@portalsync,"1"

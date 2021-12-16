@@ -13,6 +13,7 @@ Background.Video.Offset.debug=-3100
 Background.Video=18
 Artwork=img.png
 Default.BPM=200.000000
+Total.Notes=722
 
 [Sound]
 

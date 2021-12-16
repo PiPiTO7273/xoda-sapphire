@@ -43,6 +43,10 @@
 	bfRawWheelVal=RawWheelVal
 	PushButtonFlag=FALSE
 
+	if KeyFlag@(KEY_INPUT_F1)==TRUE&bfKeyFlag@(KEY_INPUT_F1)==FALSE {
+		exec dir_cur+"\\LICENSE.txt",16
+	}
+
 	SetDrawMode DX_DRAWMODE_BILINEAR
 
 	SetDrawBlendMode DX_BLENDMODE_NOBLEND
@@ -112,7 +116,7 @@
 			}
 		}
 
-		if SceneCount==60*logotime*4+60 :PlayMovieToGraph hdximg(ibg),0
+		if SceneCount==60*logotime*4+60 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
 
 		AddCount SceneCount
 

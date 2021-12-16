@@ -36,3 +36,8 @@ Data/bebd8dec-ae33-6c98-d315-cbc75e951749/
 Data/cff82d02-eedd-d061-7a52-0d4f818f7e1b/
 Data/fe0eef59-87fc-8afd-6eea-b9d55be41cdd/
 *.pkg
+xsbody.exe
+xslaunch.exe
+xsupd.exe
+Main.ax
+start.ax

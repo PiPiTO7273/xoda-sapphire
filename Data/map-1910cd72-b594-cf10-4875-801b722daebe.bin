@@ -10,6 +10,7 @@ Background.Video=3
 Artwork=img.png
 Default.BPM=146.000000
 Total.Offset=27
+Total.Notes=602
 
 [Sound]
 Sound.Set=0,ba11.wav

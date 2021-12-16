@@ -11,6 +11,7 @@ Side.NoteFlag=TRUE
 Background.Audio=audio.ogg
 Default.BPM=85.000000
 Total.Offset=20
+Total.Notes=864
 
 [Sound]
 

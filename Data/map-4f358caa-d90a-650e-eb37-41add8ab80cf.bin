@@ -11,6 +11,7 @@ Default.BPM=128.000000
 Background.Video=28
 Background.Audio=audio.ogg
 Total.Offset=30
+Total.Notes=1600
 
 [Sound]
 

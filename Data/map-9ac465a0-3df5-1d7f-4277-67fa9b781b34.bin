@@ -9,6 +9,7 @@ Background.Video=29
 Side.NoteFlag=TRUE
 Resource=d506ad24-67a7-90ca-d65b-85ec338fd537
 Artwork=img.png
+Total.Notes=204
 
 [Sound]
 Sound.Set=0,Acid_01_000.ogg

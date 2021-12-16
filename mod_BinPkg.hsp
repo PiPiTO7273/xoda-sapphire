@@ -6,9 +6,9 @@
 
 #module
 
-	//ãƒã‚¤ãƒŠãƒªãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã®èª­ã¿è¾¼ã¿
+	//ƒoƒCƒiƒŠƒpƒbƒP[ƒW‚Ì“Ç‚İ‚İ
 	//binpkg_Load p1
-	//p1		:	ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã®ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
+	//p1		:	ƒpƒbƒP[ƒW‚Ìƒtƒ@ƒCƒ‹ƒpƒX
 	#deffunc binpkg_Load str _pkgpath
 
 		dim pkgsize
@@ -17,20 +17,20 @@
 		sdim pkgBuf,pkgsize
 		bload _pkgpath,pkgBuf
 
-		//ãƒ˜ãƒƒãƒ€ãƒ¼ã®ç¢ºèª
+		//ƒwƒbƒ_[‚ÌŠm”F
 		if peek(pkgBuf,0)!'b' :return -2
 		if peek(pkgBuf,1)!'p' :return -2
 		if peek(pkgBuf,2)!'g' :return -2
 		if peek(pkgBuf,3)!'0' :return -2
 
-		//ãƒ•ã‚¡ã‚¤ãƒ«æ•°ã®ç¢ºèª
+		//ƒtƒ@ƒCƒ‹”‚ÌŠm”F
 		dim pkgIndexMax
 		pkgIndexMax=lpeek(pkgBuf,4)
 
 		dim pkgReadIndex
 		pkgReadIndex=8
 
-		//æ ¼ç´
+		//Ši”[
 		dim tmppkgFileNameLength
 		sdim tmppkgFileNameBuf
 		sdim pkgFileName,pkgIndexMax
@@ -47,15 +47,15 @@
 			pkgIndexPosition(cnt)=pkgReadIndex+4
 			pkgReadIndex+4+pkgIndexLength(cnt)
 
-			;logmes"ID:"+cnt+" \""+pkgFileName(cnt)+"\" Position:"+pkgIndexPosition(cnt)+",Length:"+pkgIndexLength(cnt)
+			logmes"ID:"+cnt+" \""+pkgFileName(cnt)+"\" Position:"+pkgIndexPosition(cnt)+",Length:"+pkgIndexLength(cnt)
 		loop
 
 		return
 
-	//ãƒã‚¤ãƒŠãƒªãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’å–å¾—
+	//ƒoƒCƒiƒŠƒpƒbƒP[ƒW‚ÌƒCƒ“ƒfƒbƒNƒX‚ğæ“¾
 	//binpkg_GetIndex(p1)
-	//p1		:	ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸å†…ã§æ¤œç´¢ã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«å
-	//ãƒ•ã‚¡ã‚¤ãƒ«ãŒå­˜åœ¨ã—ãªã‹ã£ãŸå ´åˆã€-1ãŒè¿”ã‚Šã¾ã™
+	//p1		:	ƒpƒbƒP[ƒW“à‚ÅŒŸõ‚·‚éƒtƒ@ƒCƒ‹–¼
+	//ƒtƒ@ƒCƒ‹‚ª‘¶İ‚µ‚È‚©‚Á‚½ê‡A-1‚ª•Ô‚è‚Ü‚·
 	#defcfunc binpkg_GetIndex str _pkgfilename
 
 		dim ResIndexID
@@ -68,10 +68,10 @@
 
 		return ResIndexID
 
-	//ãƒã‚¤ãƒŠãƒªãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å±•é–‹
+	//ƒoƒCƒiƒŠƒpƒbƒP[ƒW‚Ìƒtƒ@ƒCƒ‹‚ğ“WŠJ
 	//binpkg_ExtractFile p1,p2
-	//p1		:	ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸å†…ã‚’æ¤œç´¢ã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«å
-	//p2		:	å±•é–‹å…ˆã®ãƒ•ã‚¡ã‚¤ãƒ«å
+	//p1		:	ƒpƒbƒP[ƒW“à‚ğŒŸõ‚·‚éƒtƒ@ƒCƒ‹–¼
+	//p2		:	“WŠJæ‚Ìƒtƒ@ƒCƒ‹–¼
 	#deffunc binpkg_extract str _pkgfilename,str _extractfilename
 
 		repeat pkgIndexMax
@@ -84,28 +84,28 @@
 
 		return
 
-	//ãƒã‚¤ãƒŠãƒªãƒ‘ãƒƒã‚±ãƒ¼ã‚¸å†…ã®ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚µã‚¤ã‚ºã‚’å–å¾—
+	//ƒoƒCƒiƒŠƒpƒbƒP[ƒW“à‚Ìƒtƒ@ƒCƒ‹‚ÌƒTƒCƒY‚ğæ“¾
 	//binpkg_GetFileLength p1
-	//p1		:	ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·
+	//p1		:	ƒCƒ“ƒfƒbƒNƒX”Ô†
 	#defcfunc binpkg_GetFileLength int _pkgIndexID
 		return pkgIndexLength(_pkgIndexID)
 
-	//ãƒã‚¤ãƒŠãƒªãƒ‘ãƒƒã‚±ãƒ¼ã‚¸å†…ã®ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒã‚¤ãƒŠãƒªä½ç½®ã‚’å–å¾—
+	//ƒoƒCƒiƒŠƒpƒbƒP[ƒW“à‚Ìƒtƒ@ƒCƒ‹‚ÌƒoƒCƒiƒŠˆÊ’u‚ğæ“¾
 	//binpkg_GetFilePosition p1
-	//p1		:	ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·
+	//p1		:	ƒCƒ“ƒfƒbƒNƒX”Ô†
 	#defcfunc binpkg_GetFilePosition int _pkgIndexID
 		return pkgIndexPosition(_pkgIndexID)
 
-	//ãƒã‚¤ãƒŠãƒªãƒ‘ãƒƒã‚±ãƒ¼ã‚¸å†…ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¤‰æ•°ã«ã‚³ãƒ”ãƒ¼
+	//ƒoƒCƒiƒŠƒpƒbƒP[ƒW“à‚Ìƒtƒ@ƒCƒ‹‚ğ•Ï”‚ÉƒRƒs[
 	//binpkg_CopytoBuffer p1,p2
-	//p1		:	ã‚³ãƒ”ãƒ¼å…ˆã®å¤‰æ•°
-	//p2		:	ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·
+	//p1		:	ƒRƒs[æ‚Ì•Ï”
+	//p2		:	ƒCƒ“ƒfƒbƒNƒX”Ô†
 	#deffunc binpkg_CopytoBuffer var _pkgCopy,int _pkgIndexID
 		sdim _pkgCopy,pkgIndexLength(_pkgIndexID)
 		memcpy _pkgCopy,pkgBuf,pkgIndexLength(_pkgIndexID),0,pkgIndexPosition(_pkgIndexID)
 		return
 
-	//ãƒã‚¤ãƒŠãƒªãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ç”¨ã®ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆ
+	//ƒoƒCƒiƒŠƒpƒbƒP[ƒW—p‚Ìƒoƒbƒtƒ@‚ğì¬
 	#deffunc binpkg_Create var _pkgbuf
 		sdim _pkgbuf,4+4
 		poke _pkgbuf,0,'b'
@@ -115,7 +115,7 @@
 		lpoke _pkgbuf,4,0
 		return
 
-	//ãƒã‚¤ãƒŠãƒªãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã«ãƒ•ã‚¡ã‚¤ãƒ«ã‚’è¿½åŠ 
+	//ƒoƒCƒiƒŠƒpƒbƒP[ƒW‚Éƒtƒ@ƒCƒ‹‚ğ’Ç‰Á
 	#deffunc binpkg_AddFile var _pkgbuf,str _addfilename
 		sdim filename
 		filename=getpath(_addfilename,8)

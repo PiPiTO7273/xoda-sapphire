@@ -411,6 +411,7 @@
 						} else {
 							PlaySE int(hcommonsech@(sndDecide@)),1.0
 							NumTickets@portalsync--
+							librec_consticket@++
 							GoStepForward
 						}
 						WindowCount=0
@@ -434,6 +435,7 @@
 						} else {
 							PlaySE int(hcommonsech@(sndDecide@)),1.0
 							NumTickets@portalsync--
+							librec_consticket@++
 							//ŠJŽn
 							ChallengeStartFlag=TRUE
 							PushButtonFlag=TRUE
@@ -466,6 +468,7 @@
 						} else {
 							PlaySE int(hcommonsech@(sndDecide@)),1.0
 							NumTickets@portalsync-10
+							librec_consticket@+10
 							GoStepForward
 						}
 					}

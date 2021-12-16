@@ -11,6 +11,7 @@ Artwork=img.png
 Side.NoteFlag=TRUE
 Default.BPM=199.000000
 Total.Offset=20
+Total.Notes=354
 
 [Sound]
 

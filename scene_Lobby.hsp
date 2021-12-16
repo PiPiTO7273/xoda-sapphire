@@ -44,11 +44,44 @@
 		hdximg(ibg_top)=LoadGraph("Data/bg_Lobby_Top.png")
 		hdximg(iitem_freeplay)=LoadGraph("Data/item_lobby_freeplay.png")
 		hdximg(iitem_challenge)=LoadGraph("Data/item_lobby_challenge.png")
-		hdximg(iitem_newsong)=LoadGraph("Data/item_lobby_newsong.png")
+		hdximg(iitem_newsong)=MakeScreen(500,308,TRUE)
+			SetDrawScreen hdximg(iitem_newsong)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			LoadGraphScreen 0,0,"Data/item_lobby_newsong.png",TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			ChangeFont"Meiryo":SetFontSize 24:ChangeFontType DX_FONTTYPE_ANTIALIASING_4X4
+			DrawString 30,130,GetINIvalue(coreBuf@_load_,"Newsong","Title"),$000000
+			SetFontSize 16
+			DrawString 30,175,GetINIvalue(coreBuf@_load_,"Newsong","Artist"),$000000
+			SetFontSize 18
+			DrawString 30,210,GetINIvalue(coreBuf@_load_,"Newsong","Desc"),$0EB8BE
 		hdximg(iitem_library)=LoadGraph("Data/item_lobby_library.png")
-		hdximg(iitem_update)=LoadGraph("Data/item_lobby_update.png")
+		hdximg(iitem_update)=MakeScreen(500,308,TRUE)
+			SetDrawScreen hdximg(iitem_update)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			LoadGraphScreen 0,0,"Data/item_lobby_update.png",TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			ChangeFont"Meiryo":SetFontSize 24:ChangeFontType DX_FONTTYPE_ANTIALIASING_4X4
+			DrawString 30,130,"Version "+GetINIvalue(coreBuf@_load_,"Release","Version"),$000000
+			SetFontSize 16
+			tmpstr=GetINIvalue(coreBuf@_load_,"Release","Desc")
+			strrep tmpstr,"<br>","\n"
+			DrawString 30,175,tmpstr,$000000
 		hdximg(iitem_store)=LoadGraph("Data/item_lobby_store.png")
-		hdximg(iitem_recommand)=LoadGraph("Data/item_lobby_recommand.png")
+		hdximg(iitem_recommand)=MakeScreen(500,308,TRUE)
+			dim RecommandSongID
+			RecommandSongID=rnd(int(GetINIvalue(coreBuf@_load_,"Recommand","Reg.Max")))
+			sdim RecommandTitle:sdim RecommandArtist
+			tmpstr=GetINIvalue(coreBuf@_load_,"Recommand","ID."+RecommandSongID)
+			split tmpstr,",",RecommandTitle,RecommandArtist
+			SetDrawScreen hdximg(iitem_recommand)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			LoadGraphScreen 0,0,"Data/item_lobby_recommand.png",TRUE
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			ChangeFont"Meiryo":SetFontSize 24:ChangeFontType DX_FONTTYPE_ANTIALIASING_4X4
+			DrawString 30,130,RecommandTitle,$000000
+			SetFontSize 16
+			DrawString 30,175,RecommandArtist,$000000
 		hdximg(iitem_tutorial)=LoadGraph("Data/item_lobby_tutorial.png")
 		hdximg(iitem_clock)=LoadGraph("Data/item_lobby_clock.png")
 		hdximg(iitem_review)=LoadGraph("Data/item_lobby_review.png")
@@ -365,7 +398,8 @@
 					case 9:LoadPartnerSelectImages:swbreak
 					case 10:LoadChallengeModeMap"Data/map-challenge.bin":swbreak
 					case 11:LoadChallengeImages:swbreak
-					case 12:InitLoadFlag@=TRUE:swbreak
+					case 12:librec_logincount@++:swbreak
+					case 13:InitLoadFlag@=TRUE:swbreak
 				swend
 			}
 

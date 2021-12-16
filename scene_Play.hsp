@@ -702,6 +702,8 @@
 						scoreCapture_flag(cnt)=TRUE
 					}
 				loop
+
+				librec_numretire@++
 			}
 
 		//判定処理
@@ -750,7 +752,6 @@
 				ProgLaneID=cnt
 				if FinishFlag==TRUE :break	//終了済みなら判定をスキップ
 				if KeybtJudge(0,ProgLaneID)==0&KeybtJudge(1,ProgLaneID)==1 {
-					VisualBData(0)++
 					//レーンエフェクトの演出設定をリセット
 					LaneEffMode(ProgLaneID)=1
 					LaneEffCount(ProgLaneID)=0
@@ -772,6 +773,8 @@
 							}
 						}
 					}
+
+					librec_numkeypush@++
 				}
 				if KeybtJudge(0,ProgLaneID)==1&KeybtJudge(1,ProgLaneID)==0 {
 					LaneEffMode(ProgLaneID)=3
@@ -1472,6 +1475,7 @@
 		switch _judgeres
 			case jres_Excellent		//EXCELLENT判定
 				numExcellent++
+				librec_numjexcellent@++
 				curCombo++
 				if curCombo>MaxCombo :MaxCombo=curCombo
 				curScore+ObjHitScore
@@ -1484,6 +1488,7 @@
 			swbreak
 			case jres_Great		//GREAT判定
 				numGreat++
+				librec_numjgreat@++
 				curCombo++
 				if curCombo>MaxCombo :MaxCombo=curCombo
 				curScore+ObjHitScore/2
@@ -1491,12 +1496,14 @@
 			swbreak
 			case jres_Good			//GOOD判定
 				numGood++
+				librec_numjgood@++
 				curCombo++
 				if curCombo>MaxCombo :MaxCombo=curCombo
 				curScore+ObjHitScore/4
 			swbreak
 			case jres_Bad			//BAD判定
 				numBad++
+				librec_numjbad@++
 				numCombobreak++
 				curCombo=0
 
@@ -1509,6 +1516,7 @@
 			swbreak
 			case jres_Miss			//MISS判定
 				numMiss++
+				librec_numjmiss@++
 				numCombobreak++
 				curCombo=0
 
@@ -1562,6 +1570,8 @@
 
 		//HTTPリクエストを作成
 
+			librec_totalscore@+curScore
+
 			//リザルト用にバックアップ
 			dim OldCurScore:OldCurScore=curScore
 			dim OldMybestScore:OldMybestScore=int(MybestRecordBuf(ID_REC_SCORE))
@@ -1592,6 +1602,7 @@
 				maxcombo=int(MybestRecordBuf(ID_REC_MAXCOMBO))
 			} else :UpdateScoreFlag=TRUE
 				sdim HTTPpostdata
+				HTTPpostdata=""
 				HTTPpostdata+"key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendNewRecord")+"&"
 				HTTPpostdata+"id="+GetChartInfo(META_UUID)+"&"
 				HTTPpostdata+"name="+LoginUserInfo@(ID_NAME@)+"&"
@@ -1628,13 +1639,34 @@
 				if (OldnumExcellent!0)&(OldnumGreat==0&OldnumGood==0&OldnumBad==0&OldnumMiss==0) :tmpstr="ALL-EXCELLENT"
 				OldClearType=tmpstr
 				switch tmpstr
-					case"FAILED":tmpint(1)=1:swbreak
-					case"ASSIST-CLEAR":tmpint(1)=2:swbreak
-					case"CLEAR":tmpint(1)=3:swbreak
-					case"EXPERT-CLEAR":tmpint(1)=4:swbreak
-					case"MADNESS-CLEAR":tmpint(1)=5:swbreak
-					case"FULLCOMBO":tmpint(1)=6:swbreak
-					case"ALL-EXCELLENT":tmpint(1)=7:swbreak
+					case"FAILED"
+						tmpint(1)=1
+						librec_numfailed@++
+					swbreak
+					case"ASSIST-CLEAR"
+						tmpint(1)=2
+						librec_numassist@++
+					swbreak
+					case"CLEAR"
+						tmpint(1)=3
+						librec_numclear@++
+					swbreak
+					case"EXPERT-CLEAR"
+						tmpint(1)=4
+						librec_numexpert@++
+					swbreak
+					case"MADNESS-CLEAR"
+						tmpint(1)=5
+						librec_nummadness@++
+					swbreak
+					case"FULLCOMBO"
+						tmpint(1)=6
+						librec_numfullcombo@++
+					swbreak
+					case"ALL-EXCELLENT"
+						tmpint(1)=7
+						librec_numallex@++
+					swbreak
 				swend
 				//比較
 				if tmpint(0)<=tmpint(1) {
@@ -1679,15 +1711,14 @@
 
 			//能力値
 			if double(MybestRecordBuf(ID_REC_AP))>curPfPoint {
-				HTTPpostdata+"ability="+MybestRecordBuf(ID_REC_AP)+"&"
+				HTTPpostdata+"ability="+MybestRecordBuf(ID_REC_AP)
 			} else {
-				HTTPpostdata+"ability="+curPfPoint+"&"
+				HTTPpostdata+"ability="+curPfPoint
 			}
 
 			//自己ベストを更新している場合、送信
 			WebAPI_SendNewRecord HTTPpostdata
 			sdim HTTPpostdata
-
 			WebAPI_SendGlobalRanking GetChartInfo(META_UUID),curScore
 	return
 

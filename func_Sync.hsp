@@ -31,9 +31,32 @@
 		dim musicselect_ItemID@		//曲選択画面の項目ID
 		dim musicselect_LevelID@		//曲選択画面のレベル
 
+		//チュートリアル閲覧フラグ
 		dim WatchTutorial_MusicSelect_0@
 		dim WatchTutorial_MusicSelect_1@
 		dim WatchTutorial_Option@
+
+		//LIBRARYモードの記録
+		dim librec_PlayCount@		//今までプレイした楽曲数
+		dim librec_numallex@		//ALL EXCELLENTを達成した回数
+		dim librec_numfullcombo@		//FULL COMBOを達成した回数
+		dim librec_nummadness@		//MADNESSオプションでクリアした回数
+		dim librec_numexpert@		//EXPERTオプションでクリアした回数
+		dim librec_numclear@		//通常のゲージでクリアした回数
+		dim librec_numassist@		//ASSISTオプションでクリアした回数
+		dim librec_numfailed@		//クリアに失敗した回数
+		dim librec_numretire@		//途中でプレイを諦めた回数
+		dim librec_numjexcellent@	//EXCELLENT判定を出した回数
+		dim librec_numjgreat@		//GREAT判定を出した回数
+		dim librec_numjgood@		//GOOD判定を出した回数
+		dim librec_numjbad@			//BAD判定を出した回数
+		dim librec_numjmiss@		//MISS判定を出した回数
+		dim librec_numkeypush@		//今までキーを押した回数
+		dim64 librec_totalscore@		//今まで獲得したスコア
+		dim librec_conslilly@		//今まで消費したlilly
+		dim librec_consticket@		//今まで消費したチケット数
+		dim librec_consfragment@		//今まで消費した音色のかけら
+		dim librec_logincount@		//ゲームにログインした回数
 
 		AccessID@portalsync="*"
 		RegName@portalsync="******"
@@ -239,6 +262,68 @@
 
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.PLAYOPTION")=="" :syncINIdata+"XODA.WATCHTUTORIAL.PLAYOPTION=0\n"
 		WatchTutorial_Option@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.PLAYOPTION"))
+
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.PLAYCOUNT")=="" :syncINIdata+"XODA.LIBREC.PLAYCOUNT=0\n"
+		librec_PlayCount@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.PLAYCOUNT"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMALLEX")=="" :syncINIdata+"XODA.LIBREC.NUMALLEX=0\n"
+		librec_numallex@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMALLEX"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMFULLCOMBO")=="" :syncINIdata+"XODA.LIBREC.NUMFULLCOMBO=0\n"
+		librec_numfullcombo@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMFULLCOMBO"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMMADNESS")=="" :syncINIdata+"XODA.LIBREC.NUMMADNESS=0\n"
+		librec_nummadness@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMMADNESS"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMEXPERT")=="" :syncINIdata+"XODA.LIBREC.NUMEXPERT=0\n"
+		librec_numexpert@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMEXPERT"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMCLEAR")=="" :syncINIdata+"XODA.LIBREC.NUMCLEAR=0\n"
+		librec_numclear@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMCLEAR"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMASSIST")=="" :syncINIdata+"XODA.LIBREC.NUMASSIST=0\n"
+		librec_numassist@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMASSIST"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMFAILED")=="" :syncINIdata+"XODA.LIBREC.NUMFAILED=0\n"
+		librec_numfailed@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMFAILED"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMRETIRE")=="" :syncINIdata+"XODA.LIBREC.NUMRETIRE=0\n"
+		librec_numretire@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMRETIRE"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMJEXCELLENT")=="" :syncINIdata+"XODA.LIBREC.NUMJEXCELLENT=0\n"
+		librec_numjexcellent@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMJEXCELLENT"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMJGREAT")=="" :syncINIdata+"XODA.LIBREC.NUMJGREAT=0\n"
+		librec_numjgreat@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMJGREAT"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMJGOOD")=="" :syncINIdata+"XODA.LIBREC.NUMJGOOD=0\n"
+		librec_numjgood@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMJGOOD"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMJBAD")=="" :syncINIdata+"XODA.LIBREC.NUMJBAD=0\n"
+		librec_numjbad@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMJBAD"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMJMISS")=="" :syncINIdata+"XODA.LIBREC.NUMJMISS=0\n"
+		librec_numjmiss@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMJMISS"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMKEYPUSH")=="" :syncINIdata+"XODA.LIBREC.NUMKEYPUSH=0\n"
+		librec_numkeypush@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.NUMKEYPUSH"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.TOTALSCORE")=="" :syncINIdata+"XODA.LIBREC.TOTALSCORE=0\n"
+		librec_totalscore@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.TOTALSCORE"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.CONSLILLY")=="" :syncINIdata+"XODA.LIBREC.CONSLILLY=0\n"
+		librec_conslilly@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.CONSLILLY"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.CONSTICKET")=="" :syncINIdata+"XODA.LIBREC.CONSTICKET=0\n"
+		librec_consticket@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.CONSTICKET"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.CONSFRAGMENT")=="" :syncINIdata+"XODA.LIBREC.CONSFRAGMENT=0\n"
+		librec_consfragment@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.CONSFRAGMENT"))
+
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.LOGINCOUNT")=="" :syncINIdata+"XODA.LIBREC.LOGINCOUNT=0\n"
+		librec_logincount@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.LOGINCOUNT"))
+	
 	return
 
 	#deffunc GetPartnerCharUnlockData
@@ -281,6 +366,7 @@
 		CheckNetworkConnection
 	return WebAPI_Get("http://"+WebAPI_HostAddress+"/API-GetRecord.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_GetRecord")+"&name="+RegName@portalsync)
 	#deffunc WebAPI_SyncRecord str _raw,str _uuid,array _struct
+		//重いわよここ
 		sdim WebAPI_resraw
 		WebAPI_resraw=_raw
 		_struct(ID_REC_UUID)=GetINIvalue(WebAPI_resraw,_uuid,"ID")				//識別子
@@ -306,21 +392,9 @@
 		if OfflinePass@ :return
 		sdim WebAPI_resraw
 		CheckNetworkConnection
-		WebAPI_resraw=WebAPI_Post("http://"+WebAPI_HostAddress+"/API-SendNewRecord.php",_data)
-		switch WebAPI_resraw
-			case"ERROR_AUTH_APIKEY"
-			ShowErrorMsg"ERROR_AUTH_APIKEY"
-			swbreak
-			case"ERROR_AUTH_PASSWORD"
-			ShowErrorMsg"ERROR_AUTH_PASSWORD"
-			swbreak
-			case"ERROR_UNKNOWN_ID"
-			ShowErrorMsg"ERROR_UNKNOWN_ID"
-			swbreak
-			case"ERROR_UNKNOWN_PRM"
-			ShowErrorMsg"ERROR_UNKNOWN_PRM"
-			swbreak
-		swend
+		sdim tmpvar,1024*1024:tmpvar=_data
+		WebAPI_resraw=WebAPI_Post("http://"+WebAPI_HostAddress+"/API-SendNewRecord.php",tmpvar)
+		sdim tmpvar
 	return
 
 	//世界ランキングを取得
@@ -345,6 +419,22 @@
 		if OfflinePass@ :return""
 	return WebAPI_Post("http://"+WebAPI_HostAddress+"/API-SendReport.php","id="+RegName@portalsync+"&msg="+_main)
 
+	//プロフィールをまとめて保存（初期化）
+	#deffunc WebAPI_mSendProfile_Init
+		sdim tmpsendcue
+		dim tmpsendcue_max
+		return
+
+	//プロフィールをまとめて保存（登録）
+	#deffunc WebAPI_mSendProfile_Reg str _key,str _value
+		tmpsendcue+"object_"+tmpsendcue_max+"="+_key+"&value_"+tmpsendcue_max+"="+_value+"&"
+		tmpsendcue_max++
+		return
+
+	//プロフィールをまとめて保存（送信）
+	#deffunc WebAPI_mSendProfile_Send
+		return WebAPI_Post("http://"+WebAPI_HostAddress+"/API-SendProfile-Multiple.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+RegName@portalsync+"&password="+RegAuth@portalsync+"&decode="+WebAPI_DecodeKey,tmpsendcue)
+
 	//プロフィールをすべて保存
 	#deffunc SendAllProfile
 		if OfflinePass@ :return
@@ -352,29 +442,52 @@
 		if RegAuth@portalsync=="" :return
 		if InitLoadFlag@==FALSE :return
 		CheckNetworkConnection
-		WebAPI_SendProfile"XODA.LEVEL",str(RegLev@portalsync)
-		WebAPI_SendProfile"XODA.EXP",str(RegEXP@portalsync)
-		WebAPI_SendProfile"XODA.RATE",str(RegPfPoint@portalsync)
-		WebAPI_SendProfile"XODA.BADGE",str(RegBadge@portalsync)
-		WebAPI_SendProfile"XODA.PARTNER",str(RegCharID@portalsync)
-		WebAPI_SendProfile"XODA.OPTION.ADDSPEED",str(AddSpeed@)
-		WebAPI_SendProfile"XODA.OPTION.GAUGE",str(GaugeType@)
-		WebAPI_SendProfile"XODA.OPTION.PLACEMENT",str(ObjPlacement@)
-		WebAPI_SendProfile"XODA.OPTION.TARGET",str(TargetScoreRank@)
-		WebAPI_SendProfile"XODA.OPTION.JUDGEOFFSET",str(JudgeOffset@)
-		WebAPI_SendProfile"XODA.OPTION.DISPOFFSET",str(DispOffset@)
-		WebAPI_SendProfile"XODA.OPTION.AUTOPLAY",str(AutoPlayFlag@)
-		WebAPI_SendProfile"XODA.OPTION.BONUSFLAG",str(drawbonusFlag@)
-		WebAPI_SendProfile"XODA.MUSICSELECT.CURSORID",str(musicselect_ItemID@)
-		WebAPI_SendProfile"XODA.MUSICSELECT.LEVELID",str(musicselect_LevelID@)
-		WebAPI_SendProfile"XODA.NUMFRAGMENTS",str(NumFragments@portalsync)
-		WebAPI_SendProfile"XODA.NUMTICKETS",str(NumTickets@portalsync)
-		WebAPI_SendProfile"XODA.NUMLILLY",str(NumLilly@portalsync)
-		WebAPI_SendProfile"XODA.CHAPTERMAPID",str(ChapterMapID@portalsync)
-		WebAPI_SendProfile"XODA.CHAPTERSTEPID",str(ChapterStepID@portalsync)
-		WebAPI_SendProfile"XODA.WATCHTUTORIAL.MUSICSELECT.0",str(WatchTutorial_MusicSelect_0@)
-		WebAPI_SendProfile"XODA.WATCHTUTORIAL.MUSICSELECT.1",str(WatchTutorial_MusicSelect_1@)
-		WebAPI_SendProfile"XODA.WATCHTUTORIAL.PLAYOPTION",str(WatchTutorial_Option@)
+		WebAPI_mSendProfile_Init
+		WebAPI_mSendProfile_Reg"XODA.LEVEL",str(RegLev@portalsync)
+		WebAPI_mSendProfile_Reg"XODA.EXP",str(RegEXP@portalsync)
+		WebAPI_mSendProfile_Reg"XODA.RATE",str(RegPfPoint@portalsync)
+		WebAPI_mSendProfile_Reg"XODA.BADGE",str(RegBadge@portalsync)
+		WebAPI_mSendProfile_Reg"XODA.PARTNER",str(RegCharID@portalsync)
+		WebAPI_mSendProfile_Reg"XODA.OPTION.ADDSPEED",str(AddSpeed@)
+		WebAPI_mSendProfile_Reg"XODA.OPTION.GAUGE",str(GaugeType@)
+		WebAPI_mSendProfile_Reg"XODA.OPTION.PLACEMENT",str(ObjPlacement@)
+		WebAPI_mSendProfile_Reg"XODA.OPTION.TARGET",str(TargetScoreRank@)
+		WebAPI_mSendProfile_Reg"XODA.OPTION.JUDGEOFFSET",str(JudgeOffset@)
+		WebAPI_mSendProfile_Reg"XODA.OPTION.DISPOFFSET",str(DispOffset@)
+		WebAPI_mSendProfile_Reg"XODA.OPTION.AUTOPLAY",str(AutoPlayFlag@)
+		WebAPI_mSendProfile_Reg"XODA.OPTION.BONUSFLAG",str(drawbonusFlag@)
+		WebAPI_mSendProfile_Reg"XODA.MUSICSELECT.CURSORID",str(musicselect_ItemID@)
+		WebAPI_mSendProfile_Reg"XODA.MUSICSELECT.LEVELID",str(musicselect_LevelID@)
+		WebAPI_mSendProfile_Reg"XODA.NUMFRAGMENTS",str(NumFragments@portalsync)
+		WebAPI_mSendProfile_Reg"XODA.NUMTICKETS",str(NumTickets@portalsync)
+		WebAPI_mSendProfile_Reg"XODA.NUMLILLY",str(NumLilly@portalsync)
+		WebAPI_mSendProfile_Reg"XODA.CHAPTERMAPID",str(ChapterMapID@portalsync)
+		WebAPI_mSendProfile_Reg"XODA.CHAPTERSTEPID",str(ChapterStepID@portalsync)
+		WebAPI_mSendProfile_Reg"XODA.WATCHTUTORIAL.MUSICSELECT.0",str(WatchTutorial_MusicSelect_0@)
+		WebAPI_mSendProfile_Reg"XODA.WATCHTUTORIAL.MUSICSELECT.1",str(WatchTutorial_MusicSelect_1@)
+		WebAPI_mSendProfile_Reg"XODA.WATCHTUTORIAL.PLAYOPTION",str(WatchTutorial_Option@)
+
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.PLAYCOUNT",str(librec_PlayCount@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMALLEX",str(librec_numallex@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMFULLCOMBO",str(librec_numfullcombo@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMMADNESS",str(librec_nummadness@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMEXPERT",str(librec_numexpert@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMCLEAR",str(librec_numclear@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMASSIST",str(librec_numassist@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMFAILED",str(librec_numfailed@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMRETIRE",str(librec_numretire@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMJEXCELLENT",str(librec_numjexcellent@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMJGREAT",str(librec_numjgreat@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMJGOOD",str(librec_numjgood@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMJBAD",str(librec_numjbad@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMJMISS",str(librec_numjmiss@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMKEYPUSH",str(librec_numkeypush@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.TOTALSCORE",str(librec_totalscore@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.CONSLILLY",str(librec_conslilly@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.CONSTICKET",str(librec_consticket@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.CONSFRAGMENT",str(librec_consfragment@)
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.LOGINCOUNT",str(librec_logincount@)
+		WebAPI_mSendProfile_Send
 	return
 
 	//接続ハッシュ取得
