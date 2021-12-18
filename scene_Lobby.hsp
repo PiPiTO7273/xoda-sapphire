@@ -280,7 +280,6 @@
 			SetDrawScreen hdximg@(iScene)
 
 		//€–Ú•`‰æ
-
 			if RawWheelMove<0 {
 				ScrollEaseA=ScrollEaseB
 				ScrollEaseB-80
@@ -398,8 +397,9 @@
 					case 9:LoadPartnerSelectImages:swbreak
 					case 10:LoadChallengeModeMap"Data/map-challenge.bin":swbreak
 					case 11:LoadChallengeImages:swbreak
-					case 12:librec_logincount@++:swbreak
-					case 13:InitLoadFlag@=TRUE:swbreak
+					case 12:LoadLibraryImages:swbreak
+					case 13:librec_logincount@++:swbreak
+					case 14:InitLoadFlag@=TRUE:swbreak
 				swend
 			}
 
@@ -430,6 +430,11 @@
 					InitScene ID_CHALLENGE
 					InitChallengeFonts
 					StartChallenge
+				swbreak
+				case 3
+					InitScene ID_LIBRARY
+					InitLibraryFonts
+					StartLibrary
 				swbreak
 				case 9
 					InitScene ID_WELCOME1

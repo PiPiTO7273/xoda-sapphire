@@ -343,6 +343,7 @@
 			sdim plitem_unlockrawdata,32,numitem,3
 			dim plitem_unlockflag,numitem,3
 			dim plitem_unlocklilly,numitem,3
+			dim numUnlocked
 
 			ddim RegPfPoint@portalsync,1
 			ddim PfPointArr,10
@@ -440,6 +441,10 @@
 						} else :plitem_unlockflag(plitemid,pllevid)=TRUE
 						if GetChartUnlockFlag(plitem_UUID(plitemid,pllevid))==1 :plitem_unlockflag(plitemid,pllevid)=TRUE
 
+						if plitem_unlockflag(plitemid,pllevid) {
+							numUnlocked++
+						}
+
 						//IRâêÕ
 						plitem_mybest_score(plitemid,pllevid)=int(IRsyncstruct(ID_REC_SCORE))
 						plitem_mybest_rank(plitemid,pllevid)=GetScoreRank(double(plitem_mybest_score(plitemid,pllevid))/10000000.0*100.0)
@@ -499,6 +504,12 @@
 		ActiveColumnID(ID_SONGS)=0
 		bfActiveColumnID(ID_SONGS)=0
 	return
+
+	#defcfunc GetNumUnlockedCharts
+	return numUnlocked
+
+	#defcfunc GetNumCharts
+	return numitem*3
 
 	#deffunc SetFilterRefDB int _ref
 		dim c,numitem*3,3:dim lv,numitem*3,3:dim numfilteritem

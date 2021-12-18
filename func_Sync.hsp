@@ -37,6 +37,7 @@
 		dim WatchTutorial_Option@
 
 		//LIBRARYモードの記録
+		dim librec_PlayTime@		//プレイ時間
 		dim librec_PlayCount@		//今までプレイした楽曲数
 		dim librec_numallex@		//ALL EXCELLENTを達成した回数
 		dim librec_numfullcombo@		//FULL COMBOを達成した回数
@@ -264,6 +265,9 @@
 		WatchTutorial_Option@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.PLAYOPTION"))
 
 
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.PLAYTIME")=="" :syncINIdata+"XODA.LIBREC.PLAYTIME=0\n"
+		librec_PlayTime@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.PLAYTIME"))
+
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.PLAYCOUNT")=="" :syncINIdata+"XODA.LIBREC.PLAYCOUNT=0\n"
 		librec_PlayCount@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.PLAYCOUNT"))
 
@@ -467,6 +471,7 @@
 		WebAPI_mSendProfile_Reg"XODA.WATCHTUTORIAL.MUSICSELECT.1",str(WatchTutorial_MusicSelect_1@)
 		WebAPI_mSendProfile_Reg"XODA.WATCHTUTORIAL.PLAYOPTION",str(WatchTutorial_Option@)
 
+		WebAPI_mSendProfile_Reg"XODA.LIBREC.PLAYTIME",str(librec_PlayTime@)
 		WebAPI_mSendProfile_Reg"XODA.LIBREC.PLAYCOUNT",str(librec_PlayCount@)
 		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMALLEX",str(librec_numallex@)
 		WebAPI_mSendProfile_Reg"XODA.LIBREC.NUMFULLCOMBO",str(librec_numfullcombo@)

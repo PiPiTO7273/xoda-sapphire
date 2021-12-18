@@ -25,6 +25,7 @@
 #include"scene_PartnerSelect.hsp"
 #include"scene_Challenge.hsp"
 #include"scene_Setup.hsp"
+#include"scene_Library.hsp"
 
 #packopt hide 1
 
@@ -57,7 +58,7 @@
 		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_3")
 		RegLoginInfo LoginUserInfo
 
-	;CheckNetworkConnection
+	CheckNetworkConnection
 
 	DrawLoadScreen
 
@@ -94,6 +95,7 @@
 		case ID_RESULT:DrawResult:swbreak
 		case ID_PARTNERSELECT:DrawPartnerSelect:swbreak
 		case ID_CHALLENGE:DrawChallenge:swbreak
+		case ID_LIBRARY:DrawLibrary:swbreak
 		case ID_FATALERROR:DrawError:swbreak
 		case ID_SIGNIN:DrawSignin:swbreak
 		case ID_REGISTER:DrawRegister:swbreak
@@ -156,6 +158,10 @@
 	AddCount CursorImgCount@
 	AddCount CursorHideCount@
 	if CursorImgCount@>57 :CursorImgCount@=0
+
+	if InitLoadFlag@==TRUE&SceneCount@\FPSvalue@==0 {
+		librec_PlayTime@++
+	}
 
 	ScreenFlip
 

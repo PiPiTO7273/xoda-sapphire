@@ -1,0 +1,344 @@
+
+#module _library_
+
+	#enum ibg		=	0
+	#enum ibg_layer
+	#enum inav
+	#enum ibg_contents
+	#enum iwindow
+
+	#enum fEOEXB16			=	0
+	#enum fEOEXB20
+	#enum fEOEXB32
+	#enum fFAB50
+	#enum fNSCJM12
+	#enum fNSCJM15
+	#enum fNSCJM16
+	#enum fNSCJM20
+	#enum fNSCJM24
+	#enum fNSCJM32
+	#enum fPS14
+	#enum fPS16
+	#enum fPS18
+	#enum fPS20
+	#enum fPS24
+	#enum fPS40
+	#enum fPS80
+	#enum fSQNUM16
+	#enum fSQNUM24
+	#enum fSQNUM40
+
+	#deffunc LoadLibraryImages
+		dim hdximg
+		SetDXArchiveExtension"bin"
+		hdximg(ibg)=hdximg@(ibg_common_0)
+		hdximg(ibg_layer)=LoadGraph("Data/bg_library.png")
+		hdximg(inav)=LoadGraph("Data/Nav_Library.png")
+		hdximg(ibg_contents)=LoadGraph("Data/bg_library_contents.png")
+		hdximg(iwindow)=MakeScreen(1370,806,TRUE)
+		return
+
+	#deffunc InitLibraryFonts
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
+		hdxfont(fEOEXB20)=LoadFontDataToHandle("Data/eoexb20.bin")
+		hdxfont(fEOEXB32)=LoadFontDataToHandle("Data/eoexb32.bin")
+		hdxfont(fFAB50)=LoadFontDataToHandle("Data/fab50.bin")
+		hdxfont(fNSCJM12)=LoadFontDataToHandle("Data/nscjm12.bin")
+		hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
+		hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
+		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		hdxfont(fNSCJM24)=LoadFontDataToHandle("Data/nscjm24.bin")
+		hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
+		hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
+		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
+		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
+		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+		hdxfont(fPS24)=LoadFontDataToHandle("Data/ps24.bin")
+		hdxfont(fPS40)=LoadFontDataToHandle("Data/ps40.bin")
+		hdxfont(fPS80)=LoadFontDataToHandle("Data/ps80.bin")
+		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
+		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
+
+		SetFontLineSpaceToHandle 26,hdxfont(fNSCJM20)
+		return
+
+	#deffunc StartLibrary
+		dim SceneCount
+		dim DecideCount
+
+		dim ScrollEaseA
+		dim ScrollEaseB
+		dim OnScrollCount
+		dim BackButtonHoverFlag
+		dim BackButtonEase
+
+		IRsync
+		ScanAllPlaylist
+		sdim strtable_unlockedmusic
+		strtable_unlockedmusic=""+GetNumUnlockedCharts()+" / "+GetNumCharts()
+
+		sdim strtable_unlockedpartner
+		dim numunlockedpartner
+		repeat CharMax@charicon
+			if CharUnlockFlag@charicon :numunlockedpartner++
+		loop
+		strtable_unlockedpartner=""+numunlockedpartner+" / "+CharMax@charicon
+
+		sdim strtable_others,64,20
+		strtable_others(0)=str(librec_PlayCount@)+" 回"
+		strtable_others(1)=str(librec_numallex@)+" 回"
+		strtable_others(2)=str(librec_numfullcombo@)+" 回"
+		strtable_others(3)=str(librec_nummadness@)+" 回"
+		strtable_others(4)=str(librec_numexpert@)+" 回"
+		strtable_others(5)=str(librec_numclear@)+" 回"
+		strtable_others(6)=str(librec_numassist@)+" 回"
+		strtable_others(7)=str(librec_numfailed@)+" 回"
+		strtable_others(8)=str(librec_numretire@)+" 回"
+		strtable_others(9)=str(librec_numjexcellent@)+" 回"
+		strtable_others(10)=str(librec_numjgreat@)+" 回"
+		strtable_others(11)=str(librec_numjgood@)+" 回"
+		strtable_others(12)=str(librec_numjbad@)+" 回"
+		strtable_others(13)=str(librec_numjmiss@)+" 回"
+		strtable_others(14)=str(librec_numkeypush@)+" 回"
+		strtable_others(15)=str(librec_totalscore@)
+		strtable_others(16)=str(librec_conslilly@)+" Lilly"
+		strtable_others(17)=str(librec_consticket@)+" 枚"
+		strtable_others(18)=str(librec_consfragment@)+" 個"
+		strtable_others(19)=str(librec_logincount@)+" 回"
+
+		DecideCount=-1
+		return
+
+	#deffunc DrawLibrary
+
+		//カーソル位置補正
+		dim CursorPosX:dim CursorPosY:dim MouseInput
+		MouseInput=GetMouseInput()
+		CursorPosX=int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@)))
+		CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
+		RawWheelVal=GetMouseWheelRotVol()
+		RawWheelMove=0
+		if RawWheelVal<0&bfRawWheelVal<0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if RawWheelVal>0&bfRawWheelVal>0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
+		bfRawWheelVal=RawWheelVal
+		PushButtonFlag=FALSE
+
+		//項目描画
+		if RawWheelMove<0 {
+			ScrollEaseA=ScrollEaseB
+			ScrollEaseB-80
+			OnScrollCount=0
+		}
+		if RawWheelMove>0 {
+			ScrollEaseA=ScrollEaseB
+			ScrollEaseB+80
+			OnScrollCount=0
+		}
+		if ScrollEaseB<-2074+806-64-64 :ScrollEaseB=-2074+806-64-64
+		if ScrollEaseB>0 :ScrollEaseB=0
+
+		SetDrawScreen hdximg(iwindow)
+		ClearDrawScreen
+		setease ScrollEaseA,ScrollEaseB,ease_cubic_out
+		dim ScrollPos:ScrollPos=getease(OnScrollCount,8)
+		DrawGraph 0,64+ScrollPos,hdximg(ibg_contents),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawStringToHandle 40,66+151+ScrollPos,RegName@portalsync,$FFFFFF,hdxfont(fPS40)
+		DrawStringXAlignRightToHandle 748,66+104+ScrollPos,"Lv. "+str(RegLev@portalsync),112,$FFFFFF,hdxfont(fPS40)
+		DrawStringXAlignRightToHandle 770,66+234+ScrollPos,strf("%.2f",RegPfPoint@portalsync),90,$FFFFFF,hdxfont(fPS40)
+		DrawStringXAlignRightToHandle 1231,66+104+ScrollPos,str(RegEXP@portalsync),99,$FFFFFF,hdxfont(fPS40)
+		DrawStringXAlignRightToHandle 1184,66+235+ScrollPos,strf("%d:%02d:%02d",librec_PlayTime@/60/60\60,librec_PlayTime@/60\60,librec_PlayTime@\60),146,$FFFFFF,hdxfont(fPS40)
+		DrawStringXAlignRightToHandle 708,66+403+ScrollPos,strtable_unlockedmusic,134,$FFFFFF,hdxfont(fPS40)
+		DrawStringXAlignRightToHandle 696,66+507+ScrollPos,strtable_unlockedpartner,146,$FFFFFF,hdxfont(fPS40)
+
+		repeat 20
+			DrawStringXAlignRightToHandle 1134,66+692+(755-685)*cnt+ScrollPos,strtable_others(cnt),56,$FFFFFF,hdxfont(fNSCJM32)
+		loop
+
+		SetDrawScreen hdximg@(iScene)
+
+		//背景（動画）
+		if SceneCount<20|DecideCount>20 {
+			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+			DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+		} else {
+			DrawCommonBackground FrameCount@
+		}
+		if SceneCount==20 :PauseMovieToGraph hdximg(ibg)
+		if DecideCount==20 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+		if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+
+		//背景変更
+		setease 0,BufWidth@,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		if DecideCount==-1 {
+			if SceneCount<20 {
+				DrawBox 0,0,getease(SceneCount,20),BufHeight@,$FFFFFF,TRUE
+			} else {
+				DrawBox getease(SceneCount-20,20),0,BufWidth@,BufHeight@,$FFFFFF,TRUE
+			}
+		} else {
+			if DecideCount<20 {
+				DrawBox 0,0,getease(DecideCount,20),BufHeight@,$FFFFFF,TRUE
+			} else {
+				DrawBox getease(DecideCount-20,20),0,BufWidth@,BufHeight@,$FFFFFF,TRUE
+			}
+		}
+
+		//黒背景
+		if DecideCount==-1 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-40,25)
+			setease -BufWidth@,0,ease_cubic_out
+			DrawGraph getease(SceneCount-40,25),187,hdximg(ibg_layer),TRUE
+		} else {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			setease 0,-BufWidth@,ease_cubic_out
+			DrawGraph getease(DecideCount,25),187,hdximg(ibg_layer),TRUE
+		}
+
+		//項目
+		if SceneCount>45&DecideCount==-1 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-45,25)
+			setease -128,0,ease_cubic_out
+			DrawGraph 275+getease(SceneCount-45,25),234,hdximg(iwindow),TRUE
+		}
+
+		//ナビゲーション
+		if DecideCount==-1 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,20)
+			setease -64,0,ease_cubic_out
+			DrawGraph 48+getease(SceneCount-10,20),32,hdximg(inav),TRUE
+		} else {
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,20)
+			setease -64,0,ease_cubic_out
+			DrawGraph 48+getease(DecideCount,20),32,hdximg(inav),TRUE
+		}
+
+		//プレイヤー情報
+		if SceneCount-20>0&DecideCount==-1 {
+			setease -41-108,0,ease_cubic_out
+			EasePosY=getease(SceneCount-20,20)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1170,41+EasePosY,hdximg@_lobby_(ibg_playerinfo@_lobby_),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				//名前
+				DrawStringToHandle 1315,54+EasePosY,RegName@portalsync,Getcolor(0,0,0),hdxfont(fPS24)
+				//レベル
+				DrawStringToHandle 1315,86+EasePosY,"Lv. "+RegLev@portalsync,Getcolor(0,0,0),hdxfont(fPS16)
+				//総合能力値
+				DrawStringToHandle 1397,109+EasePosY,strf("%.2f",RegPfPoint@portalsync),Getcolor(0,0,0),hdxfont(fPS16)
+				//経験値
+				DrawStringToHandle 1450,86+EasePosY,"EXP "+RegEXP@portalsync+" / "+lpeek(expTablebuf@,RegLev@portalsync*4),Getcolor(0,0,0),hdxfont(fPS16)
+				DrawBox 1450,109+EasePosY,1450+int(100.0*(double(RegEXP@portalsync)/double(lpeek(expTablebuf@,RegLev@portalsync*4)))),109+8+EasePosY,$3FECF2,TRUE
+		}
+		if DecideCount!-1 {
+			setease 0,-41-108,ease_cubic_out
+			EasePosY=getease(DecideCount,20)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1170,41+EasePosY,hdximg@_lobby_(ibg_playerinfo@_lobby_),TRUE
+		}
+		if SceneCount-30>0&DecideCount==-1 {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			setease 0,125,ease_cubic_out:EaseWidth=getease(SceneCount-30,15)
+			setease 0,100,ease_cubic_out:EaseHeight=getease(SceneCount-30,15)
+			DrawExtendGraph 1170+125/2-EaseWidth/2,40+100/2-EaseHeight/2,1170+125/2+EaseWidth/2,40+100/2+EaseHeight/2,hCharImg@charicon(RegCharID@portalsync),TRUE
+		}
+		//コメント
+		if insquare(CursorPosX,CursorPosY,1635,57,1635+140,57+30) {
+			if (MouseInput&MOUSE_INPUT_LEFT) {
+				OpenEditCommentDialog
+				SetDrawScreen hdximg(ilayer_all)
+			}
+		}
+
+		//ステータス
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+			DrawStringToHandle 24,1048,"SAPPHIRE - Library",GetColor(230,230,230),hdxfont(fPS20)
+
+			DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
+			if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,10
+				DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
+				if GetMouseInput()&MOUSE_INPUT_LEFT {
+					goto*Exit@
+				}
+			}
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+
+		//戻るボタン
+			//ホバーエフェクト
+			if BackButtonHoverFlag==FALSE&insquare(CursorPosX,CursorPosY,0,1000,240,1080)==TRUE {
+				BackButtonEase=-1
+			}
+			if BackButtonHoverFlag==TRUE&insquare(CursorPosX,CursorPosY,0,1000,240,1080)==FALSE {
+				BackButtonEase=1
+			}
+			if BackButtonEase<0 :BackButtonEase--
+			if BackButtonEase>0 :BackButtonEase++
+
+			//拡大縮小
+			if BackButtonEase>0 {
+				setease 1.2,1,ease_cubic_out
+			} else {
+				setease 1,1.2,ease_cubic_out
+			}
+			EaseWidth=int(240.0*geteasef(abs(BackButtonEase),10))
+			EaseHeight=int(80.0*geteasef(abs(BackButtonEase),10))
+			EasePosX=0:EasePosY=BufHeight@-EaseHeight
+
+			//フェードイン・フェードアウト
+			if SceneCount<20 {
+				setease -int(240.0*1.2),0,ease_cubic_out
+				EasePosX=getease(SceneCount,20)
+			}
+			if DecideCount!-1 {
+				setease 0,-int(240.0*1.2),ease_cubic_out
+				EasePosX=getease(DecideCount,20)
+			}
+
+			//描画
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg@(ibutton_backscene),TRUE
+
+			//戻るボタン判定
+			if insquare(CursorPosX,CursorPosY,0,1000,240,1080)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&DecideCount==-1 {
+				PushButtonFlag=TRUE
+				PlaySE int(hcommonsech@(sndDecide@)),1.0
+				DecideCount=0
+			}
+
+		BackButtonHoverFlag=insquare(CursorPosX,CursorPosY,0,1000,240,1080)
+
+		//プリローダー
+			if SceneCount>50 {
+				setease 400,0,ease_cubic_out
+				EaseWidth=getease(SceneCount-50,20)
+			} else :EaseWidth=400
+			if DecideCount!-1 {
+				setease 0,400,ease_cubic_out
+				EaseWidth=getease(DecideCount,20)
+			}
+			DrawExtendGraph BufWidth@/2-EaseWidth/2,BufHeight@/2-EaseWidth/2,BufWidth@/2+EaseWidth/2,BufHeight@/2+EaseWidth/2,hdximg_arr_preloader_2@(FrameCount@\74),TRUE
+
+		if DecideCount>60 {
+			InitScene ID_LOBBY
+			InitLobbyFonts
+			StartLobby
+		}
+
+		AddCount SceneCount
+		AddCount OnScrollCount
+		if DecideCount!-1 :AddCount DecideCount
+
+		return
+
+#global

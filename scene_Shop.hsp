@@ -1,0 +1,9 @@
+#module _shop_
+
+	#deffunc LoadShopImages
+		return
+
+	#deffunc InitShopFonts
+		return
+
+#global
