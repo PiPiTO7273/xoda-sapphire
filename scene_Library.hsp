@@ -75,15 +75,13 @@
 		dim BackButtonHoverFlag
 		dim BackButtonEase
 
-		IRsync
-		ScanAllPlaylist
 		sdim strtable_unlockedmusic
 		strtable_unlockedmusic=""+GetNumUnlockedCharts()+" / "+GetNumCharts()
 
 		sdim strtable_unlockedpartner
 		dim numunlockedpartner
 		repeat CharMax@charicon
-			if CharUnlockFlag@charicon :numunlockedpartner++
+			if CharUnlockFlag@charicon(cnt) :numunlockedpartner++
 		loop
 		strtable_unlockedpartner=""+numunlockedpartner+" / "+CharMax@charicon
 
@@ -219,7 +217,7 @@
 		} else {
 			setease 256,0,ease_cubic_out
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,20)
-			setease -64,0,ease_cubic_out
+			setease 0,-64,ease_cubic_out
 			DrawGraph 48+getease(DecideCount,20),32,hdximg(inav),TRUE
 		}
 
@@ -261,19 +259,7 @@
 		}
 
 		//ステータス
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
-			DrawStringToHandle 24,1048,"SAPPHIRE - Library",GetColor(230,230,230),hdxfont(fPS20)
-
-			DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
-			if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,10
-				DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
-				if GetMouseInput()&MOUSE_INPUT_LEFT {
-					goto*Exit@
-				}
-			}
-			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawDefaultStatus"Sapphire - Library",hdxfont(fPS16),TRUE,CursorPosX,CursorPosY
 
 		//戻るボタン
 			//ホバーエフェクト

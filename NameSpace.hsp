@@ -25,6 +25,7 @@
 #enum global ID_RESULT
 #enum global ID_PARTNERSELECT
 #enum global ID_LIBRARY
+#enum global ID_SHOP
 #enum global ID_FATALERROR
 #enum global ID_SIGNIN
 #enum global ID_REGISTER

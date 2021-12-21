@@ -193,7 +193,7 @@
 		} else {
 			setease 256,0,ease_cubic_out
 			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,20)
-			setease -64,0,ease_cubic_out
+			setease 0,-64,ease_cubic_out
 			DrawGraph 48+getease(DecideCount,20),32,hdximg(inav),TRUE
 		}
 
@@ -220,16 +220,7 @@
 		}
 
 		//ステータス
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
-		DrawStringToHandle 458,1050,"x"+NumTickets@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
-		DrawStringToHandle 670,1050,"x"+NumFragments@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
-		DrawStringToHandle 814,1050,str(NumLilly@portalsync)+" Lilly",Getcolor(255,255,255),hdxfont(fPS16)
-
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-		DrawGraph 300,1048,hdximg@(iStatus_Ticket),TRUE
-		DrawGraph 560,1048,hdximg@(iStatus_Fragment),TRUE
-		DrawGraph 780,1048,hdximg@(iStatus_Lilly),TRUE
+		DrawDefaultStatus"",hdxfont(fPS16),TRUE,CursorPosX,CursorPosY
 
 		//ステップ
 		if SceneCount>50 {
@@ -383,7 +374,7 @@
 			}
 		}*/
 
-		//確認ウィンドウ
+		//ウィンドウ類
 		if WindowID!0 {
 			if WindowID>0 {	//in
 				setease 0,500,ease_cubic_out
@@ -680,11 +671,11 @@
 				tmpRewardsTitle(cnt)="楽曲「"+GetINIvalue(tmpstr,"Metadata","Title")+"」 難易度 "+GetINIvalue(tmpstr,"Metadata","Difficulty")
 
 				//ジャケット画像
-				exist"Data/mr/"+GetINIvalue(tmpstr,"Metadata","Resource")+"/img.png"
+				exist"Data/"+GetINIvalue(tmpstr,"Metadata","Resource")+"/img.png"
 				if strsize==-1 {
 					tmpRewardsImg(cnt)=LoadGraph("Data/Icon_Artwork_Dummy.png")
 				} else {
-					tmpRewardsImg(cnt)=LoadGraph("Data/mr/"+GetINIvalue(tmpstr,"Metadata","Resource")+"/img.png")
+					tmpRewardsImg(cnt)=LoadGraph("Data/"+GetINIvalue(tmpstr,"Metadata","Resource")+"/img.png")
 				}
 				sdim tmpstr
 			}
@@ -733,10 +724,40 @@
 	#deffunc SetOptionForMission
 		switch stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync)
 			case"ed278d27-4e77-d7c6-4388-60d501d81531"	//楽曲"進捗どうですか？"の難易度NORMALをクリア
-				ObjPlacement@=OBJP_NORMAL
+				GaugeType@=GAUGE_NORMAL
+			swbreak
+			case"5be1a136-0765-81c6-858f-145c6ee40c88"	//楽曲"進捗どうですか？"の難易度HARDをクリア
+				GaugeType@=GAUGE_NORMAL
+			swbreak
+			case"51cfde4a-5bcb-658b-d380-487caaa0147b"	//楽曲"進捗どうですか？"の難易度HARDをEXPERTゲージでクリア
+				GaugeType@=GAUGE_EXPERT
+			swbreak
+			case"c016e125-498a-cb23-3b6a-d1f26aef19b7"	//楽曲"Break Through Myself"の難易度NORMALをクリア
+				GaugeType@=GAUGE_NORMAL
+			swbreak
+			case"1212ec76-5653-37e5-c790-f0ed57d0b209"	//楽曲"Break Through Myself"の難易度NORMALをAAAランク以上でクリア
+				GaugeType@=GAUGE_NORMAL
+			swbreak
+			case"486a2e90-1851-957e-176a-9c16c15c6fed"	//楽曲"Break Through Myself"の難易度HARDをクリア
+				GaugeType@=GAUGE_NORMAL
+			swbreak
+			case"1d588f48-bc17-5dfb-c54d-2b581a3302cf"	//楽曲"Break Through Myself"の難易度HARDをEXPERTゲージでクリア
+				GaugeType@=GAUGE_EXPERT
+			swbreak
+			case"4c6d49dc-3ae8-b074-9889-09081438f354"	//楽曲"初音ミクの激唱"の難易度NORMALをMADNESSゲージでクリア
+				GaugeType@=GAUGE_NORMAL
+			swbreak
+			case"cb3db970-25d3-9fae-0a8e-38cf22b6ce70"	//楽曲"メテオライト"の難易度HARDをEXPERTゲージでクリア
+				GaugeType@=GAUGE_EXPERT
+			swbreak
+			case"6771d442-a1ba-3ec8-cd0e-f61f60bd30ad"	//楽曲"初音ミクの激唱"の難易度HARDをAランク以上でクリア
+				GaugeType@=GAUGE_NORMAL
+			swbreak
+			case"0d2ced19-9301-1faf-4cbe-8979d64e40cb"	//楽曲"メテオライト"の難易度CHAOSをクリア
 				GaugeType@=GAUGE_NORMAL
 			swbreak
 		swend
+		ObjPlacement@=OBJP_NORMAL
 		AutoPlayFlag@=FALSE
 		return
 

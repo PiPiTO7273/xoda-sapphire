@@ -483,20 +483,7 @@
 			DrawExtendGraph 1440,EasePosY,1440+300,EasePosY+EaseHeight,tmpint,TRUE
 		}
 
-		//ステータス
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
-			DrawStringToHandle 24,1048,"SAPPHIRE - Result",GetColor(230,230,230),hdxfont(fPS20)
-
-			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-			DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
-			if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,10
-				DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
-				if GetMouseInput()&MOUSE_INPUT_LEFT {
-					goto*Exit@
-				}
-			}
+		DrawDefaultStatus"Sapphire - Result",hdxfont(fPS16),FALSE,CursorPosX,CursorPosY
 
 		//ボタンの当たり判定
 		if SceneCount>70 {

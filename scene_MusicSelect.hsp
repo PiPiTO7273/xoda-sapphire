@@ -229,7 +229,6 @@
 		hdximg(iobj_switch_off)=LoadGraph("Data/res_obj_option/switch_off.png")
 		hdximg(iobj_switch_on)=LoadGraph("Data/res_obj_option/switch_on.png")
 		hdximg(ibg_lanepreview)=LoadGraph("Data/bg_musicselect_preview.png")
-		hdximg(inote_preview)=LoadGraph("Data/note_0.png")
 		hdximg(ilanehide)=LoadGraph("Data/layer_musicselect_lanehide.png")
 		hdximg(ibg_playerinfo)=LoadGraph("Data/bg_musicselect_playerinfo.png")
 		hdximg(ibadge_failed)=LoadGraph("Data/Icon_Badge_Failed.png")
@@ -312,6 +311,9 @@
 	//ライブラリをスキャン
 	#deffunc ScanAllPlaylist
 
+			//前回読み込んだデータを削除
+			if InitMusicSelectFlag :DeleteMusicSelectResource
+
 			dim numitem
 
 			numitem=int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))	//項目数
@@ -326,6 +328,8 @@
 			dim plitem_Level,numitem,3
 			dim plitem_artwork,numitem,3
 			sdim plitem_artworkpath,32,numitem,3
+			dim64 plitem_hsmppreview,numitem,3
+			dim64 plitem_hchpreview,numitem,3
 			dim plitem_mybest_score,numitem,3
 			sdim plitem_mybest_rank,4,numitem,3
 			sdim plitem_mybest_rate,5,numitem,3
@@ -344,14 +348,19 @@
 			dim plitem_unlockflag,numitem,3
 			dim plitem_unlocklilly,numitem,3
 			dim numUnlocked
+			dim InitMusicSelectFlag:InitMusicSelectFlag=TRUE
 
 			ddim RegPfPoint@portalsync,1
 			ddim PfPointArr,10
 			dim PfPointArrMax
 
-			exist"Data/cache/music_playlist_meta.bin"
-			sdim metaCache,strsize
-			bload"Data/cache/music_playlist_meta.bin",metaCache
+			exist"Data/_cache/music_playlist_meta.bin"
+			if strsize!-1 {
+				sdim metaCache,strsize
+				bload"Data/_cache/music_playlist_meta.bin",metaCache
+			} else {
+				sdim metaCache
+			}
 
 			//解析
 			repeat numitem
@@ -406,7 +415,7 @@
 							}
 
 							//キャッシュに書き込み
-							INIInit"Data/cache/music_playlist_meta.bin"
+							INIInit"Data/_cache/music_playlist_meta.bin"
 							INISet plitem_UUID(plitemid,pllevid),"Flag","TRUE"
 							INISet plitem_UUID(plitemid,pllevid),"Title",plitem_Title(plitemid,pllevid)
 							INISet plitem_UUID(plitemid,pllevid),"Artist",plitem_Artist(plitemid,pllevid)
@@ -420,9 +429,17 @@
 
 						}
 
-						dim tmpint:tmpint=LoadGraph("Data/mr/"+plitem_resID(plitemid,pllevid)+"/"+plitem_artworkpath(plitemid,pllevid))
+						dim tmpint:tmpint=LoadGraph("Data/"+plitem_resID(plitemid,pllevid)+"/"+plitem_artworkpath(plitemid,pllevid))
 						if tmpint<=0 :tmpint=hdximg(iIcon_Artwork_Dummy)
 						plitem_artwork(plitemid,pllevid)=tmpint
+						
+						
+						exist"Data/"+plitem_resID(plitemid,pllevid)+"/preview.ogg"
+						sdim tmpstr,strsize
+						bload"Data/"+plitem_resID(plitemid,pllevid)+"/preview.ogg",tmpstr
+						plitem_hsmppreview(plitemid,pllevid)=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(tmpstr),0,varsize(tmpstr),32,0)
+						plitem_hchpreview(plitemid,pllevid)=cfunc64(RET_INT64,BASS_SampleGetChannel,plitem_hsmppreview(plitemid,pllevid),0)
+						sdim tmpstr
 
 						//アンロック状況
 						plitem_unlockflag(plitemid,pllevid)=TRUE
@@ -605,6 +622,9 @@
 
 		//チュートリアル
 			if WatchTutorial_MusicSelect_0@==FALSE|WatchTutorial_MusicSelect_1@==FALSE :TutorialWindowID=0
+
+		//プレビュー用
+			hdximg(inote_preview)=LoadGraph("Data/res_playtheme/note_"+playtheme_Note@+".png")
 	return
 
 	#deffunc StartMusicSelect_WithoutDarkness
@@ -1370,26 +1390,7 @@
 		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ilayer_all),TRUE
 
 		//ステータス
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
-		DrawStringToHandle 458,1050,"x"+NumTickets@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
-		DrawStringToHandle 670,1050,"x"+NumFragments@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
-		DrawStringToHandle 814,1050,str(NumLilly@portalsync)+" Lilly",Getcolor(255,255,255),hdxfont(fPS16)
-
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-		DrawGraph 300,1048,hdximg@(iStatus_Ticket),TRUE
-		DrawGraph 560,1048,hdximg@(iStatus_Fragment),TRUE
-		DrawGraph 780,1048,hdximg@(iStatus_Lilly),TRUE
-
-		DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
-		if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,10
-			DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
-			if GetMouseInput()&MOUSE_INPUT_LEFT {
-				goto*Exit@
-			}
-		}
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawDefaultStatus"",hdxfont(fPS16),TRUE,CursorPosX,CursorPosY
 
 		//戻るボタン
 			//ホバーエフェクト
@@ -1773,7 +1774,39 @@
 			AddCount JumpSceneCount
 		}
 
+		//プレビュー再生
+		if SongChangeCount==0|DecideCount==1 {
+			repeat numitem
+				plitemid=cnt
+				repeat 3
+					pllevid=cnt
+					cfunc64v BASS_ChannelPause,plitem_hchpreview(plitemid,pllevid)
+				loop
+			loop
+		}
+		if SongChangeCount==0 {
+			cfunc64v BASS_ChannelSetPosition,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),0,0,0
+			cfunc64v BASS_ChannelPlay,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
+			cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,0;d2f(0.65)
+			cfunc64v BASS_ChannelSetAttribute,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),BASS_ATTRIB_VOL,d2f(0.65)
+		}
+		if SongChangeCount<FPSvalue@/2 {
+			setease 0,0.65,ease_linear
+			cfunc64v BASS_ChannelSetAttribute,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),BASS_ATTRIB_VOL,d2f(geteasef(SongChangeCount,FPSvalue@/2))
+		}
+		if SongChangeCount==FPSvalue@*10 {
+			cfunc64v BASS_ChannelPause,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
+		}
+		if SongChangeCount>FPSvalue@*8+FPSvalue@/2 {
+			setease 0,0.65,ease_linear
+			cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,d2f(geteasef(SongChangeCount-FPSvalue@*8-FPSvalue@/2,FPSvalue@))
+		}
+
 		//決定
+		if DecideCount==1 {		//リソース解放
+			DeleteGraph hdximg(inote_preview)
+			cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,d2f(0.65)
+		}
 		if DecideCount>10+25+60*3&SceneTransID==ID_TRANS_PLAY {
 			//カウンタ
 			librec_PlayCount@++
@@ -1815,4 +1848,16 @@
 		if MouseInput&MOUSE_INPUT_LEFT :AddCount LClickKeepCount:else:LClickKeepCount=0
 
 	return
+
+	#deffunc DeleteMusicSelectResource
+		repeat numitem
+			plitemid=cnt
+			repeat 3
+				pllevid=cnt
+				DeleteGraph plitem_artwork(plitemid,pllevid)
+				cfunc64v BASS_ChannelFree,plitem_hchpreview(plitemid,pllevid)
+				cfunc64v BASS_SampleFree,plitem_hsmppreview(plitemid,pllevid)
+			loop
+		loop
+		return
 #global

@@ -3,10 +3,63 @@
 
 	//起動設定を読み込み
 	#deffunc LoadCoreSettings str _filename
+
+		//ユーザー設定
 		exist _filename
 		if strsize==-1 :return -1
-		sdim coreBuf,strsize
-		bload _filename,coreBuf
+		sdim coreBuf
+		sdim coreuserBuf,strsize
+		notesel coreuserBuf
+		noteload _filename
+		coreBuf+GetINISection(coreuserBuf,"Common")+GetINISection(coreuserBuf,"Graphics")+GetINISection(coreuserBuf,"Auth")
+		
+		//システム設定
+		exist"Data/res_scene_0.bin"
+		sdim coresysBuf,strsize
+		notesel coresysBuf
+		noteload"Data/res_scene_0.bin"
+		coreBuf+"\n"+coresysBuf
+
+		//キーの置き換え
+		if GetINIvalue(coreBuf,"Hash","acckey")=="%_keymac%" {
+			strrep coreBuf,"acckey=%_keymac%","acckey="+_keymac_acckey@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","APIkey_GetProfile")=="%_keymac%" {
+			strrep coreBuf,"APIkey_GetProfile=%_keymac%","APIkey_GetProfile="+_keymac_APIkey_GetProfile@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","APIkey_SendProfile")=="%_keymac%" {
+			strrep coreBuf,"APIkey_SendProfile=%_keymac%","APIkey_SendProfile="+_keymac_APIKey_SendProfile@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","APIkey_GetUpdate")=="%_keymac%" {
+			strrep coreBuf,"APIkey_GetUpdate=%_keymac%","APIkey_GetUpdate="+_keymac_APIkey_GetUpdate@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","APIkey_GetGlobalRanking")=="%_keymac%" {
+			strrep coreBuf,"APIkey_GetGlobalRanking=%_keymac%","APIkey_GetGlobalRanking="+_keymac_APIkey_GetGlobalRanking@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","APIkey_SendGlobalRanking")=="%_keymac%" {
+			strrep coreBuf,"APIkey_SendGlobalRanking=%_keymac%","APIkey_SendGlobalRanking="+_keymac_APIkey_SendGlobalRanking@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","APIkey_SendNewRecord")=="%_keymac%" {
+			strrep coreBuf,"APIkey_SendNewRecord=%_keymac%","APIkey_SendNewRecord="+_keymac_APIkey_SendNewRecord@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","APIkey_GetRecord")=="%_keymac%" {
+			strrep coreBuf,"APIkey_GetRecord=%_keymac%","APIkey_GetRecord="+_keymac_APIkey_GetRecord@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","APIkey_RegisterUser")=="%_keymac%" {
+			strrep coreBuf,"APIkey_RegisterUser=%_keymac%","APIkey_RegisterUser="+_keymac_APIkey_RegisterUser@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","SSL_Decode_0")=="%_keymac%" {
+			strrep coreBuf,"SSL_Decode_0=%_keymac%","SSL_Decode_0="+_keymac_SSL_Decode_0@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","SSL_Decode_1")=="%_keymac%" {
+			strrep coreBuf,"SSL_Decode_1=%_keymac%","SSL_Decode_1="+_keymac_SSL_Decode_1@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","SSL_Decode_2")=="%_keymac%" {
+			strrep coreBuf,"SSL_Decode_2=%_keymac%","SSL_Decode_2="+_keymac_SSL_Decode_2@
+		}
+		if GetINIvalue(coreBuf,"PortalSvc","SSL_Decode_3")=="%_keymac%" {
+			strrep coreBuf,"SSL_Decode_3=%_keymac%","SSL_Decode_3="+_keymac_SSL_Decode_3@
+		}
 
 		dim DispWidth@
 		DispWidth@=int(GetINIvalue(coreBuf,"Graphics","Display.Width"))

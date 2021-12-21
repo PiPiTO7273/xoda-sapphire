@@ -341,27 +341,7 @@
 		}
 
 		//ステータス
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
-		DrawStringToHandle 24,1048,"SAPPHIRE - Lobby",GetColor(230,230,230),hdxfont(fPS20)
-		DrawStringToHandle 458,1050,"x"+NumTickets@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
-		DrawStringToHandle 670,1050,"x"+NumFragments@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
-		DrawStringToHandle 814,1050,str(NumLilly@portalsync)+" Lilly",Getcolor(255,255,255),hdxfont(fPS16)
-
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-		DrawGraph 300,1048,hdximg@(iStatus_Ticket),TRUE
-		DrawGraph 560,1048,hdximg@(iStatus_Fragment),TRUE
-		DrawGraph 780,1048,hdximg@(iStatus_Lilly),TRUE
-
-		DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
-		if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,10
-			DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
-			if GetMouseInput()&MOUSE_INPUT_LEFT {
-				goto*Exit@
-			}
-		}
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawDefaultStatus"Sapphire - Lobby",hdxfont(fPS16),TRUE,CursorPosX,CursorPosY
 
 		//コメント
 		if insquare(CursorPosX,CursorPosY,1635,57,1635+140,57+30) {
@@ -398,8 +378,10 @@
 					case 10:LoadChallengeModeMap"Data/map-challenge.bin":swbreak
 					case 11:LoadChallengeImages:swbreak
 					case 12:LoadLibraryImages:swbreak
-					case 13:librec_logincount@++:swbreak
-					case 14:InitLoadFlag@=TRUE:swbreak
+					case 13:LoadShopImages:swbreak
+					case 14:LoadShopItems:swbreak
+					case 15:librec_logincount@++:swbreak
+					case 16:InitLoadFlag@=TRUE:swbreak
 				swend
 			}
 
@@ -419,6 +401,10 @@
 		if ActiveItemID==0&DecideCount==32 :SetFilterRefDB ID_CAT_ALL
 		if ActiveItemID==0&DecideCount==33 :InitMusicSelectFonts
 
+		if ActiveItemID==3&DecideCount==29 :PlaySE int(hcommonsech@(vocWait@)),1.0
+		if ActiveItemID==3&DecideCount==30 :IRsync
+		if ActiveItemID==3&DecideCount==31 :ScanAllPlaylist
+
 		//シーン移行処理
 		if DecideCount>25+2*length(ItemImgID)+1&DecideFlag==TRUE {
 			switch ActiveItemID
@@ -435,6 +421,11 @@
 					InitScene ID_LIBRARY
 					InitLibraryFonts
 					StartLibrary
+				swbreak
+				case 5
+					InitScene ID_SHOP
+					InitShopFonts
+					StartShop
 				swbreak
 				case 9
 					InitScene ID_WELCOME1

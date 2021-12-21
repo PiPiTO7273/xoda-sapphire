@@ -31,6 +31,8 @@
 		dim musicselect_ItemID@		//曲選択画面の項目ID
 		dim musicselect_LevelID@		//曲選択画面のレベル
 
+		dim playtheme_Note@			//ノーツのカスタマイズ
+
 		//チュートリアル閲覧フラグ
 		dim WatchTutorial_MusicSelect_0@
 		dim WatchTutorial_MusicSelect_1@
@@ -190,6 +192,7 @@
 			ShowErrorMsg"ERROR_SVC_CONNECTION"
 		}
 
+		//基本プロフィール
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LEVEL")=="" :syncINIdata+"XODA.LEVEL=1\n"
 		RegLev@portalsync=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LEVEL"))
 
@@ -264,7 +267,7 @@
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.PLAYOPTION")=="" :syncINIdata+"XODA.WATCHTUTORIAL.PLAYOPTION=0\n"
 		WatchTutorial_Option@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.WATCHTUTORIAL.PLAYOPTION"))
 
-
+		//Libraryモード用の記録
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.PLAYTIME")=="" :syncINIdata+"XODA.LIBREC.PLAYTIME=0\n"
 		librec_PlayTime@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.PLAYTIME"))
 
@@ -327,6 +330,10 @@
 
 		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.LOGINCOUNT")=="" :syncINIdata+"XODA.LIBREC.LOGINCOUNT=0\n"
 		librec_logincount@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.LIBREC.LOGINCOUNT"))
+
+		//カスタマイズ
+		if GetINIvalue(syncINIdata,"SAVEDATA","XODA.PLAYTHEME.NOTE")=="" :syncINIdata+"XODA.PLAYTHEME.NOTE=0\n"
+		playtheme_Note@=int(GetINIvalue(syncINIdata,"SAVEDATA","XODA.PLAYTHEME.NOTE"))
 	
 	return
 
@@ -451,6 +458,7 @@
 		WebAPI_mSendProfile_Reg"XODA.EXP",str(RegEXP@portalsync)
 		WebAPI_mSendProfile_Reg"XODA.RATE",str(RegPfPoint@portalsync)
 		WebAPI_mSendProfile_Reg"XODA.BADGE",str(RegBadge@portalsync)
+		if CharUnlockFlag@charicon(RegCharID@portalsync)==FALSE :RegCharID@portalsync=0
 		WebAPI_mSendProfile_Reg"XODA.PARTNER",str(RegCharID@portalsync)
 		WebAPI_mSendProfile_Reg"XODA.OPTION.ADDSPEED",str(AddSpeed@)
 		WebAPI_mSendProfile_Reg"XODA.OPTION.GAUGE",str(GaugeType@)

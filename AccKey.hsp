@@ -1,0 +1,15 @@
+
+#define _keymac_acckey	"xs.b.000-51ff5884-2976-9688-e3e7-8e175a3b133a"
+
+#define _keymac_APIkey_GetProfile			"AZkVb7yHsZudHyXJNgh68j8GWpQMdaDA"
+#define _keymac_APIKey_SendProfile			"DyCTsBWBdG3bg2pKHJce6b9AXxKEniu6"
+#define _keymac_APIkey_GetUpdate			"brzdY5m67UMhiF4QiTYpPK6jxSSg2ZVd"
+#define _keymac_APIkey_GetGlobalRanking		"EdH9mERWi62K9zHEk9Gpr8TNnwXwjkbY"
+#define _keymac_APIkey_SendGlobalRanking	"iU2tBsZVKwP3pwbpsaXu9P2ycAyNREBu"
+#define _keymac_APIkey_SendNewRecord		"eYjQZfYpwyZpMnRkhXadWn8NbkhCWnUf"
+#define _keymac_APIkey_GetRecord			"nSxedF7ZDQicsDMgt3yQ2xD4s7T22zN5"
+#define _keymac_APIkey_RegisterUser		"zxpxVeh9FM6BhHxppu2sbzVwYE9Q9U2R"
+#define _keymac_SSL_Decode_0				"bqjEPAQh1ZmiQpFbXLbtVBdR8p1z0yF6"
+#define _keymac_SSL_Decode_1				"IkZHJO74UfvfCX2hhoDr8zaAEmvAKb0f"
+#define _keymac_SSL_Decode_2				"ls4kcIoqKMwWnUhAqI5EzDpDyvy2PyXC"
+#define _keymac_SSL_Decode_3				"PeaF1N5JlH3AxUXPeHRxeE8j1BNE9mo0"

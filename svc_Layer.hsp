@@ -115,4 +115,35 @@
 
 	return
 
+	//str	=	シーン名
+	//int	=	fPS16 handle
+	//int	=	アイテムの所持数を描画するフラグ
+	//int	=	カーソルX座標
+	//int	=	カーソルY座標
+	#deffunc DrawDefaultStatus str _name,int _hfont,int _itemdrawflag,int _cposx,int _cposy
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+		DrawStringToHandle 24,1051,_name,GetColor(230,230,230),_hfont
+
+		if _itemdrawflag {
+			DrawStringToHandle 458,1050,"x"+NumTickets@portalsync,Getcolor(255,255,255),_hfont
+			DrawStringToHandle 670,1050,"x"+NumFragments@portalsync,Getcolor(255,255,255),_hfont
+			DrawStringToHandle 814,1050,str(NumLilly@portalsync)+" Lilly",Getcolor(255,255,255),_hfont
+
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 300,1048,hdximg@(iStatus_Ticket),TRUE
+			DrawGraph 560,1048,hdximg@(iStatus_Fragment),TRUE
+			DrawGraph 780,1048,hdximg@(iStatus_Lilly),TRUE
+		}
+
+		DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
+		if insquare(_cposx,_cposy,1750,1040,1750+150,1080) {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,10
+			DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
+			if GetMouseInput()&MOUSE_INPUT_LEFT {
+				goto*Exit@
+			}
+		}
+		return
+
 #global

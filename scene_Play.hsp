@@ -15,6 +15,12 @@
 	#enum inote_0
 	#enum ihold_org_0
 	#enum ihold_0
+	#enum iside_l
+	#enum iside_r
+	#enum ihold_org_l
+	#enum ihold_org_r
+	#enum ihold_l_0
+	#enum ihold_r_0
 	#enum ijudge_excellent
 	#enum ijudge_great
 	#enum ijudge_good
@@ -120,8 +126,6 @@
 		hdximg(ibg_score)=LoadGraph("Data/bg_score.png")
 		hdximg(ichip_key)=LoadGraph("Data/chip_Key.png")
 		hdximg(ichip_key_active)=LoadGraph("Data/chip_key_active.png")
-		hdximg(inote_0)=LoadGraph("Data/note_0.png")
-		hdximg(ihold_org_0)=LoadGraph("Data/note_hold_0.png")
 		hdximg(ijudge_excellent)=LoadGraph("Data/res_judge/judge_excellent.png")
 		hdximg(ijudge_great)=LoadGraph("Data/res_judge/judge_great.png")
 		hdximg(ijudge_good)=LoadGraph("Data/res_judge/judge_good.png")
@@ -158,14 +162,6 @@
 		cfunc64v LoadDivGraph,"Data/effect_Burst.png",16,2,8,384,384,varptr64(hdximg_arr_burst)
 
 		dim hdximg_char:hdximg_char=MakeScreen(80,64,TRUE)
-
-		//ロングノーツ用
-			hdximg(ihold_0)=MakeScreen(90,1024,TRUE)
-			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-			repeat 1024/90+1
-				SetDrawScreen hdximg(ihold_0)
-					DrawGraph 0,cnt*90,hdximg(ihold_org_0),TRUE
-			loop
 	return
 
 	//プレイ画面で使用するフォントの初期化
@@ -405,11 +401,11 @@
 
 		//キーサウンドの読み込み
 			dim UseDefaultKeySnd	//デフォルトのキーサウンドを使用するフラグ
-			exist"Data/mr/"+chartMetaInfo(META_RESID)+"/musicdata.pkg"
+			exist"Data/"+chartMetaInfo(META_RESID)+"/musicdata.pkg"
 			dim64 hSndDB:dim64 hsmpSndDB:dim keysndIndexID
 			sdim keysndBuf:dim hLoadCnt
 			if strsize!-1 {
-				binpkg_Load"Data/mr/"+chartMetaInfo(META_RESID)+"/musicdata.pkg"
+				binpkg_Load"Data/"+chartMetaInfo(META_RESID)+"/musicdata.pkg"
 				repeat SoundDBMax
 					keysndIndexID(hLoadCnt)=binpkg_GetIndex(SoundDBFileName(hLoadCnt))
 					if keysndIndexID(hLoadCnt)!-1 {
@@ -428,9 +424,9 @@
 
 		//BGM
 			if GetChartInfo(META_BGM)!"" {
-				exist"Data/mr/"+chartMetaInfo(META_RESID)+"/"+GetChartInfo(META_BGM)
+				exist"Data/"+chartMetaInfo(META_RESID)+"/"+GetChartInfo(META_BGM)
 				sdim hBGMbuf,strsize
-				bload"Data/mr/"+chartMetaInfo(META_RESID)+"/"+GetChartInfo(META_BGM),hBGMbuf
+				bload"Data/"+chartMetaInfo(META_RESID)+"/"+GetChartInfo(META_BGM),hBGMbuf
 				dim64 hSndBGM:dim64 hsmpSndBGM
 				hsmpSndBGM=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(hBGMbuf),0,varsize(hBGMbuf),32,0)
 				hSndBGM=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndBGM,TRUE)
@@ -545,6 +541,30 @@
 			loop
 		loop
 
+		//スキン読み込み
+		hdximg(inote_0)=LoadGraph("Data/res_playtheme/note_"+playtheme_Note@+".png")
+		hdximg(ihold_org_0)=LoadGraph("Data/res_playtheme/note_hold_"+playtheme_Note@+".png")
+		hdximg(iside_l)=LoadGraph("Data/res_playtheme/note_l_"+playtheme_Note@+".png")
+		hdximg(iside_r)=LoadGraph("Data/res_playtheme/note_r_"+playtheme_Note@+".png")
+		hdximg(ihold_0)=MakeScreen(90,1024,TRUE)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		repeat 1024/90+1
+			SetDrawScreen hdximg(ihold_0)
+				DrawGraph 0,cnt*90,hdximg(ihold_org_0),TRUE
+		loop
+		hdximg(ihold_l_0)=MakeScreen(110,1024,TRUE)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		repeat 1024/90+1
+			SetDrawScreen hdximg(ihold_l_0)
+				DrawGraph 0,cnt*90,hdximg(ihold_org_l),TRUE
+		loop
+		hdximg(ihold_r_0)=MakeScreen(110,1024,TRUE)
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		repeat 1024/90+1
+			SetDrawScreen hdximg(ihold_r_0)
+				DrawGraph 0,cnt*90,hdximg(ihold_org_r),TRUE
+		loop
+
 	return
 
 	//譜面ファイルのメタデータを取得
@@ -619,26 +639,22 @@
 
 		//BGAファイルの処理
 			if GetChartInfo(META_BGA)!"" {
-				exist"Data/mr/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGA)
+				exist"Data/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGA)
 				dim hdximg_gameplaybga
 				if strsize==-1 {
 					SetDXArchiveExtension"bin"
-					if GetMovieAlias(GetChartInfo(META_BGA))!-1 {
-						hdximg_gameplaybga=LoadGraph("Data/res_movie_p/"+BGAquality@+"_m"+GetMovieAlias(GetChartInfo(META_BGA))+".ogv")
-						BGAgenflag=TRUE
-					} else {
-						hdximg_gameplaybga=LoadGraph("Data/res_movie_p/"+BGAquality@+"_m"+GetChartInfo(META_BGA)+".ogv")
-						BGAgenflag=TRUE
-					}
+					hdximg_gameplaybga=LoadGraph("Data/res_movie_p/"+BGAquality@+"_m"+GetChartInfo(META_BGA)+".ogv")
+					if hdximg_gameplaybga==-1 :hdximg_gameplaybga=LoadGraph("Data/res_movie_"+GetChartInfo(META_BGA)+"/"+BGAquality@+"_m"+GetChartInfo(META_BGA)+".ogv")
+					BGAgenflag=TRUE
 					PlayMovieToGraph hdximg_gameplaybga,DX_PLAYTYPE_LOOP
 				} else {
-					hdximg_gameplaybga=LoadGraph("Data/mr/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGA))
+					hdximg_gameplaybga=LoadGraph("Data/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGA))
 					BGAgenflag=FALSE
 				}
 			}
 			if GetChartInfo(META_BGAIMAGE)!"" {
 				dim hdximg_gameplaybga
-				hdximg_gameplaybga=LoadGraph("Data/mr/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGAIMAGE))
+				hdximg_gameplaybga=LoadGraph("Data/"+GetChartInfo(META_RESID)+"/"+GetChartInfo(META_BGAIMAGE))
 			}
 
 		//キャラクターバッファ
@@ -904,8 +920,8 @@
 							CopyMatImageHwnd=hdximg(inote_0)
 						}
 						if ObjLaneID(cnt)==0|ObjLaneID(cnt)==5 {
-							if ObjLaneID(cnt)==0 :DrawGraph 662,DrawPosY,hdximg(inote_0),TRUE
-							if ObjLaneID(cnt)==5 :DrawGraph 1148,DrawPosY,hdximg(inote_0),TRUE
+							if ObjLaneID(cnt)==0 :DrawGraph 662,DrawPosY,hdximg(iside_l),TRUE
+							if ObjLaneID(cnt)==5 :DrawGraph 1148,DrawPosY,hdximg(iside_r),TRUE
 						} else {
 							DrawGraph 780+(ObjLaneID(cnt)-1)*90,DrawPosY,CopyMatImageHwnd,TRUE
 						}
@@ -916,8 +932,8 @@
 						tmpholdNoteHeight=ObjDrawPos(tmpholdStartID)-(DrawPosY+NoteHeight)
 						if DrawPosY+tmpholdNoteHeight+NoteHeight>864 :tmpholdNoteHeight=864-DrawPosY-NoteHeight
 						if ObjLaneID(cnt)==0|ObjLaneID(cnt)==5 {
-							if ObjLaneID(cnt)==0 :CopyMatImageHwnd=hdximg(ihold_0)
-							if ObjLaneID(cnt)==5 :CopyMatImageHwnd=hdximg(ihold_0)
+							if ObjLaneID(cnt)==0 :CopyMatImageHwnd=hdximg(ihold_l_0)
+							if ObjLaneID(cnt)==5 :CopyMatImageHwnd=hdximg(ihold_r_0)
 						} else {
 							if ObjLaneID(cnt)\2==0 {
 								CopyMatImageHwnd=hdximg(ihold_0)
@@ -1134,20 +1150,9 @@
 				DrawGraph 40+ChartSeekPos-8,264,hdximg(icursor_Seek),TRUE
 
 		//ステータス
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-			DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
-			DrawStringToHandle 24,1048,"SAPPHIRE",GetColor(230,230,230),hdxfont(fPS20)
-			DrawStringToHandle 160,1052,"Now playing "+GetChartInfo(META_ARTIST)+" - "+GetChartInfo(META_TITLE)+" ["+GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL)+"]",GetColor(210,210,210),hdxfont(fNSCJM16)
-
-			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-			DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
-			if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
-				SetDrawBlendMode DX_BLENDMODE_ALPHA,10
-				DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
-				if GetMouseInput()&MOUSE_INPUT_LEFT {
-					goto*Exit@
-				}
-			}
+		DrawDefaultStatus"Sapphire",hdxfont(fPS16),FALSE,CursorPosX,CursorPosY
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawStringToHandle 160,1052,"Now playing "+GetChartInfo(META_ARTIST)+" - "+GetChartInfo(META_TITLE)+" ["+GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL)+"]",GetColor(210,210,210),hdxfont(fNSCJM16)
 
 		//ノーツボム
 			repeat 6
@@ -1331,6 +1336,18 @@
 					wait
 					StartMusicSelect
 					*/
+
+					//リソース解放
+					DeleteGraph hdximg(inote_0)
+					DeleteGraph hdximg(ihold_0)
+					DeleteGraph hdximg(ihold_org_0)
+					DeleteGraph hdximg(iside_l)
+					DeleteGraph hdximg(iside_r)
+					DeleteGraph hdximg(ihold_l_0)
+					DeleteGraph hdximg(ihold_r_0)
+					DeleteGraph hdximg(ihold_org_l)
+					DeleteGraph hdximg(ihold_org_r)
+
 					if ChallengeModeFlag==FALSE {
 						InitScene ID_RESULT
 						LoadResultFonts
@@ -1475,7 +1492,7 @@
 		switch _judgeres
 			case jres_Excellent		//EXCELLENT判定
 				numExcellent++
-				librec_numjexcellent@++
+				if AutoPlayFlag@==FALSE :librec_numjexcellent@++
 				curCombo++
 				if curCombo>MaxCombo :MaxCombo=curCombo
 				curScore+ObjHitScore
@@ -1717,7 +1734,9 @@
 			}
 
 			//自己ベストを更新している場合、送信
-			WebAPI_SendNewRecord HTTPpostdata
+			sdim tmpsendstr,strlen(HTTPpostdata)
+			memcpy tmpsendstr,HTTPpostdata,strlen(HTTPpostdata),0,0
+			WebAPI_SendNewRecord tmpsendstr
 			sdim HTTPpostdata
 			WebAPI_SendGlobalRanking GetChartInfo(META_UUID),curScore
 	return
@@ -1726,6 +1745,76 @@
 		sdim MissionRes
 		switch stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync)
 			case"ed278d27-4e77-d7c6-4388-60d501d81531"	//楽曲"進捗どうですか？"の難易度NORMALをクリア
+				if GaugeType@==GAUGE_NORMAL&curGauge>70.0 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+			case"5be1a136-0765-81c6-858f-145c6ee40c88"	//楽曲"進捗どうですか？"の難易度HARDをクリア
+				if GaugeType@==GAUGE_NORMAL&curGauge>70.0 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+			case"51cfde4a-5bcb-658b-d380-487caaa0147b"	//楽曲"進捗どうですか？"の難易度HARDをEXPERTゲージでクリア
+				if GaugeType@==GAUGE_EXPERT&curGauge>0.0 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+			case"c016e125-498a-cb23-3b6a-d1f26aef19b7"	//楽曲"Break Through Myself"の難易度NORMALをクリア
+				if GaugeType@==GAUGE_NORMAL&curGauge>70.0 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+			case"1212ec76-5653-37e5-c790-f0ed57d0b209"	//楽曲"Break Through Myself"の難易度NORMALをAAAランク以上でクリア
+				if GaugeType@==GAUGE_NORMAL&curGauge>70.0&curScore>7000000 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+			case"486a2e90-1851-957e-176a-9c16c15c6fed"	//楽曲"Break Through Myself"の難易度HARDをクリア
+				if GaugeType@==GAUGE_NORMAL&curGauge>70.0 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+			case"1d588f48-bc17-5dfb-c54d-2b581a3302cf"	//楽曲"Break Through Myself"の難易度HARDをEXPERTゲージでクリア
+				if GaugeType@==GAUGE_EXPERT&curGauge>0.0 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+			case"4c6d49dc-3ae8-b074-9889-09081438f354"	//楽曲"初音ミクの激唱"の難易度NORMALをMADNESSゲージでクリア
+				if GaugeType@==GAUGE_MADNESS&curGauge>0.0 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+			case"cb3db970-25d3-9fae-0a8e-38cf22b6ce70"	//楽曲"メテオライト"の難易度HARDをEXPERTゲージでクリア
+				if GaugeType@==GAUGE_EXPERT&curGauge>0.0 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+			case"6771d442-a1ba-3ec8-cd0e-f61f60bd30ad"	//楽曲"初音ミクの激唱"の難易度HARDをAランク以上でクリア
+				if GaugeType@==GAUGE_NORMAL&curGauge>70.0&curScore>5000000 {
+					MissionRes="#t"
+				} else {
+					MissionRes="#f"
+				}
+			swbreak
+			case"0d2ced19-9301-1faf-4cbe-8979d64e40cb"	//楽曲"メテオライト"の難易度CHAOSをクリア
 				if GaugeType@==GAUGE_NORMAL&curGauge>70.0 {
 					MissionRes="#t"
 				} else {

@@ -1,9 +1,445 @@
 #module _shop_
 
+	#enum ibg		=	0
+	#enum ibg_layer
+	#enum iwindow
+	#enum inav
+	#enum iactive_item
+	#enum iwindow_confirm
+	#enum iwindow_error
+	#enum iwindow_success
+	#enum ibutton
+
+	#enum fEOEXB16			=	0
+	#enum fEOEXB20
+	#enum fEOEXB32
+	#enum fFAB50
+	#enum fNSCJM12
+	#enum fNSCJM15
+	#enum fNSCJM16
+	#enum fNSCJM20
+	#enum fNSCJM24
+	#enum fNSCJM32
+	#enum fPS14
+	#enum fPS16
+	#enum fPS18
+	#enum fPS20
+	#enum fPS24
+	#enum fPS40
+	#enum fPS80
+	#enum fSQNUM16
+	#enum fSQNUM24
+	#enum fSQNUM40
+
+	#enum ID_CONFIRM	=	1
+	#enum ID_ERROR
+	#enum ID_SUCCESS
+
 	#deffunc LoadShopImages
+		dim hdximg
+		SetDXArchiveExtension"bin"
+		hdximg(ibg)=hdximg@(ibg_common_0)
+		hdximg(ibg_layer)=LoadGraph("Data/bg_shop.png")
+		hdximg(inav)=LoadGraph("Data/Nav_Shop.png")
+		hdximg(iactive_item)=LoadGraph("Data/layer_shop_activeitem.png")
+		hdximg(iwindow_confirm)=LoadGraph("Data/layer_shop_confirm.png")
+		hdximg(iwindow_error)=LoadGraph("Data/layer_shop_error.png")
+		hdximg(iwindow_success)=LoadGraph("Data/layer_shop_success.png")
+		hdximg(ibutton)=LoadGraph("Data/layer_shop_button.png")
+		hdximg(iwindow)=MakeScreen(1370,806,TRUE)
 		return
 
 	#deffunc InitShopFonts
+		InitFontToHandle
+		dim hdxfont
+		hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
+		hdxfont(fEOEXB20)=LoadFontDataToHandle("Data/eoexb20.bin")
+		hdxfont(fEOEXB32)=LoadFontDataToHandle("Data/eoexb32.bin")
+		hdxfont(fFAB50)=LoadFontDataToHandle("Data/fab50.bin")
+		hdxfont(fNSCJM12)=LoadFontDataToHandle("Data/nscjm12.bin")
+		hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
+		hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
+		hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+		hdxfont(fNSCJM24)=LoadFontDataToHandle("Data/nscjm24.bin")
+		hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
+		hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
+		hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
+		hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
+		hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+		hdxfont(fPS24)=LoadFontDataToHandle("Data/ps24.bin")
+		hdxfont(fPS40)=LoadFontDataToHandle("Data/ps40.bin")
+		hdxfont(fPS80)=LoadFontDataToHandle("Data/ps80.bin")
+		hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+		hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
+		hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
+
+		SetFontLineSpaceToHandle 26,hdxfont(fNSCJM20)
+		return
+
+	#deffunc LoadShopItems
+		dim numShopItems
+		numShopItems=int(GetINIvalue(coreBuf@_load_,"Shop","Reg.Max"))		//項目数
+
+		sdim shopitem_name,32,numShopItems		//名前
+		dim shopitem_price,numShopItems		//価格
+		dim shopitem_hicon,numShopItems		//アイコン
+		repeat numShopItems
+			shopitem_name(cnt)=GetINIvalue(coreBuf@_load_,"Shop","Item."+cnt+".Name")
+			shopitem_price(cnt)=int(GetINIvalue(coreBuf@_load_,"Shop","Item."+cnt+".Price"))
+			shopitem_hicon(cnt)=LoadGraph("Data/"+GetINIvalue(coreBuf@_load_,"Shop","Item."+cnt+".Icon")+".png")
+		loop
+		return
+
+	#deffunc StartShop
+		dim SceneCount
+		dim DecideCount
+
+		dim ScrollEaseA
+		dim ScrollEaseB
+		dim OnScrollCount
+		dim BackButtonHoverFlag
+		dim BackButtonEase
+
+		dim ItemDrawColumn
+		dim ItemDrawLine
+		dim ItemDrawPosX
+		dim ItemDrawPosY
+		dim ActiveItemID
+
+		dim WindowID
+		dim WindowCount
+		dim bfMouseInput
+
+		DecideCount=-1
+		return
+
+	#deffunc DrawShop
+		//カーソル位置補正
+		dim CursorPosX:dim CursorPosY:dim MouseInput
+		MouseInput=GetMouseInput()
+		CursorPosX=int(double(CursorPosX@)*(double(BufWidth@)/double(DispWidth@)))
+		CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
+		RawWheelVal=GetMouseWheelRotVol()
+		RawWheelMove=0
+		if RawWheelVal<0&bfRawWheelVal<0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if RawWheelVal>0&bfRawWheelVal>0&RawWheelVal!bfRawWheelVal :RawWheelMove=RawWheelVal-bfRawWheelVal
+		if (RawWheelVal>0&bfRawWheelVal<0)|(RawWheelVal<0&bfRawWheelVal>0) :RawWheelMove=RawWheelVal
+		bfRawWheelVal=RawWheelVal
+		PushButtonFlag=FALSE
+
+		//項目描画
+		if RawWheelMove<0 {
+			ScrollEaseA=ScrollEaseB
+			ScrollEaseB-80
+			OnScrollCount=0
+		}
+		if RawWheelMove>0 {
+			ScrollEaseA=ScrollEaseB
+			ScrollEaseB+80
+			OnScrollCount=0
+		}
+		if ScrollEaseB<-310+806:ScrollEaseB=-310+806
+		if ScrollEaseB>0 :ScrollEaseB=0
+
+		SetDrawScreen hdximg(iwindow)
+		ClearDrawScreen
+		setease ScrollEaseA,ScrollEaseB,ease_cubic_out
+		dim ScrollPos:ScrollPos=getease(OnScrollCount,8)
+
+		//項目
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		ItemDrawColumn=0:ItemDrawLine=0
+		if WindowID==0 :ActiveItemID=-1
+		repeat numShopItems
+			//描画位置を算出
+			ItemDrawPosX=220+ItemDrawColumn*(530-220)
+			ItemDrawPosY=310-234+ScrollPos+ItemDrawLine*(560-310)
+
+			//描画
+			DrawGraph ItemDrawPosX,ItemDrawPosY,shopitem_hicon(cnt),TRUE
+			if insquare(CursorPosX,CursorPosY,ItemDrawPosX,ItemDrawPosY+234,ItemDrawPosX+240,ItemDrawPosY+234+200)&DecideCount==-1&WindowID==0 {
+				//アクティブな項目
+				ActiveItemID=cnt
+				DrawGraph ItemDrawPosX,ItemDrawPosY,hdximg(iactive_item),TRUE
+
+				//クリック判定
+				if (MouseInput&MOUSE_INPUT_LEFT)&WindowID==0 {
+					PlaySE int(hcommonsech@(sndDecide@)),1.0
+					WindowID=ID_CONFIRM
+					WindowCount=0
+				}
+			}
+
+			ItemDrawColumn++
+			if ItemDrawColumn>5 :ItemDrawLine++:ItemDrawColumn=0
+		loop
+
+		SetDrawScreen hdximg@(iScene)
+
+		//背景（動画）
+		if SceneCount<20|DecideCount>20 {
+			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+			DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+		} else {
+			DrawCommonBackground FrameCount@
+		}
+		if SceneCount==20 :PauseMovieToGraph hdximg(ibg)
+		if DecideCount==20 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+		if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+
+		//背景変更
+		setease 0,BufWidth@,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		if DecideCount==-1 {
+			if SceneCount<20 {
+				DrawBox 0,0,getease(SceneCount,20),BufHeight@,$FFFFFF,TRUE
+			} else {
+				DrawBox getease(SceneCount-20,20),0,BufWidth@,BufHeight@,$FFFFFF,TRUE
+			}
+		} else {
+			if DecideCount<20 {
+				DrawBox 0,0,getease(DecideCount,20),BufHeight@,$FFFFFF,TRUE
+			} else {
+				DrawBox getease(DecideCount-20,20),0,BufWidth@,BufHeight@,$FFFFFF,TRUE
+			}
+		}
+
+		//黒背景
+		if DecideCount==-1 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-40,25)
+			setease -BufWidth@,0,ease_cubic_out
+			DrawGraph getease(SceneCount-40,25),187,hdximg(ibg_layer),TRUE
+		} else {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			setease 0,-BufWidth@,ease_cubic_out
+			DrawGraph getease(DecideCount,25),187,hdximg(ibg_layer),TRUE
+		}
+
+		//項目
+		if SceneCount>45&DecideCount==-1 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-45,25)
+			setease -128,0,ease_cubic_out
+			DrawGraph getease(SceneCount-45,25),234,hdximg(iwindow),TRUE
+		}
+
+		//Lilly数
+		if SceneCount>60 {
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-60,15)
+			DrawStringXAlignRightToHandle 1700,200,str(NumLilly@portalsync)+" Lilly",82,$FFFFFF,hdxfont(fPS20)
+		}
+
+		//ウィンドウ類
+		if WindowID!0 {
+			if WindowID>0 {	//in
+				setease 0,500,ease_cubic_out
+				EaseHeight=getease(WindowCount,12)
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(WindowCount,20)
+			} else {			//out
+				setease 500,0,ease_cubic_out
+				EaseHeight=getease(WindowCount,12)
+				setease 256,0,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(WindowCount,20)
+				if WindowCount>20 :WindowID=0
+			}
+			DrawExtendGraph 0,BufHeight@/2-EaseHeight/2,BufWidth@,BufHeight@/2+EaseHeight/2,hdximg(iwindow_confirm+(abs(WindowID)-1)),TRUE
+		}
+		switch WindowID
+
+			case ID_CONFIRM
+				setease 0,256,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(WindowCount-10,10)
+				DrawStringXCenterToHandle 0,456,str(shopitem_price(ActiveItemID))+" Lillyを消費して、「"+shopitem_name(ActiveItemID)+"」を購入しますか？",BufWidth@,$FFFFFF,hdxfont(fNSCJM24)
+
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				if insquare(CursorPosX,CursorPosY,794,686,794+150,686+40) {
+					//はい
+					DrawGraph 794,686,hdximg(ibutton),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						if NumLilly@portalsync<shopitem_price(ActiveItemID) {
+							WindowID=ID_ERROR
+							WindowCount=0
+							PlaySE int(hcommonsech@(sndError@)),1.0
+						} else {
+							NumLilly@portalsync-shopitem_price(ActiveItemID)
+							librec_conslilly@+shopitem_price(ActiveItemID)
+
+							//アイテム別加算処理
+							switch shopitem_name(ActiveItemID)
+								case"チャレンジモード用チケットx1"
+									NumTickets@portalsync++
+								swbreak
+								case"音色のかけらx1"
+									NumFragments@portalsync++
+								swbreak
+							swend
+
+							PlaySE int(hcommonsech@(sndDecide@)),1.0
+							PlaySE int(hcommonsech@(vocBuy@)),1.0
+							WindowID=ID_SUCCESS
+							WindowCount=0
+						}
+					}
+				}
+				if insquare(CursorPosX,CursorPosY,976,686,976+150,686+40) {
+					//いいえ
+					DrawGraph 976,686,hdximg(ibutton),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndCancel@)),1.0
+						WindowID*-1:WindowCount=0
+					}
+				}
+			swbreak
+
+			case ID_ERROR		//Lillyが足りません
+				if insquare(CursorPosX,CursorPosY,885,686,885+150,686+40) {
+					DrawGraph 885,686,hdximg(ibutton),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndCancel@)),1.0
+						WindowID*-1:WindowCount=0
+					}
+				}
+			swbreak
+
+			case ID_SUCCESS	//ありがとうございます
+				setease 0,256,ease_linear
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(WindowCount-10,10)
+				DrawStringXCenterToHandle 0,496,"「"+shopitem_name(ActiveItemID)+"」を購入しました。",BufWidth@,$FFFFFF,hdxfont(fNSCJM24)
+
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				if insquare(CursorPosX,CursorPosY,885,686,885+150,686+40) {
+					DrawGraph 885,686,hdximg(ibutton),TRUE
+					if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+						PlaySE int(hcommonsech@(sndCancel@)),1.0
+						WindowID*-1:WindowCount=0
+					}
+				}
+			swbreak
+
+		swend
+
+		//ナビゲーション
+		if DecideCount==-1 {
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneCount-10,20)
+			setease -64,0,ease_cubic_out
+			DrawGraph 48+getease(SceneCount-10,20),32,hdximg(inav),TRUE
+		} else {
+			setease 256,0,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,20)
+			setease 0,-64,ease_cubic_out
+			DrawGraph 48+getease(DecideCount,20),32,hdximg(inav),TRUE
+		}
+
+		//プレイヤー情報
+		if SceneCount-20>0&DecideCount==-1 {
+			setease -41-108,0,ease_cubic_out
+			EasePosY=getease(SceneCount-20,20)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1170,41+EasePosY,hdximg@_lobby_(ibg_playerinfo@_lobby_),TRUE
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+				//名前
+				DrawStringToHandle 1315,54+EasePosY,RegName@portalsync,Getcolor(0,0,0),hdxfont(fPS24)
+				//レベル
+				DrawStringToHandle 1315,86+EasePosY,"Lv. "+RegLev@portalsync,Getcolor(0,0,0),hdxfont(fPS16)
+				//総合能力値
+				DrawStringToHandle 1397,109+EasePosY,strf("%.2f",RegPfPoint@portalsync),Getcolor(0,0,0),hdxfont(fPS16)
+				//経験値
+				DrawStringToHandle 1450,86+EasePosY,"EXP "+RegEXP@portalsync+" / "+lpeek(expTablebuf@,RegLev@portalsync*4),Getcolor(0,0,0),hdxfont(fPS16)
+				DrawBox 1450,109+EasePosY,1450+int(100.0*(double(RegEXP@portalsync)/double(lpeek(expTablebuf@,RegLev@portalsync*4)))),109+8+EasePosY,$3FECF2,TRUE
+		}
+		if DecideCount!-1 {
+			setease 0,-41-108,ease_cubic_out
+			EasePosY=getease(DecideCount,20)
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawGraph 1170,41+EasePosY,hdximg@_lobby_(ibg_playerinfo@_lobby_),TRUE
+		}
+		if SceneCount-30>0&DecideCount==-1 {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			setease 0,125,ease_cubic_out:EaseWidth=getease(SceneCount-30,15)
+			setease 0,100,ease_cubic_out:EaseHeight=getease(SceneCount-30,15)
+			DrawExtendGraph 1170+125/2-EaseWidth/2,40+100/2-EaseHeight/2,1170+125/2+EaseWidth/2,40+100/2+EaseHeight/2,hCharImg@charicon(RegCharID@portalsync),TRUE
+		}
+		//コメント
+		if insquare(CursorPosX,CursorPosY,1635,57,1635+140,57+30) {
+			if (MouseInput&MOUSE_INPUT_LEFT) {
+				OpenEditCommentDialog
+				SetDrawScreen hdximg(ilayer_all)
+			}
+		}
+
+		//ステータス
+			DrawDefaultStatus"Sapphire - Shop",hdxfont(fPS16),TRUE,CursorPosX,CursorPosY
+
+		//戻るボタン
+			//ホバーエフェクト
+			if BackButtonHoverFlag==FALSE&insquare(CursorPosX,CursorPosY,0,1000,240,1080)==TRUE {
+				BackButtonEase=-1
+			}
+			if BackButtonHoverFlag==TRUE&insquare(CursorPosX,CursorPosY,0,1000,240,1080)==FALSE {
+				BackButtonEase=1
+			}
+			if BackButtonEase<0 :BackButtonEase--
+			if BackButtonEase>0 :BackButtonEase++
+
+			//拡大縮小
+			if BackButtonEase>0 {
+				setease 1.2,1,ease_cubic_out
+			} else {
+				setease 1,1.2,ease_cubic_out
+			}
+			EaseWidth=int(240.0*geteasef(abs(BackButtonEase),10))
+			EaseHeight=int(80.0*geteasef(abs(BackButtonEase),10))
+			EasePosX=0:EasePosY=BufHeight@-EaseHeight
+
+			//フェードイン・フェードアウト
+			if SceneCount<20 {
+				setease -int(240.0*1.2),0,ease_cubic_out
+				EasePosX=getease(SceneCount,20)
+			}
+			if DecideCount!-1 {
+				setease 0,-int(240.0*1.2),ease_cubic_out
+				EasePosX=getease(DecideCount,20)
+			}
+
+			//描画
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg@(ibutton_backscene),TRUE
+
+			//戻るボタン判定
+			if insquare(CursorPosX,CursorPosY,0,1000,240,1080)&((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0)&DecideCount==-1 {
+				PushButtonFlag=TRUE
+				PlaySE int(hcommonsech@(sndDecide@)),1.0
+				DecideCount=0
+			}
+
+		BackButtonHoverFlag=insquare(CursorPosX,CursorPosY,0,1000,240,1080)
+
+		//プリローダー
+			if SceneCount>50 {
+				setease 400,0,ease_cubic_out
+				EaseWidth=getease(SceneCount-50,20)
+			} else :EaseWidth=400
+			if DecideCount!-1 {
+				setease 0,400,ease_cubic_out
+				EaseWidth=getease(DecideCount,20)
+			}
+			DrawExtendGraph BufWidth@/2-EaseWidth/2,BufHeight@/2-EaseWidth/2,BufWidth@/2+EaseWidth/2,BufHeight@/2+EaseWidth/2,hdximg_arr_preloader_2@(FrameCount@\74),TRUE
+
+		if DecideCount>60 {
+			InitScene ID_LOBBY
+			InitLobbyFonts
+			StartLobby
+		}
+
+		AddCount SceneCount
+		AddCount OnScrollCount
+		AddCount WindowCount
+		if DecideCount!-1 :AddCount DecideCount
+		bfMouseInput=MouseInput
+
 		return
 
 #global

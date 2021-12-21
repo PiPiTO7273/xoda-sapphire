@@ -5,6 +5,7 @@
 #include"bass_x64.as"
 #include"hspint64.as"
 
+#addition"AccKey.hsp"
 #include"NameSpace.hsp"
 #include"mod_BinPkg.hsp"
 #include"mod_dxlibplus.hsp"
@@ -26,6 +27,7 @@
 #include"scene_Challenge.hsp"
 #include"scene_Setup.hsp"
 #include"scene_Library.hsp"
+#include"scene_Shop.hsp"
 
 #packopt hide 1
 
@@ -96,6 +98,7 @@
 		case ID_PARTNERSELECT:DrawPartnerSelect:swbreak
 		case ID_CHALLENGE:DrawChallenge:swbreak
 		case ID_LIBRARY:DrawLibrary:swbreak
+		case ID_SHOP:DrawShop:swbreak
 		case ID_FATALERROR:DrawError:swbreak
 		case ID_SIGNIN:DrawSignin:swbreak
 		case ID_REGISTER:DrawRegister:swbreak

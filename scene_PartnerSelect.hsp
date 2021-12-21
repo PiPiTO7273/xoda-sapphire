@@ -340,27 +340,7 @@
 		}
 
 		//ステータス
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
-		DrawStringToHandle 24,1048,"SAPPHIRE - Partner Select",GetColor(230,230,230),hdxfont(fPS20)
-		DrawStringToHandle 458,1050,"x"+NumTickets@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
-		DrawStringToHandle 670,1050,"x"+NumFragments@portalsync,Getcolor(255,255,255),hdxfont(fPS16)
-		DrawStringToHandle 814,1050,str(NumLilly@portalsync)+" Lilly",Getcolor(255,255,255),hdxfont(fPS16)
-
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-		DrawGraph 300,1048,hdximg@(iStatus_Ticket),TRUE
-		DrawGraph 560,1048,hdximg@(iStatus_Fragment),TRUE
-		DrawGraph 780,1048,hdximg@(iStatus_Lilly),TRUE
-
-		DrawGraph 1750,1040,hdximg@(ibutton_gameexit),TRUE
-		if insquare(CursorPosX,CursorPosY,1750,1040,1750+150,1080) {
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,10
-			DrawBox 1750,1040,1750+150,1080,$FFFFFF,TRUE
-			if GetMouseInput()&MOUSE_INPUT_LEFT {
-				goto*Exit@
-			}
-		}
-		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawDefaultStatus"Sapphire - Partner Select",hdxfont(fPS16),TRUE,CursorPosX,CursorPosY
 
 		//プリローダー
 		if DecideCount!-1 {
@@ -378,14 +358,15 @@
 		
 		if DecideCount!-1 :AddCount DecideCount
 		if DecideCount>20 {
+			PlaySE int(hcommonsech@(vocWait@)),1.0
 			//次へ
 			SyncPartnerInfo
 			InitScene ID_MUSICSELECT
 			;LoadMusicSelectImages
 			;LoadMusicSelectSounds
 			InitMusicSelectFonts
-			;IRsync
-			;ScanAllPlaylist
+			IRsync
+			ScanAllPlaylist
 			StartMusicSelect_WithoutDarkness
 		}
 	return

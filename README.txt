@@ -100,9 +100,13 @@ Sound Cloudにて、クリエイティブ・コモンズライセンスが適用
 https://soundcloud.com/tkrism/indoor			Yunomi & nicamoq - インドア系ならトラックメイカー
 https://soundcloud.com/yuzame-label/meteorite-miku	Yunomi - メテオライト (feat. 初音ミク)
 
-
-Lime（Kankitsu）様の楽曲を使用させていただいております。
+「Chronomia」について
+Lime（Kankitsu）様の楽曲を使用しております。
 http://kanki2.net/	楽曲の使用について
+
+「FREEDOM DiVE↓」について
+xi様の楽曲を使用しております。
+http://web.archive.org/web/20091228130929/http://www.muzie.co.jp/artist/a037818/	楽曲の利用規約について（現在はリンク切れ）
 
 ━━━━━━━━━━━━━━━━━━━━
 ■免責事項

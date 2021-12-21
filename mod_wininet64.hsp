@@ -169,7 +169,6 @@ return httpres
 	strrep httpres,code_lf,""
 	strrep httpres,code_cr,""
 	strrep httpres,"</br>","\n"
-	logmes httpres
 return httpres
 #defcfunc geturl_server str _org
 	sdim tmpstr1
