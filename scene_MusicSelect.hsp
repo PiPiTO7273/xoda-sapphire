@@ -615,7 +615,7 @@
 
 		//BGMçƒê∂
 			if BASS_ChannelIsActive(int(hcommonchannel@))!BASS_ACTIVE_PLAYING :PlaySE int(hcommonchannel@),0.65
-			cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,d2f(0.65)
+			cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,0
 
 		//îwåiìÆâÊçƒê∂
 			if cfunc64i(GetMovieStateToGraph,hdximg(ibg))==0 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
@@ -1784,22 +1784,24 @@
 				loop
 			loop
 		}
-		if SongChangeCount==0 {
-			cfunc64v BASS_ChannelSetPosition,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),0,0,0
-			cfunc64v BASS_ChannelPlay,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
-			cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,0;d2f(0.65)
-			cfunc64v BASS_ChannelSetAttribute,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),BASS_ATTRIB_VOL,d2f(0.65)
-		}
-		if SongChangeCount<FPSvalue@/2 {
-			setease 0,0.65,ease_linear
-			cfunc64v BASS_ChannelSetAttribute,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),BASS_ATTRIB_VOL,d2f(geteasef(SongChangeCount,FPSvalue@/2))
-		}
-		if SongChangeCount==FPSvalue@*10 {
-			cfunc64v BASS_ChannelPause,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
-		}
-		if SongChangeCount>FPSvalue@*8+FPSvalue@/2 {
-			setease 0,0.65,ease_linear
-			cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,d2f(geteasef(SongChangeCount-FPSvalue@*8-FPSvalue@/2,FPSvalue@))
+		if DecideCount==-1 {
+			if SongChangeCount==0 {
+				cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,0;d2f(0.65)
+				cfunc64v BASS_ChannelSetAttribute,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),BASS_ATTRIB_VOL,d2f(0.65)
+				cfunc64v BASS_ChannelSetPosition,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),0,0,0
+				cfunc64v BASS_ChannelPlay,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
+			}
+			if SongChangeCount<FPSvalue@/2 {
+				setease 0,0.65,ease_linear
+				cfunc64v BASS_ChannelSetAttribute,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),BASS_ATTRIB_VOL,d2f(geteasef(SongChangeCount,FPSvalue@/2))
+			}
+			if SongChangeCount==FPSvalue@*10 {
+				cfunc64v BASS_ChannelPause,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
+			}
+			if SongChangeCount>FPSvalue@*9 {
+				setease 0,0.65,ease_linear
+				cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,d2f(geteasef(SongChangeCount-FPSvalue@*9,FPSvalue@)/2)
+			}
 		}
 
 		//åàíË

@@ -277,3 +277,63 @@ Resource=5ac8c04a-309d-8495-d24a-157a8ff3e519
 Default.BPM=222.220000
 Artwork=img.png
 Total.Notes=1737
+[2b81f30b-da2a-ba14-8052-afeb186a1751]
+Flag=TRUE
+Title=シャルル
+Artist=バルーン
+Source=Vocaloid Collection
+Level=3
+Resource=aa562543-de96-239d-0c34-8e35715e40da
+Default.BPM=145.000000
+Artwork=img.png
+Total.Notes=290
+[12364197-e029-0098-67e2-0ac2803f389c]
+Flag=TRUE
+Title=シャルル
+Artist=バルーン
+Source=Vocaloid Collection
+Level=5
+Resource=aa562543-de96-239d-0c34-8e35715e40da
+Default.BPM=145.000000
+Artwork=img.png
+Total.Notes=469
+[0e4d4439-3195-5e4f-6076-265ce7ba6168]
+Flag=TRUE
+Title=シャルル
+Artist=バルーン
+Source=Vocaloid Collection
+Level=10
+Resource=aa562543-de96-239d-0c34-8e35715e40da
+Default.BPM=145.000000
+Artwork=img.png
+Total.Notes=730
+[66a25799-da35-4903-c352-79859f9ad28a]
+Flag=TRUE
+Title=もぺもぺ
+Artist=LeaF
+Source=BOFU2017 - LEGENDA EST A MYTH -
+Level=10
+Resource=9253b5c4-ab97-8f4f-f78b-cba3fbb0c7d1
+Default.BPM=200.000000
+Artwork=img.png
+Total.Notes=552
+[d807f2d9-a366-1e8b-83e4-6fd1d1e75bd4]
+Flag=TRUE
+Title=もぺもぺ
+Artist=LeaF
+Source=BOFU2017 - LEGENDA EST A MYTH -
+Level=2
+Resource=9253b5c4-ab97-8f4f-f78b-cba3fbb0c7d1
+Default.BPM=200.000000
+Artwork=img.png
+Total.Notes=552
+[10efb7cf-e481-f620-86f3-5adf15c71c97]
+Flag=TRUE
+Title=もぺもぺ
+Artist=LeaF
+Source=BOFU2017 - LEGENDA EST A MYTH -
+Level=7
+Resource=9253b5c4-ab97-8f4f-f78b-cba3fbb0c7d1
+Default.BPM=200.000000
+Artwork=img.png
+Total.Notes=552

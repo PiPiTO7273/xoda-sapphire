@@ -279,6 +279,10 @@
 		ddim objBPM,1
 		dim ObjMax
 
+		dim Event_HorrorModeTime
+		dim Event_HorrorModeFlag
+		dim Event_HorrorModeMax
+
 		//サウンドライブラリ関連の変数を初期化
 		sdim SoundDBFileName
 		dim SoundDBMax
@@ -369,6 +373,18 @@
 					SndEventVol(SndEventMax)=double(Objinfoprm(2))/100.0
 					SndPlayFlag(SndEventMax)=0
 					SndEventMax++
+				swbreak
+				case"Event.HorrorMode.ON"	//ホラーモードON
+					split INIval,",",Objinfoprm
+					Event_HorrorModeTime(Event_HorrorModeMax)=int(Objinfoprm(0))
+					Event_HorrorModeFlag(Event_HorrorModeMax)=TRUE
+					Event_HorrorModeMax++
+				swbreak
+				case"Event.HorrorMode.OFF"	//ホラーモードOFF
+					split INIval,",",Objinfoprm
+					Event_HorrorModeTime(Event_HorrorModeMax)=int(Objinfoprm(0))
+					Event_HorrorModeFlag(Event_HorrorModeMax)=FALSE
+					Event_HorrorModeMax++
 				swbreak
 			swend
 		loop
@@ -626,10 +642,16 @@
 			dim BonusAddFlag
 			sdim tmpstr
 			dim DispHowToPlayFlag
+			dim curHorrorModeFlag
+			dim orgLowQuaFlag
+			dim orgChallengeModeFlag
 			burstCount=-1
 
 			easeAddSpeedA=AddSpeed@:easeAddSpeedB=AddSpeed@
 			if GaugeType@==GAUGE_EXPERT|GaugeType@==GAUGE_MADNESS :curGauge=100.0
+
+			orgLowQuaFlag=LowQuaFlag@
+			orgChallengeModeFlag=ChallengeModeFlag
 
 			//how to play
 			DispHowToPlayFlag=TRUE
@@ -816,16 +838,22 @@
 			setease 0,256,ease_linear
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(curCount-PreTime,1000)
 			if BGAgenflag==TRUE :SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-			if GetChartInfo(META_BGA)=="*"&GetChartInfo(META_BGAIMAGE)=="" {
-				DrawGraph 0,0,hdximg(ibg_0),FALSE
-			} else {
-				if BGAgenflag==FALSE {
-					if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga:SetMovieVolumeToGraph 0,hdximg_gameplaybga
-				}
-				DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
+			if BGAgenflag==FALSE {
+				if int(GetChartInfo(META_BGAOFFSET))<curCount-PreTime&BGAplayflag==FALSE :BGAplayflag=TRUE:PlayMovieToGraph hdximg_gameplaybga:SetMovieVolumeToGraph 0,hdximg_gameplaybga
 			}
+			if curHorrorModeFlag :SetDrawBlendMode DX_BLENDMODE_INVSRC,256
+			DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg_gameplaybga,FALSE
 			if BGAblurlev@!0 {
 				GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,100*BGAblurlev@
+			}
+			if curHorrorModeFlag {
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,rnd(100)
+				DrawBox 0,0,BufWidth@,BufHeight@,Getcolor(rnd(50),rnd(50),rnd(50)),TRUE
+				repeat 10
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,rnd(100)
+					EasePosY=rnd(BufHeight@)
+					DrawBox 0,EasePosY,BufWidth@,EasePosY+rnd(64),0,TRUE
+				loop
 			}
 
 		//BGM
@@ -1015,6 +1043,7 @@
 			DrawGraph 0,0,hdximg(ibg_top),TRUE
 
 		//下部パネル
+		if curHorrorModeFlag==FALSE {
 			;SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 			DrawGraph 0,874,hdximg(ibg_bottom),TRUE
 			;SetDrawBlendMode DX_BLENDMODE_ALPHA,256
@@ -1031,6 +1060,7 @@
 				DrawStringToHandle 1596,909,strf("%04d",MaxCombo),GetColor(255,255,255),hdxfont(fSQNUM24)
 			//ノーツの速度
 				DrawStringToHandle 1556,974,strf("%.2f",AddSpeed@),GetColor(255,255,255),hdxfont(fSQNUM24)
+		}
 
 		//左パネル
 		if LowQuaFlag@==FALSE {
@@ -1100,12 +1130,24 @@
 			DrawGraph 0,100,hdximg(ibg_songinfo),TRUE
 			//値
 			;SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-			if strlen(GetChartInfo(META_TITLE))>25 {
-				DrawStringToHandle 40,132,GetChartInfo(META_TITLE),GetColor(10,10,10),hdxfont(fNSCJM24)
-			} else {
-				DrawStringToHandle 40,128,GetChartInfo(META_TITLE),GetColor(10,10,10),hdxfont(fNSCJM32)
+			tmpstr=GetChartInfo(META_TITLE)
+			if curHorrorModeFlag==TRUE&rnd(3)==0 {
+				repeat strlen(tmpstr)
+					poke tmpstr,cnt,rnd(256)
+				loop
 			}
-			DrawStringToHandle 40,183,GetChartInfo(META_ARTIST),GetColor(30,30,30),hdxfont(fNSCJM20)
+			if strlen(tmpstr)>25 {
+				DrawStringToHandle 40,132,tmpstr,GetColor(10,10,10),hdxfont(fNSCJM24)
+			} else {
+				DrawStringToHandle 40,128,tmpstr,GetColor(10,10,10),hdxfont(fNSCJM32)
+			}
+			tmpstr=GetChartInfo(META_ARTIST)
+			if curHorrorModeFlag==TRUE&rnd(3)==0 {
+				repeat strlen(tmpstr)
+					poke tmpstr,cnt,rnd(256)
+				loop
+			}
+			DrawStringToHandle 40,183,tmpstr,GetColor(30,30,30),hdxfont(fNSCJM20)
 			DrawStringToHandle 40,222,GetChartInfo(META_SOURCE),GetColor(50,50,50),hdxfont(fNSCJM16)
 			DrawStringToHandle 40,311,GetChartInfo(META_DIFFICULTY)+" Lv."+GetChartInfo(META_LEVEL),GetColor(240,240,240),hdxfont(fEOEXB20)
 			//位置
@@ -1231,6 +1273,7 @@
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 			setease easeScoreA,easeScoreB,ease_linear
 			DrawStringToHandle 1580,124,strf("%08d",getease(easeScoreCount,FPSvalue@/2)),GetColor(0,0,0),hdxfont(fSQNUM40)
+			if curHorrorModeFlag&rnd(3)==0 :DrawStringToHandle 1580,124,"*99*99*8",GetColor(0,0,0),hdxfont(fSQNUM40)
 			AddCount easeScoreCount
 			curPfPoint=GetPfPoint(int(GetChartInfo(META_LEVEL)),curScore,maxcombo,GetChartInfo(META_DIFFICULTY),bonusPfPoint)
 			DrawStringToHandle 1618,182,strf("%3.2f",curPfPoint),GetColor(30,30,30),hdxfont(fSQNUM16)
@@ -1422,6 +1465,20 @@
 					SndPlayFlag(cnt)=1
 				}
 			loop
+
+		//ホラーモード
+			repeat Event_HorrorModeMax
+				if curCount>Event_HorrorModeTime(cnt)+PreTime {
+					curHorrorModeFlag=Event_HorrorModeFlag(cnt)
+				}
+			loop
+			if curHorrorModeFlag {
+				if rnd(5)==0 :LowQuaFlag@=TRUE:else:LowQuaFlag@=FALSE
+				if rnd(5)==0 :ChallengeModeFlag=TRUE:else:ChallengeModeFlag=FALSE
+			} else {
+				LowQuaFlag@=orgLowQuaFlag
+				ChallengeModeFlag=orgChallengeModeFlag
+			}
 
 		//グラフのキャプチャーIDを取得
 			repeat objmax
