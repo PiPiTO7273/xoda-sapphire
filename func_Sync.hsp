@@ -380,6 +380,55 @@
 		//重いわよここ
 		sdim WebAPI_resraw
 		WebAPI_resraw=_raw
+		notesel WebAPI_resraw
+		sdim NoteLine:sdim INIkey:sdim INIvalue:sdim CurSection
+		_struct(ID_REC_UUID)=""
+		_struct(ID_REC_PLAYER)=""
+		_struct(ID_REC_SCORE)=""
+		_struct(ID_REC_EXCELLENT)=""
+		_struct(ID_REC_GREAT)=""
+		_struct(ID_REC_GOOD)=""
+		_struct(ID_REC_BAD)=""
+		_struct(ID_REC_MISS)=""
+		_struct(ID_REC_EARLY)=""
+		_struct(ID_REC_LATE)=""
+		_struct(ID_REC_MAXCOMBO)=""
+		_struct(ID_REC_PACE_4BINHEX)=""
+		_struct(ID_REC_SCORE_4BINHEX)=""
+		_struct(ID_REC_CLEARTYPE)=""
+		_struct(ID_REC_DATE)=""
+		_struct(ID_REC_AP)=""
+		repeat notemax
+			noteget NoteLine,cnt
+			split NoteLine,"=",INIkey,INIvalue
+
+			if strmid(NoteLine,0,1)=="[" {
+				CurSection=NoteLine
+			} else {
+				if CurSection=="["+_uuid+"]" {
+					switch INIkey
+						case"ID":_struct(ID_REC_UUID)=INIvalue:swbreak
+						case"Name":_struct(ID_REC_PLAYER)=INIvalue:swbreak
+						case"Score":_struct(ID_REC_SCORE)=INIvalue:swbreak
+						case"NumExcellent":_struct(ID_REC_EXCELLENT)=INIvalue:swbreak
+						case"NumGreat":_struct(ID_REC_GREAT)=INIvalue:swbreak
+						case"NumGood":_struct(ID_REC_GOOD)=INIvalue:swbreak
+						case"NumBad":_struct(ID_REC_BAD)=INIvalue:swbreak
+						case"NumMiss":_struct(ID_REC_MISS)=INIvalue:swbreak
+						case"NumEarly":_struct(ID_REC_EARLY)=INIvalue:swbreak
+						case"NumLate":_struct(ID_REC_LATE)=INIvalue:swbreak
+						case"MaxCombo":_struct(ID_REC_MAXCOMBO)=INIvalue:swbreak
+						case"Gauge_64":_struct(ID_REC_PACE_4BINHEX)=INIvalue:swbreak
+						case"Score_64":_struct(ID_REC_SCORE_4BINHEX)=INIvalue:swbreak
+						case"Type":_struct(ID_REC_CLEARTYPE)=INIvalue:swbreak
+						case"Date":_struct(ID_REC_DATE)=INIvalue:swbreak
+						case"Ability":_struct(ID_REC_AP)=INIvalue:swbreak
+					swend
+				}
+			}
+		loop
+		noteunsel
+		/*
 		_struct(ID_REC_UUID)=GetINIvalue(WebAPI_resraw,_uuid,"ID")				//識別子
 		_struct(ID_REC_PLAYER)=GetINIvalue(WebAPI_resraw,_uuid,"Name")			//プレイヤー名
 		_struct(ID_REC_SCORE)=GetINIvalue(WebAPI_resraw,_uuid,"Score")			//スコア(10000000点満点)
@@ -396,6 +445,7 @@
 		_struct(ID_REC_CLEARTYPE)=GetINIvalue(WebAPI_resraw,_uuid,"Type")		//クリアの種類
 		_struct(ID_REC_DATE)=GetINIvalue(WebAPI_resraw,_uuid,"Date")			//日時
 		_struct(ID_REC_AP)=GetINIvalue(WebAPI_resraw,_uuid,"Ability")			//能力値
+		*/
 	return
 
 	//スコアデータを送信

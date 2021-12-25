@@ -28,7 +28,7 @@
 		pkgIndexMax=lpeek(pkgBuf,4)
 
 		dim pkgReadIndex
-		pkgReadIndex=8
+		pkgReadIndex=64
 
 		//Ši”[
 		dim tmppkgFileNameLength
@@ -47,7 +47,7 @@
 			pkgIndexPosition(cnt)=pkgReadIndex+4
 			pkgReadIndex+4+pkgIndexLength(cnt)
 
-			logmes"ID:"+cnt+" \""+pkgFileName(cnt)+"\" Position:"+pkgIndexPosition(cnt)+",Length:"+pkgIndexLength(cnt)
+			;logmes"ID:"+cnt+" \""+pkgFileName(cnt)+"\" Position:"+pkgIndexPosition(cnt)+",Length:"+pkgIndexLength(cnt)
 		loop
 
 		return

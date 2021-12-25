@@ -169,7 +169,7 @@
 		}
 		if SceneCount==20 :PauseMovieToGraph hdximg(ibg)
 		if DecideCount==20 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
-		if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+		;if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
 
 		//îwåiïœçX
 		setease 0,BufWidth@,ease_cubic_out

@@ -446,6 +446,7 @@
 				dim64 hSndBGM:dim64 hsmpSndBGM
 				hsmpSndBGM=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(hBGMbuf),0,varsize(hBGMbuf),32,0)
 				hSndBGM=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndBGM,TRUE)
+				cfunc64v BASS_ChannelSetAttribute,hSndBGM,BASS_ATTRIB_VOL,d2f(0.7)
 			}
 
 		//スコア計算
@@ -1069,7 +1070,7 @@
 			;SetDrawBlendMode DX_BLENDMODE_ALPHA,256
 			//自己ベストスコア
 				DrawStringToHandle 140,652,strf("%08d",MybestRecordBuf(ID_REC_SCORE)),GetColor(0,0,0),hdxfont(fSQNUM24)
-				DrawStringToHandle 140,686,"S+ , 能力値:"+strf("%.2f",MybestRecordBuf(ID_REC_AP)),GetColor(0,0,0),hdxfont(fNSCJM12)
+				DrawStringToHandle 140,686,"能力値:"+strf("%.2f",MybestRecordBuf(ID_REC_AP)),GetColor(0,0,0),hdxfont(fNSCJM12)
 
 				if ChallengeModeFlag==FALSE {
 					//差分表示（自己ベスト）

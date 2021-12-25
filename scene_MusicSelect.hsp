@@ -89,6 +89,10 @@
 	#enum itutorial_window_0
 	#enum itutorial_window_1
 	#enum itutorial_option
+	#enum iprice_fragment
+	#enum iwindow_frag_confirm
+	#enum iwindow_frag_error
+	#enum ibutton_usefrag
 
 	//BASS Audio Libraryサンプル、チャンネルハンドル(musicselect)
 	#enum bgmMain	=	0
@@ -160,6 +164,10 @@
 
 	//個数
 	#const NUM_ITEM_CATEGORY		14
+
+	#define ID_FRAGMENTS_NODIALOG	0
+	#define ID_FRAGMENTS_CONFIRM	1
+	#define ID_FRAGMENTS_ERROR		2
 
 	#deffunc LoadMusicSelectImages
 		;DrawLoadScreen
@@ -247,6 +255,10 @@
 		hdximg(itutorial_window_0)=LoadGraph("Data/guide_musicselect_0.png")
 		hdximg(itutorial_window_1)=LoadGraph("Data/guide_musicselect_1.png")
 		hdximg(itutorial_option)=LoadGraph("Data/guide_option.png")
+		hdximg(iprice_fragment)=LoadGraph("Data/layer_musicselect_pricefragments.png")
+		hdximg(iwindow_frag_confirm)=LoadGraph("Data/layer_musicselect_usefragments_confirm.png")
+		hdximg(iwindow_frag_error)=LoadGraph("Data/layer_musicselect_usefragments_error.png")
+		hdximg(ibutton_usefrag)=LoadGraph("Data/layer_musicselect_usefragments_button.png")
 		hdximg(iwindow_category)=MakeScreen(450,811,TRUE)
 		hdximg(iwindow_songs)=MakeScreen(700,811,TRUE)
 		hdximg(iwindow_ranking)=MakeScreen(350,210,TRUE)
@@ -297,19 +309,59 @@
 		SetFontLineSpaceToHandle 26,hdxfont(fNSCJM20)
 	return
 
+	#define global UpdateMusicSelectPreloader(%1=0,%2=0) _UpdateMusicSelectPreloader %1,%2
+	#deffunc _UpdateMusicSelectPreloader int _process,int _flag
+		if _flag!0 :return
+		SetDrawScreen hdximg@(iScene)
+		ClearDrawScreen
+
+		//背景動画
+		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+		;if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+
+		//プリローダー
+		DrawGraph BufWidth@/2-400/2,BufHeight@/2-400/2,hdximg_arr_preloader_2@(FrameCount@\74),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
+		DrawBox 0,BufHeight@-4,int(double(BufWidth@)/100.0*double(_process)),BufHeight@,$00FFCB,TRUE
+
+		SetDrawScreen DX_SCREEN_BACK
+
+		//シーン
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		DrawExtendGraph 0,0,DispWidth@,DispHeight@,hdximg@(iScene),TRUE
+
+		DrawSystemLayer
+
+		ScreenFlip
+
+		FrameCount@++
+		
+		return
+
 	//IRを同期
-	#deffunc IRsync
-		;DrawLoadScreen
+	#define global IRSYNC_FULLSCREEN_PRELOADER 1
+	#define global IRSYNC_WITHOUT_PRELOADER 2
+	#define global IRsync(%1=0) _IRsync %1
+	#deffunc _IRsync int _flag
+		if _flag==IRSYNC_FULLSCREEN_PRELOADER :DrawLoadScreen
+		UpdateMusicSelectPreloader 5,_flag
 		sdim IRsyncbuf
 		IRsyncbuf=WebAPI_GetRecord()
-		;DrawLoadScreen
+		UpdateMusicSelectPreloader 25,_flag
+		if _flag=IRSYNC_FULLSCREEN_PRELOADER :DrawLoadScreen
+		UpdateMusicSelectPreloader 30,_flag
 		sdim IRrankbuf
 		IRrankbuf=WebAPI_GetGlobalRanking()
+		UpdateMusicSelectPreloader 40,_flag
 		dim FirstLoadFlag
 		return
 
 	//ライブラリをスキャン
-	#deffunc ScanAllPlaylist
+	#define global ScanAllPlaylist(%1=0) _ScanAllPlaylist %1
+	#deffunc _ScanAllPlaylist int _flag
 
 			//前回読み込んだデータを削除
 			if InitMusicSelectFlag :DeleteMusicSelectResource
@@ -376,10 +428,11 @@
 					if strsize!-1 {
 						//IR取得
 						sdim IRsyncstruct
-						WebAPI_SyncRecord IRsyncbuf,plitem_UUID(plitemid,pllevid),IRsyncstruct
+						;SetMainWindowText"Loading Records from Portal"
 
 						//メタデータをキャッシュから読み込み
 						if GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Flag")=="TRUE" {
+							;SetMainWindowText"Loading Metadata from cache"
 							plitem_Title(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Title")
 							plitem_Artist(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Artist")
 							plitem_Source(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Source")
@@ -389,6 +442,7 @@
 							plitem_artworkpath(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Artwork")
 							plitem_unlockrawdata(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Unlock")
 						} else {
+							;SetMainWindowText"Loading Metadata from chart data"
 							//譜面データからメタデータを読み込み
 							sdim tmpstr,strsize:bload plitem_Path(plitemid,pllevid),tmpstr
 							plitem_Title(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Title")
@@ -429,11 +483,12 @@
 
 						}
 
+						;SetMainWindowText"Loading Artwork"
 						dim tmpint:tmpint=LoadGraph("Data/"+plitem_resID(plitemid,pllevid)+"/"+plitem_artworkpath(plitemid,pllevid))
 						if tmpint<=0 :tmpint=hdximg(iIcon_Artwork_Dummy)
 						plitem_artwork(plitemid,pllevid)=tmpint
 						
-						
+						;SetMainWindowText"Loading Preview sound"
 						exist"Data/"+plitem_resID(plitemid,pllevid)+"/preview.ogg"
 						sdim tmpstr,strsize
 						bload"Data/"+plitem_resID(plitemid,pllevid)+"/preview.ogg",tmpstr
@@ -442,6 +497,7 @@
 						sdim tmpstr
 
 						//アンロック状況
+						;SetMainWindowText"Checking unlock information"
 						plitem_unlockflag(plitemid,pllevid)=TRUE
 						plitem_unlocklilly(plitemid,pllevid)=0
 						tmpstr(1)=plitem_unlockrawdata(plitemid,pllevid)
@@ -463,6 +519,8 @@
 						}
 
 						//IR解析
+						;SetMainWindowText"Loading Records"
+						WebAPI_SyncRecord IRsyncbuf,plitem_UUID(plitemid,pllevid),IRsyncstruct
 						plitem_mybest_score(plitemid,pllevid)=int(IRsyncstruct(ID_REC_SCORE))
 						plitem_mybest_rank(plitemid,pllevid)=GetScoreRank(double(plitem_mybest_score(plitemid,pllevid))/10000000.0*100.0)
 						plitem_mybest_rate(plitemid,pllevid)=strf("%.1f",double(plitem_mybest_score(plitemid,pllevid))/10000000.0*100.0)+"%"
@@ -485,13 +543,17 @@
 							memcpy plitem_mybest_gauge(plitemid,pllevid),HEXdecbin,350
 						}
 						plitem_pfpoint(plitemid,pllevid)=double(IRsyncstruct(ID_REC_AP))
+						
+						/*
 						//世界ランキング
+						;SetMainWindowText"Loading Internet Ranking"
 						repeat 100
 							sdim tmpstr:tmpstr=GetINIvalue(IRrankbuf,"SAVEDATA",plitem_UUID(plitemid,pllevid)+".RANK#"+(cnt+1))
 							split tmpstr,",",plitem_ir_name(plitemid,pllevid,cnt),tmpstr(1)
 							plitem_ir_score(plitemid,pllevid,cnt)=int(tmpstr(1))
 						loop
 						//自分の順位を取得
+						;SetMainWindowText"Loading Player Rank Data"
 						plitem_ir_myrank(plitemid,pllevid)=-1
 						repeat
 							sdim tmpstr:tmpstr=GetINIvalue(IRrankbuf,"SAVEDATA",plitem_UUID(plitemid,pllevid)+".RANK#"+(cnt+1))
@@ -499,10 +561,15 @@
 							if tmpstr(1)==LoginUserInfo@(ID_NAME@) :plitem_ir_myrank(plitemid,pllevid)=cnt
 							if tmpstr(1)==""&tmpstr(2)=="" :plitem_ir_maxrank(plitemid,pllevid)=cnt:break
 						loop
+						*/
 
 						//総合能力値を計算
 						PfPointArr(PfPointArrMax)=plitem_pfpoint(plitemid,pllevid)
 						PfPointArrMax++
+					}
+					if rnd(4)==0 {
+						if _flag=IRSYNC_FULLSCREEN_PRELOADER :DrawLoadScreen
+						UpdateMusicSelectPreloader int(50+50.0/double(numitem*3)*double(plitemid*3+pllevid)),_flag
 					}
 				loop
 
@@ -607,6 +674,8 @@
 			dim BackButtonHoverFlag
 			dim TutorialWindowID
 			dim TutorialWindowCount
+			dim usefragmentWindowID
+			dim usefragmentWindowCount
 			TutorialWindowID=-1
 			DecideCount=-1
 
@@ -687,7 +756,7 @@
 			}
 
 		//カーソル位置から項目IDを取得
-			if OptionWindowFlag==0&DecideCount==-1 {
+			if OptionWindowFlag==0&DecideCount==-1&usefragmentWindowID==0 {
 				HoverColumnID(ID_CATEGORY)=-1
 				if insquare(CursorPosX,CursorPosY,0,229,450,229+811) {
 					//カテゴリー選択
@@ -737,6 +806,28 @@
 				}
 			}
 
+			//楽曲選択時にランキング解析＆反映
+			if SongChangeCount==0 {
+				//IR同期
+				plitemid=c(ActiveColumnID(ID_SONGS),CurSelLev)
+				pllevid=lv(ActiveColumnID(ID_SONGS),CurSelLev)
+
+				//世界ランキング
+				repeat 100
+					sdim tmpstr:tmpstr=GetINIvalue(IRrankbuf,"SAVEDATA",plitem_UUID(plitemid,pllevid)+".RANK#"+(cnt+1))
+					split tmpstr,",",plitem_ir_name(plitemid,pllevid,cnt),tmpstr(1)
+					plitem_ir_score(plitemid,pllevid,cnt)=int(tmpstr(1))
+				loop
+				//自分の順位を取得
+				plitem_ir_myrank(plitemid,pllevid)=-1
+				repeat
+					sdim tmpstr:tmpstr=GetINIvalue(IRrankbuf,"SAVEDATA",plitem_UUID(plitemid,pllevid)+".RANK#"+(cnt+1))
+					split tmpstr,",",tmpstr(1),tmpstr(2)
+					if tmpstr(1)==LoginUserInfo@(ID_NAME@) :plitem_ir_myrank(plitemid,pllevid)=cnt
+					if tmpstr(1)==""&tmpstr(2)=="" :plitem_ir_maxrank(plitemid,pllevid)=cnt:break
+				loop
+			}
+
 			repeat 3
 				if plitem_UUID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))=="*"|plitem_UUID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))=="" {
 					switch CurSelLev
@@ -753,7 +844,7 @@
 		//背景動画
 			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
 			DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
-			if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+			;if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
 
 		//----以下、シーン別レイヤー-----
 		SetDrawScreen hdximg(ilayer_all)
@@ -1111,7 +1202,7 @@
 			}
 
 		//ボタンの描画と判定
-		if OptionWindowFlag==0|OptionWindowFlag==2 {
+		if (OptionWindowFlag==0|OptionWindowFlag==2) {
 			//プレイ開始ボタン
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
 				if plitem_unlockflag(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))==TRUE {
@@ -1129,11 +1220,30 @@
 					} else {
 						DrawGraph 1620,960,hdximg(ibutton_start_0),TRUE
 					}
+				} else {
+					//未解禁で音色のかけらを使用してプレイする
+					if insquare(CursorPosX,CursorPosY,1620,960,1620+280,960+64)&(usefragmentWindowID==0) {
+						if (MouseInput&MOUSE_INPUT_LEFT)&DecideCount==-1 {
+							DrawGraph 1620,960,hdximg(ibutton_start_2),TRUE
+							usefragmentWindowID=ID_FRAGMENTS_CONFIRM
+							usefragmentWindowCount=0
+						} else {
+							DrawGraph 1620,960,hdximg(ibutton_start_1),TRUE
+						}
+					} else {
+						DrawGraph 1620,960,hdximg(ibutton_start_0),TRUE
+					}
+					//値段
+					setease 100,256,ease_linear+ease_loop
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SongChangeCount,60)
+					DrawGraph 1810,999,hdximg(iprice_fragment),TRUE
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SongChangeCount,60)
+					DrawStringXCenterToHandle 1844,1002,"x"+str((lv(ActiveColumnID(ID_SONGS),CurSelLev)+1)*2),39,$FFFFFF,hdxfont(fPS16)
 				}
 
 			//オプション
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
-				if insquare(CursorPosX,CursorPosY,1720,850,1720+180,850+40) {
+				if insquare(CursorPosX,CursorPosY,1720,850,1720+180,850+40)&(usefragmentWindowID==0) {
 					if (MouseInput&MOUSE_INPUT_LEFT)&DecideCount==-1 {
 						DrawGraph 1720,850,hdximg(ibutton_option_2),TRUE
 						PushButtonFlag=TRUE
@@ -1155,7 +1265,7 @@
 						if CurSelLev==0 {	//normal
 							DrawGraph 1254,826,hdximg(ibutton_normal_2),TRUE
 						} else {
-							if insquare(CursorPosX,CursorPosY,1254,826,1254+150,826+32) {
+							if insquare(CursorPosX,CursorPosY,1254,826,1254+150,826+32)&(usefragmentWindowID==0) {
 								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=0:PushButtonFlag=TRUE
 								DrawGraph 1254,826,hdximg(ibutton_normal_1),TRUE
 							} else {
@@ -1167,7 +1277,7 @@
 						if CurSelLev==1 {	//hard
 							DrawGraph 1254,866,hdximg(ibutton_hard_2),TRUE
 						} else {
-							if insquare(CursorPosX,CursorPosY,1254,866,1254+150,866+32) {
+							if insquare(CursorPosX,CursorPosY,1254,866,1254+150,866+32)&(usefragmentWindowID==0) {
 								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=1:PushButtonFlag=TRUE
 								DrawGraph 1254,866,hdximg(ibutton_hard_1),TRUE
 							} else {
@@ -1179,7 +1289,7 @@
 						if CurSelLev==2 {	//chaos
 							DrawGraph 1254,906,hdximg(ibutton_chaos_2),TRUE
 						} else {
-							if insquare(CursorPosX,CursorPosY,1254,906,1254+150,906+32) {
+							if insquare(CursorPosX,CursorPosY,1254,906,1254+150,906+32)&(usefragmentWindowID==0) {
 								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=2:PushButtonFlag=TRUE
 								DrawGraph 1254,906,hdximg(ibutton_chaos_1),TRUE
 							} else {
@@ -1189,9 +1299,9 @@
 					}
 				} else {
 					switch lv(ActiveColumnID(ID_SONGS),CurSelLev)
-					case 0:DrawGraph 1254,826,hdximg(ibutton_normal_1),TRUE:swbreak
-					case 1:DrawGraph 1254,826,hdximg(ibutton_hard_1),TRUE:swbreak
-					case 2:DrawGraph 1254,826,hdximg(ibutton_chaos_1),TRUE:swbreak
+						case 0:DrawGraph 1254,826,hdximg(ibutton_normal_1),TRUE:swbreak
+						case 1:DrawGraph 1254,826,hdximg(ibutton_hard_1),TRUE:swbreak
+						case 2:DrawGraph 1254,826,hdximg(ibutton_chaos_1),TRUE:swbreak
 					swend
 				}
 		}
@@ -1362,6 +1472,87 @@
 			if UnlockDialogID==-2&UnlockDialogCount>20 :UnlockDialogID=0
 		}
 		AddCount UnlockDialogCount
+
+		//音色のかけらを使用する？
+			//ウィンドウ類
+			if usefragmentWindowID!0 {
+				if usefragmentWindowID>0 {	//in
+					setease 0,500,ease_cubic_out
+					EaseHeight=getease(usefragmentWindowCount,12)
+					setease 0,256,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(usefragmentWindowCount,20)
+				} else {			//out
+					setease 500,0,ease_cubic_out
+					EaseHeight=getease(usefragmentWindowCount,12)
+					setease 256,0,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(usefragmentWindowCount,20)
+					if usefragmentWindowCount>20 :usefragmentWindowID=0
+				}
+				DrawExtendGraph 0,BufHeight@/2-EaseHeight/2,BufWidth@,BufHeight@/2+EaseHeight/2,hdximg(iwindow_frag_confirm+(abs(usefragmentWindowID)-1)),TRUE
+			}
+
+			switch usefragmentWindowID
+				case ID_FRAGMENTS_CONFIRM
+					if insquare(CursorPosX,CursorPosY,794,686,794+150,686+40) {		//はい
+						DrawGraph 794,686,hdximg(ibutton_usefrag),TRUE
+						if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+							if NumFragments@portalsync<((lv(ActiveColumnID(ID_SONGS),CurSelLev)+1)*2) {
+								//不足
+								usefragmentWindowID=ID_FRAGMENTS_ERROR
+								usefragmentWindowCount=0
+							} else {
+								//消費
+								NumFragments@portalsync-((lv(ActiveColumnID(ID_SONGS),CurSelLev)+1)*2)
+								librec_consfragment@+((lv(ActiveColumnID(ID_SONGS),CurSelLev)+1)*2)
+
+								//確定
+								PushButtonFlag=TRUE
+								PlaySE int(hbasschannel(sndDecide)),1.0
+								PlayMovieToGraph hdximg(ibg_Load),DX_PLAYTYPE_LOOP
+								DecideCount=0
+								SceneTransID=ID_TRANS_PLAY
+
+								usefragmentWindowID*-1:usefragmentWindowCount=0
+							}
+						}
+					}
+					if insquare(CursorPosX,CursorPosY,976,686,976+150,686+40) {		//いいえ
+						DrawGraph 976,686,hdximg(ibutton_usefrag),TRUE
+						if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+							PlaySE int(hbasschannel(sndCancel)),1.0
+							usefragmentWindowID*-1:usefragmentWindowCount=0
+						}
+					}
+
+					setease 0,256,ease_cubic_out
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(usefragmentWindowCount-15,20)
+					setease -64,0,ease_cubic_out
+					DrawStringXCenterToHandle 959+getease(usefragmentWindowCount-10,20),549,"x"+str((lv(ActiveColumnID(ID_SONGS),CurSelLev)+1)*2),34,$FFFFFF,hdxfont(fPS24)
+				swbreak
+				case ID_FRAGMENTS_ERROR
+					if insquare(CursorPosX,CursorPosY,885,686,885+150,686+40) {
+						DrawGraph 885,686,hdximg(ibutton_usefrag),TRUE
+						if ((MouseInput&MOUSE_INPUT_LEFT)==1)&((bfMouseInput&MOUSE_INPUT_LEFT)==0) {
+							PlaySE int(hbasschannel(sndCancel)),1.0
+							usefragmentWindowID*-1:usefragmentWindowCount=0
+						}
+					}
+				swbreak
+			swend
+
+		//リロード
+		if insquare(CursorPosX,CursorPosY,1789,63,1789+64,63+64)&(OptionWindowFlag==0|OptionWindowFlag==2) {
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,50
+			DrawBox 1789,63,1789+64,63+64,$000000,TRUE
+			if (MouseInput&MOUSE_INPUT_LEFT)==TRUE&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
+				PlaySE int(hbasschannel(sndDecide)),1.0
+				PlaySE int(hcommonsech@(vocWait@)),1.0
+				cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,d2f(0.65)
+				DeleteMusicSelectResource
+				IRsync IRSYNC_WITHOUT_PRELOADER
+				ScanAllPlaylist IRSYNC_WITHOUT_PRELOADER
+			}
+		}
 
 		if PushButtonFlag==TRUE&(MouseInput&MOUSE_INPUT_LEFT)==TRUE&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
 			PlaySE int(hbasschannel(sndCursor)),1.0
@@ -1632,10 +1823,10 @@
 			}
 			switch OptionWindowFlag
 				case 1
-					setease 0,130,ease_cubic_out
+					setease 0,200,ease_cubic_out
 					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(OptionWindowCount,20)
 					setease 0,800,ease_cubic_out
-					if LowQuaFlag@==FALSE:GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(OptionWindowCount,20)
+					if LowQuaFlag@==FALSE:GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),300,0,300+596,864,300,0,DX_GRAPH_FILTER_GAUSS,64,getease(OptionWindowCount,20)
 					DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
 					setease 200,256,ease_cubic_out
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(OptionWindowCount,20)
@@ -1685,8 +1876,6 @@
 				case 2
 					setease 130,0,ease_cubic_out
 					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(OptionWindowCount,20)
-					setease 800,0,ease_cubic_out
-					if LowQuaFlag@==FALSE:GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,64,getease(OptionWindowCount,20)
 					DrawBox 0,0,BufWidth@,BufHeight@,GetColor(0,0,0),TRUE
 					setease 256,0,ease_cubic_out
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(OptionWindowCount,20)
@@ -1800,7 +1989,7 @@
 			}
 			if SongChangeCount>FPSvalue@*9 {
 				setease 0,0.65,ease_linear
-				cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,d2f(geteasef(SongChangeCount-FPSvalue@*9,FPSvalue@)/2)
+				cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,d2f(geteasef(SongChangeCount-FPSvalue@*9,FPSvalue@/2))
 			}
 		}
 
@@ -1848,6 +2037,7 @@
 		bfMouseInput=MouseInput
 		if DecideCount!-1 :AddCount DecideCount
 		if MouseInput&MOUSE_INPUT_LEFT :AddCount LClickKeepCount:else:LClickKeepCount=0
+		AddCount usefragmentWindowCount
 
 	return
 

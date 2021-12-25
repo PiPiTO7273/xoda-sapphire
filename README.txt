@@ -108,6 +108,18 @@ http://kanki2.net/	楽曲の使用について
 xi様の楽曲を使用しております。
 http://web.archive.org/web/20091228130929/http://www.muzie.co.jp/artist/a037818/	楽曲の利用規約について（現在はリンク切れ）
 
+「シャルル」について
+バルーン様の楽曲を使用しております。
+https://www.tabloid0120.com/contact/		楽曲二次創作について
+
+「もぺもぺ」について
+LeaF様の楽曲を使用しております。
+http://leafbms.web.fc2.com/profile.html		楽曲利用規約
+
+「GOODRAGE」について
+EBIMAYO様の楽曲を使用しております。楽曲の音源、およびライセンスは以下のリンクから参照できます。
+https://ab-sounds.com/bms/
+
 ━━━━━━━━━━━━━━━━━━━━
 ■免責事項
 

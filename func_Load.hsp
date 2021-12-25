@@ -105,15 +105,11 @@
 
 	//起動設定を編集
 	#deffunc EditCoreSettings str _section,str _key,str _value
-		sdim tmpstr:tmpstr=GetINIvalue(coreBuf,_section,_key)
-		strrep coreBuf,"\n"+_key+"="+tmpstr+"\n","\n"+_key+"="+_value+"\n"
+		INIInit"core.ini":INISet _section,_key,_value
 		return
 
 	//起動設定を反映
 	#deffunc SaveCoreSettings str _filename
-		notesel coreBuf
-		notesave _filename
-		noteunsel
 		return
 
 	//DXライブラリを初期化

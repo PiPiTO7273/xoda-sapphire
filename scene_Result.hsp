@@ -578,8 +578,8 @@
 					;LoadMusicSelectImages
 					;LoadMusicSelectSounds
 					InitMusicSelectFonts
-					IRsync
-					ScanAllPlaylist
+					IRsync IRSYNC_FULLSCREEN_PRELOADER
+					ScanAllPlaylist IRSYNC_FULLSCREEN_PRELOADER
 					cfunc64v BASS_ChannelSetPosition,hcommonchannel@,0,0,0
 					StartMusicSelect
 				swbreak

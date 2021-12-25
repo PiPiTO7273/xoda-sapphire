@@ -111,7 +111,7 @@
 		//îwåiÅiìÆâÊÅj
 		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
 		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
-		if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+		;if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
 
 		SetDrawScreen hdximg(ilayer_all)
 		ClearDrawScreen

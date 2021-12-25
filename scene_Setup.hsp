@@ -298,6 +298,7 @@
 				if GetINIvalue(tmpstr,"SAVEDATA","XODA.NEWDATA")=="1" {
 					InitScene ID_WELCOME0
 					StartWelcome
+					TestRequest=WebAPI_Get("http://"+WebAPI_HostAddress@_sync_+"/API-SendProfile.php?key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendProfile")+"&id="+LoginUserInfo@(ID_NAME)+"&password="+LoginUserInfo@(ID_KEY)+"&decode="+WebAPI_DecodeKey@_sync_+"&object=XODA.NEWDATA&value=0")
 				} else {
 					InitScene ID_WELCOME2
 					StartWelcome

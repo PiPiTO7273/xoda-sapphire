@@ -174,7 +174,7 @@
 		//背景（動画）
 		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
 		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
-		if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+		;if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
 
 		//項目更新
 			SetDrawScreen hdximg(iwindow)
@@ -399,7 +399,6 @@
 		if ActiveItemID==0&DecideCount==30 :IRsync
 		if ActiveItemID==0&DecideCount==31 :ScanAllPlaylist
 		if ActiveItemID==0&DecideCount==32 :SetFilterRefDB ID_CAT_ALL
-		if ActiveItemID==0&DecideCount==33 :InitMusicSelectFonts
 
 		if ActiveItemID==3&DecideCount==29 :PlaySE int(hcommonsech@(vocWait@)),1.0
 		if ActiveItemID==3&DecideCount==30 :IRsync
@@ -411,6 +410,7 @@
 				case 0
 					InitScene ID_MUSICSELECT
 					StartMusicSelect_WithoutDarkness
+					InitMusicSelectFonts
 				swbreak
 				case 1
 					InitScene ID_CHALLENGE
