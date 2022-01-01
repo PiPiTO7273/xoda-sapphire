@@ -1,31 +1,88 @@
 
 #module _title_
 
-#enum ibg		=	0
-#enum ilogo_0
-#enum ilogo_1
-#enum ilogo_2
-#enum ilogo_3
+	#enum ibg		=	0
+	#enum ilogo_0
+	#enum ilogo_1
+	#enum ilogo_2
+	#enum ilogo_3
 
-#define logotime	4
+	#enum ilayer_bg
+	#enum isp_0
+	#enum isp_1
+	#enum ilogo
+	#enum iguide
+	#enum itr
+
+	#enum fEOEXB16			=	0
+	#enum fEOEXB20
+	#enum fFAB50
+	#enum fNSCJM12
+	#enum fNSCJM15
+	#enum fNSCJM16
+	#enum fNSCJM20
+	#enum fNSCJM24
+	#enum fNSCJM32
+	#enum fPS14
+	#enum fPS16
+	#enum fPS18
+	#enum fPS20
+	#enum fPS24
+	#enum fPS80
+	#enum fSQNUM16
+	#enum fSQNUM24
+	#enum fSQNUM40
+
+	#define logotime	4
 
 #deffunc LoadTitleImages
 	dim hdximg
 	SetDXArchiveExtension"bin"
-	hdximg(ibg)=LoadGraph("Data/bg_title.mp4")
+	hdximg(ibg)=hdximg@(ibg_common_0)
 	repeat 4
 		hdximg(ilogo_0+cnt)=LoadGraph("Data/common_title_"+cnt+".png")
 	loop
-	cfunc64v SetMovieVolumeToGraph,9500,hdximg(ibg)
+	hdximg(ilayer_bg)=LoadGraph("Data/bg_Title.png")
+	hdximg(isp_0)=LoadGraph("Data/layer_Title_bgsp0.png")
+	hdximg(isp_1)=LoadGraph("Data/layer_Title_bgsp1.png")
+	hdximg(ilogo)=LoadGraph("Data/layer_Title_Logo.png")
+	hdximg(iguide)=LoadGraph("Data/layer_Title_guide.png")
+	hdximg(itr)=LoadGraph("Data/layer_Title_tr.png")
 	return
 
 #deffunc LoadTitleFonts
+	InitFontToHandle
+	dim hdxfont
+	hdxfont(fEOEXB16)=LoadFontDataToHandle("Data/eoexb16.bin")
+	hdxfont(fEOEXB20)=LoadFontDataToHandle("Data/eoexb20.bin")
+	hdxfont(fFAB50)=LoadFontDataToHandle("Data/fab50.bin")
+	hdxfont(fNSCJM12)=LoadFontDataToHandle("Data/nscjm12.bin")
+	hdxfont(fNSCJM15)=LoadFontDataToHandle("Data/nscjm15.bin")
+	hdxfont(fNSCJM16)=LoadFontDataToHandle("Data/nscjm16.bin")
+	hdxfont(fNSCJM20)=LoadFontDataToHandle("Data/nscjm20.bin")
+	hdxfont(fNSCJM24)=LoadFontDataToHandle("Data/nscjm24.bin")
+	hdxfont(fNSCJM32)=LoadFontDataToHandle("Data/nscjm32.bin")
+	hdxfont(fPS14)=LoadFontDataToHandle("Data/ps14.bin")
+	hdxfont(fPS16)=LoadFontDataToHandle("Data/ps16.bin")
+	hdxfont(fPS18)=LoadFontDataToHandle("Data/ps18.bin")
+	hdxfont(fPS20)=LoadFontDataToHandle("Data/ps20.bin")
+	hdxfont(fPS24)=LoadFontDataToHandle("Data/ps24.bin")
+	hdxfont(fPS80)=LoadFontDataToHandle("Data/ps80.bin")
+	hdxfont(fSQNUM40)=LoadFontDataToHandle("Data/sqnum40.bin")
+	hdxfont(fSQNUM24)=LoadFontDataToHandle("Data/sqnum24.bin")
+	hdxfont(fSQNUM16)=LoadFontDataToHandle("Data/sqnum16.bin")
+	return
+
+#deffunc LoadTitleSounds
+	dim64 htitlebgm:dim64 hsmptitlebgm
+	LoadBASSsample"Data/bgm_Title.ogg",htitlebgm,hsmptitlebgm,BASS_SAMPLE_LOOP
 	return
 
 #deffunc StartTitle
 	dim SceneCount
 	dim SceneTransCount:SceneTransCount=-1
 	dim tmpscreencount
+	dim TitleSceneCount
 	return
 
 #deffunc DrawTitle
@@ -52,10 +109,86 @@
 	SetDrawBlendMode DX_BLENDMODE_NOBLEND
 	DrawBox 0,0,BufWidth@,BufHeight@,$FFFFFF,TRUE
 
-	if SceneCount>60*logotime*4 {
+	if SceneTransCount>20 {
+		DrawMainBackground FrameCount@
+
+		setease 0,-40,ease_cubic_out
+		DrawBox 0,BufHeight@+getease(SceneTransCount-20,20),BufWidth@,BufHeight@,$272727,TRUE
+	}
+	if SceneCount>60*logotime*4&SceneTransCount<=20 {
 		setease 0,256,ease_linear
 		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount-60*logotime*4,30)
 		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		setease -1513,0,ease_cubic_out
+		DrawGraph getease(TitleSceneCount-8,25),275,hdximg(isp_1),TRUE
+
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+		setease 587+1888,587,ease_cubic_out
+		EasePosX=getease(TitleSceneCount,30)
+		setease -112-1888,-112,ease_cubic_out
+		EasePosY=getease(TitleSceneCount,30)
+		DrawGraph EasePosX,EasePosY,hdximg(isp_0),TRUE
+
+		//基本背景
+		setease 1.2,1,ease_cubic_out
+		dim EasePosX:dim EasePosY:dim EaseWidth:dim EaseHeight
+		EaseWidth=int(double(BufWidth@)*geteasef(TitleSceneCount-20,25))
+		EaseHeight=int(double(BufHeight@)*geteasef(TitleSceneCount-20,25))
+		EasePosX=BufWidth@/2-EaseWidth/2:EasePosY=BufHeight@/2-EaseHeight/2
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(TitleSceneCount-20,25)
+		DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ilayer_bg),TRUE
+
+		//タイトルロゴ
+		setease 0,256,ease_cubic_out
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(TitleSceneCount-15,25)
+		setease 200,0,ease_cubic_out
+		DrawGraph 175+getease(TitleSceneCount-15,25),372,hdximg(ilogo),TRUE
+
+		//コピーライト
+		setease 0,256,ease_linear
+		SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(TitleSceneCount-40,20)
+		DrawStringToHandle 175,532,"Copyright (c) 2020-"+gettime(0)+" puoro. Games",$000000,hdxfont(fPS24)
+
+		//操作（英語）
+		if TitleSceneCount>40 {
+			if TitleSceneCount/4\2==0 :SetDrawBlendMode DX_BLENDMODE_ALPHA,100:else:SetDrawBlendMode DX_BLENDMODE_ALPHA,256
+			DrawStringToHandle 175,678,"CLICK ON THE SCREEN TO START THE GAME.",$000000,hdxfont(fPS20)
+		}
+
+		//操作
+		if TitleSceneCount>30 {
+			setease 0,256,ease_linear+ease_loop
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(TitleSceneCount-30,30)
+			DrawGraph 1293,476,hdximg(iguide),TRUE
+		}
+
+		//三角
+		if TitleSceneCount>40 {
+			if TitleSceneCount/4\4==0 :SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256:else:SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,0
+			DrawGraph 51,678,hdximg(itr),TRUE
+			if TitleSceneCount/4\4==1 :SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256:else:SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,0
+			DrawGraph 87,678,hdximg(itr),TRUE
+			if TitleSceneCount/4\4==2 :SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256:else:SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,0
+			DrawGraph 123,678,hdximg(itr),TRUE
+		}
+
+		//テキストアニメーション
+		if TitleSceneCount>50 {
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			DrawRotaGraph 1666,804,1.0,-0.785375,hdximg_arr_titleanim@(limit((TitleSceneCount-50)\281,0,280)),TRUE,FALSE
+		}
+
+		//左上
+		if TitleSceneCount>25 {
+			setease 0,256,ease_linear
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(TitleSceneCount-25,20)
+			DrawGraph -26-TitleSceneCount\403,-26+TitleSceneCount\403,hdximg@(ibg_rep),TRUE
+			DrawGraph -26+403-TitleSceneCount\403,-26-403+TitleSceneCount\403,hdximg@(ibg_rep),TRUE
+		}
+
 	}
 
 		//ロゴ
@@ -77,7 +210,11 @@
 		loop
 
 		if (GetMouseInput()&MOUSE_INPUT_LEFT)&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE&SceneTransCount==-1 {
-			PlaySE int(hcommonsech@(sndCursor@)),1.0
+			if SceneCount>60*logotime*4 {
+				PlaySE int(hcommonsech@(sndDecide@)),1.0
+			} else {
+				PlaySE int(hcommonsech@(sndCursor@)),1.0
+			}
 			if SceneCount<60*logotime*4 {
 				SceneCount=limit(SceneCount+60*logotime,0,60*logotime*4)
 			} else {
@@ -85,22 +222,52 @@
 			}
 		}
 
-		if SceneCount<15 {
+		if SceneCount<25 {
 			setease 256,0,ease_linear
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,15)
+			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneCount,25)
 			DrawBox 0,0,BufWidth@,BufHeight@,0,TRUE
 		}
 
 		if SceneTransCount!-1 {
-			setease 0,256,ease_linear
-			SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(SceneTransCount,15)
-			DrawBox 0,0,BufWidth@,BufHeight@,0,TRUE
-			setease 9500,8000,ease_linear
-			cfunc64v SetMovieVolumeToGraph,getease(SceneTransCount,15),hdximg(ibg)
+			SetDrawScreen hdximg@(iscenechange)
+			DrawCommonBackground FrameCount@
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256:DrawGraph 0,0,hdximg@(ibg_scenechange),TRUE
+			SetDrawScreen hdximg@(iScene)
+
+			if SceneTransCount<=20 {
+				setease 1.2,1,ease_cubic_out
+				dim EasePosX:dim EasePosY:dim EaseWidth:dim EaseHeight
+				EaseWidth=int(double(BufWidth@)*geteasef(SceneTransCount,20))
+				EaseHeight=int(double(BufHeight@)*geteasef(SceneTransCount,20))
+				EasePosX=BufWidth@/2-EaseWidth/2:EasePosY=BufHeight@/2-EaseHeight/2
+				setease 0,256,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneTransCount,20)
+			} else {
+				setease 1,1.2,ease_cubic_out
+				dim EasePosX:dim EasePosY:dim EaseWidth:dim EaseHeight
+				EaseWidth=int(double(BufWidth@)*geteasef(SceneTransCount-20,20))
+				EaseHeight=int(double(BufHeight@)*geteasef(SceneTransCount-20,20))
+				EasePosX=BufWidth@/2-EaseWidth/2:EasePosY=BufHeight@/2-EaseHeight/2
+				setease 256,0,ease_cubic_out
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(SceneTransCount-20,20)
+			}
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg@(iscenechange),TRUE
+
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+			setease 0,400,ease_cubic_out
+			EaseWidth=getease(SceneTransCount,20)
+			DrawExtendGraph BufWidth@/2-EaseWidth/2,BufHeight@/2-EaseWidth/2,BufWidth@/2+EaseWidth/2,BufHeight@/2+EaseWidth/2,hdximg_arr_preloader_2@(FrameCount@\74),TRUE
+
+			setease 0.65,0,ease_linear
+			cfunc64v BASS_ChannelSetAttribute,htitlebgm,BASS_ATTRIB_VOL,d2f(geteasef(SceneTransCount-20,20))
+		}
+
+		if SceneTransCount==20 {
+			LoadPlaylist
 		}
 
 		if SceneTransCount!-1 :AddCount SceneTransCount
-		if SceneTransCount>20 {
+		if SceneTransCount>40 {
 
 			PauseMovieToGraph hdximg(ibg)
 
@@ -116,7 +283,14 @@
 			}
 		}
 
-		if SceneCount==60*logotime*4+60 :PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+		if SceneCount==60*logotime*4 {
+			PlayMovieToGraph hdximg(ibg),DX_PLAYTYPE_LOOP
+			PlayMovieToGraph hdximg@(ibg_tx),DX_PLAYTYPE_LOOP
+			PlaySE int(htitlebgm),0.65
+		}
+		if SceneCount>60*logotime*4+20 {
+			AddCount TitleSceneCount
+		}
 
 		AddCount SceneCount
 

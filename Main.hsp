@@ -1,37 +1,62 @@
 
-#include"hsp3_64.as"
-#include"dxlib_x64.as"
-#include"a2d.hsp"
-#include"bass_x64.as"
-#include"hspint64.as"
+// Sapphire x64
+// (c) 2020-2022 puoro. / puoro. Games
 
-#addition"AccKey.hsp"
-#include"NameSpace.hsp"
-#include"mod_BinPkg.hsp"
-#include"mod_dxlibplus.hsp"
-#include"mod_4bithex.hsp"
-#include"mod_wininet64.hsp"
-#include"func_Default.hsp"
-#include"func_Load.hsp"
-#include"func_Sync.hsp"
-#include"func_Background.hsp"
-#include"svc_Layer.hsp"
-#include"svc_Online.hsp"
-#include"scene_Title.hsp"
-#include"scene_MusicSelect.hsp"
-#include"scene_Lobby.hsp"
-#include"scene_Play.hsp"
-#include"scene_Result.hsp"
-#include"scene_KeyConfig.hsp"
-#include"scene_PartnerSelect.hsp"
-#include"scene_Challenge.hsp"
-#include"scene_Setup.hsp"
-#include"scene_Library.hsp"
-#include"scene_Shop.hsp"
+#include"hsp3_64.as"					//HSP3 x64 ランタイム
+#include"dxlib_x64.as"					//DXライブラリモジュール
+#include"a2d.hsp"						//Artlet2Dモジュール
+#include"bass_x64.as"					//Bass Audio Libraryモジュール
+#include"hspint64.as"					//HSPint64 (by inovia)
+
+#addition"AccKey.hsp"					//APIキー、復号化キーなど
+#include"NameSpace.hsp"					//グローバル空間における定数
+#include"mod_BinPkg.hsp"				//Binary Packageモジュール
+#include"mod_dxlibplus.hsp"				//DXライブラリ拡張モジュール
+#include"mod_4bithex.hsp"				//バイナリを文字列に書き換えるモジュール
+#include"mod_wininet64.hsp"				//wininetモジュール
+#include"func_Default.hsp"				//基本的な呼び出し命令・関数
+#include"func_Load.hsp"					//ロード、初期化関連
+#include"func_Sync.hsp"					//WebAPI、セーブデータ同期関連
+#include"func_Background.hsp"			//背景、演出関連
+#include"svc_Layer.hsp"					//システムレイヤー
+#include"svc_Online.hsp"				//通信関連のレイヤー
+#include"scene_Title.hsp"				//タイトル画面
+#include"scene_MusicSelect.hsp"			//曲選択画面
+#include"scene_Lobby.hsp"				//ロビー
+#include"scene_Play.hsp"				//ゲームプレイ
+#include"scene_Result.hsp"				//リザルト
+#include"scene_KeyConfig.hsp"			//キー割り当て設定
+#include"scene_PartnerSelect.hsp"		//パートナー選択
+#include"scene_Challenge.hsp"			//チャレンジモード
+#include"scene_Setup.hsp"				//初期設定、チュートリアル
+#include"scene_Library.hsp"				//ライブラリ
+#include"scene_Shop.hsp"				//ショップ
 
 #packopt hide 1
 
 	gsel 0,-1
+
+	//ランチャーアップデートを検知
+	exist"Data/_cache/update_SapphireLauncher.exe"
+	if strsize!-1 {
+		screen 0,480,120
+		title"puoro. updater"
+		font"MS GOTHIC",16,1
+		pos 20,40:mes"しばらくお待ち下さい・・・"
+		wait 100
+		bcopy"Data/_cache/update_SapphireLauncher.exe","SapphireLauncher.exe"
+		wait 100
+		delete"Data/_cache/update_SapphireLauncher.exe"
+		wait 100
+		exist"SapphireLauncher.exe"
+		if strsize!-1 {
+			wait 100
+			exec"SapphireLauncher.exe"
+		}
+		repeat
+			end
+		loop
+	}
 
 	LoadCoreSettings"core.ini"
 	if GetINIvalue(coreBuf@_load_,"Hash","core")!hash_core {
@@ -60,13 +85,27 @@
 		LoginUserInfo(ID_DECODE)+GetINIvalue(coreBuf@_load_,"PortalSvc","SSL_Decode_3")
 		RegLoginInfo LoginUserInfo
 
-	CheckNetworkConnection
+	CheckNetworkConnection:DrawLoadScreen
 
-	DrawLoadScreen
-
-	LoadTitleImages
-	LoadErrorImages
-	LoadSigninImages
+	WebAPI_SyncProfile:DrawLoadScreen
+	LoadMusicSelectImages:DrawLoadScreen
+	LoadMusicSelectSounds:DrawLoadScreen
+	LoadGamePlayImages:DrawLoadScreen
+	LoadPartnerIcon:DrawLoadScreen
+	InitGamePlaySounds:DrawLoadScreen
+	LoadKeyConfigImages:DrawLoadScreen
+	LoadResultImages:DrawLoadScreen
+	LoadResultSounds:DrawLoadScreen
+	LoadPartnerSelectImages:DrawLoadScreen
+	LoadChallengeModeMap"Data/map-challenge.bin":DrawLoadScreen
+	LoadChallengeImages:DrawLoadScreen
+	LoadLibraryImages:DrawLoadScreen
+	LoadShopImages:DrawLoadScreen
+	LoadShopItems:DrawLoadScreen
+	LoadTitleImages:DrawLoadScreen
+	LoadTitleSounds:DrawLoadScreen
+	LoadErrorImages:DrawLoadScreen
+	LoadSigninImages:DrawLoadScreen
 
 	LoadTitleFonts
 	InitScene ID_TITLE
@@ -125,7 +164,7 @@
 	AddCount CursorHideCount@
 	if CursorImgCount@>57 :CursorImgCount@=0
 
-	if InitLoadFlag@==TRUE&SceneCount@\FPSvalue@==0 {
+	if SceneCount@\FPSvalue@==0 {
 		librec_PlayTime@++
 	}
 

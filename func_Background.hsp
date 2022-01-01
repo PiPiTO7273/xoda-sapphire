@@ -43,4 +43,33 @@
 	loop
 	return
 
+#deffunc DrawMainBackground int _fid
+	dim tmpdrawhandle:tmpdrawhandle=GetActiveGraph()
+	SetDrawScreen hdximg@(itmp_bgscreen)
+	ClearDrawScreen
+
+	SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+	DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg@(ibg_common_0),FALSE
+	SetDrawBlendMode DX_BLENDMODE_SUB,100
+	DrawModiGraph 0,100,640,100,640-100,100+480-100,0,100+480,hdximg@(ibg_tx),TRUE
+	DrawModiGraph 0,BufHeight@-480,640-100,BufHeight@-480+100,640,BufHeight@,0,BufHeight@,hdximg@(ibg_tx),TRUE
+	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+	DrawGraph 0,0,hdximg@(ibg_common_0_layer),TRUE
+	DrawRotaGraph 1666,804,1.0,-0.785375,hdximg_arr_titleanim@(limit((_fid-50)\281,0,280)),TRUE,FALSE
+	SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,100
+	DrawGraph -26-_fid\403,-26+_fid\403,hdximg@(ibg_rep),TRUE
+	DrawGraph -26+403-_fid\403,-26-403+_fid\403,hdximg@(ibg_rep),TRUE
+	repeat 4
+		setease 0,256,ease_linear+ease_loop
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(_fid-5*cnt,30)
+		DrawGraph 1840,22+65*cnt,hdximg@(ibg_tr0),TRUE
+		DrawGraph 814+75*cnt,1011,hdximg@(ibg_tr1),TRUE
+	loop
+	;if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+
+	SetDrawScreen tmpdrawhandle
+	SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
+	DrawGraph 0,0,hdximg@(itmp_bgscreen)
+	return
+
 #global

@@ -178,8 +178,7 @@
 
 		//îwåiÅiìÆâÊÅj
 		if SceneCount<20|DecideCount>20 {
-			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
-			DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+			DrawMainBackground FrameCount@
 		} else {
 			DrawCommonBackground FrameCount@
 		}

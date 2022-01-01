@@ -93,6 +93,7 @@
 	#enum iwindow_frag_confirm
 	#enum iwindow_frag_error
 	#enum ibutton_usefrag
+	#enum ibg_downloading
 
 	//BASS Audio Libraryサンプル、チャンネルハンドル(musicselect)
 	#enum bgmMain	=	0
@@ -259,10 +260,14 @@
 		hdximg(iwindow_frag_confirm)=LoadGraph("Data/layer_musicselect_usefragments_confirm.png")
 		hdximg(iwindow_frag_error)=LoadGraph("Data/layer_musicselect_usefragments_error.png")
 		hdximg(ibutton_usefrag)=LoadGraph("Data/layer_musicselect_usefragments_button.png")
+		hdximg(ibg_downloading)=LoadGraph("Data/layer_downloading.png")
 		hdximg(iwindow_category)=MakeScreen(450,811,TRUE)
 		hdximg(iwindow_songs)=MakeScreen(700,811,TRUE)
 		hdximg(iwindow_ranking)=MakeScreen(350,210,TRUE)
 		hdximg(iwindow_option_obj)=MakeScreen(770,790,TRUE)
+
+		dim hdximg_arr_songselect,35
+		cfunc64v LoadDivGraph,"Data/layer_musicselect_eff.png",35,1,35,1080,180,varptr64(hdximg_arr_songselect)
 	return
 
 	#deffunc LoadMusicSelectSounds
@@ -316,16 +321,11 @@
 		ClearDrawScreen
 
 		//背景動画
-		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
-		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
-		;if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+		DrawCommonBackground FrameCount@
+		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256:DrawGraph 0,0,hdximg@(ibg_scenechange),TRUE
 
 		//プリローダー
 		DrawGraph BufWidth@/2-400/2,BufHeight@/2-400/2,hdximg_arr_preloader_2@(FrameCount@\74),TRUE
-
-		SetDrawBlendMode DX_BLENDMODE_ALPHA,256
-		DrawBox 0,BufHeight@-40,BufWidth@,BufHeight@,$272727,TRUE
-		DrawBox 0,BufHeight@-4,int(double(BufWidth@)/100.0*double(_process)),BufHeight@,$00FFCB,TRUE
 
 		SetDrawScreen DX_SCREEN_BACK
 
@@ -359,52 +359,28 @@
 		dim FirstLoadFlag
 		return
 
-	//ライブラリをスキャン
-	#define global ScanAllPlaylist(%1=0) _ScanAllPlaylist %1
-	#deffunc _ScanAllPlaylist int _flag
+	//プレイリストを読み込み
+	#deffunc LoadPlaylist
+		dim numitem
+		numitem=int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))	//項目数
 
-			//前回読み込んだデータを削除
-			if InitMusicSelectFlag :DeleteMusicSelectResource
-
-			dim numitem
-
-			numitem=int(GetINIvalue(coreBuf@_load_,"Playlist","Reg.Max"))	//項目数
-
-			//変数初期化
 			sdim plitem_Title,64,numitem,3
 			sdim plitem_Artist,64,numitem,3
 			sdim plitem_Source,64,numitem,3
 			sdim plitem_UUID,32,numitem,3
 			sdim plitem_resID,32,numitem,3
 			sdim plitem_Path,64,numitem,3
+			sdim plitem_bgmov,64,numitem,3
 			dim plitem_Level,numitem,3
 			dim plitem_artwork,numitem,3
 			sdim plitem_artworkpath,32,numitem,3
 			dim64 plitem_hsmppreview,numitem,3
 			dim64 plitem_hchpreview,numitem,3
-			dim plitem_mybest_score,numitem,3
-			sdim plitem_mybest_rank,4,numitem,3
-			sdim plitem_mybest_rate,5,numitem,3
-			sdim plitem_mybest_cleartype,16,numitem,3
-			dim plitem_mybest_judge,numitem,3,7
-			sdim plitem_mybest_ratio,8,numitem,3
-			sdim plitem_mybest_gauge,350,numitem,3
-			sdim plitem_ir_name,32,numitem,3,100
-			dim plitem_ir_score,numitem,3,100
-			dim plitem_ir_myrank,numitem,3
-			dim plitem_ir_maxrank,numitem,3
 			ddim plitem_defbpm,numitem,3
 			ddim plitem_pfpoint,numitem,3
 			dim plitem_totalnotes,numitem,3
 			sdim plitem_unlockrawdata,32,numitem,3
-			dim plitem_unlockflag,numitem,3
 			dim plitem_unlocklilly,numitem,3
-			dim numUnlocked
-			dim InitMusicSelectFlag:InitMusicSelectFlag=TRUE
-
-			ddim RegPfPoint@portalsync,1
-			ddim PfPointArr,10
-			dim PfPointArrMax
 
 			exist"Data/_cache/music_playlist_meta.bin"
 			if strsize!-1 {
@@ -414,14 +390,13 @@
 				sdim metaCache
 			}
 
-			//解析
 			repeat numitem
 				sdim tmpstr:tmpstr=GetINIvalue(coreBuf@_load_,"Playlist","ID."+cnt)
 				split tmpstr,",",plitem_UUID(cnt,0),plitem_UUID(cnt,1),plitem_UUID(cnt,2)
 				dim plitemid:plitemid=cnt
 				repeat 3
-					;DrawLoadScreen
 					dim pllevid:pllevid=cnt
+
 					plitem_Path(plitemid,pllevid)="Data/map-"+plitem_UUID(plitemid,pllevid)+".bin"
 					//譜面ファイルの存在を確認
 					exist plitem_Path(plitemid,pllevid)
@@ -430,6 +405,7 @@
 						sdim IRsyncstruct
 						;SetMainWindowText"Loading Records from Portal"
 
+						
 						//メタデータをキャッシュから読み込み
 						if GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Flag")=="TRUE" {
 							;SetMainWindowText"Loading Metadata from cache"
@@ -441,6 +417,7 @@
 							plitem_defbpm(plitemid,pllevid)=double(GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Default.BPM"))
 							plitem_artworkpath(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Artwork")
 							plitem_unlockrawdata(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Unlock")
+							plitem_bgmov(plitemid,pllevid)=GetINIvalue(metaCache,plitem_UUID(plitemid,pllevid),"Background.Video")
 						} else {
 							;SetMainWindowText"Loading Metadata from chart data"
 							//譜面データからメタデータを読み込み
@@ -453,6 +430,7 @@
 							plitem_defbpm(plitemid,pllevid)=double(GetINIvalue(tmpstr,"Metadata","Default.BPM"))
 							plitem_artworkpath(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Artwork")
 							plitem_unlockrawdata(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Unlock")
+							plitem_bgmov(plitemid,pllevid)=GetINIvalue(tmpstr,"Metadata","Background.Video")
 
 							//ノーツ数を取得
 							if GetINIvalue(tmpstr,"Metadata","Total.Notes")=="" {
@@ -480,9 +458,11 @@
 							INISet plitem_UUID(plitemid,pllevid),"Artwork",plitem_artworkpath(plitemid,pllevid)
 							INISet plitem_UUID(plitemid,pllevid),"Unlock",plitem_unlockrawdata(plitemid,pllevid)
 							INISet plitem_UUID(plitemid,pllevid),"Total.Notes",str(plitem_totalnotes(plitemid,pllevid))
+							INISet plitem_UUID(plitemid,pllevid),"Background.Video",str(plitem_bgmov(plitemid,pllevid))
 
 						}
-
+						
+						
 						;SetMainWindowText"Loading Artwork"
 						dim tmpint:tmpint=LoadGraph("Data/"+plitem_resID(plitemid,pllevid)+"/"+plitem_artworkpath(plitemid,pllevid))
 						if tmpint<=0 :tmpint=hdximg(iIcon_Artwork_Dummy)
@@ -495,6 +475,40 @@
 						plitem_hsmppreview(plitemid,pllevid)=cfunc64(RET_INT64,BASS_SampleLoad,TRUE,varptr64(tmpstr),0,varsize(tmpstr),32,0)
 						plitem_hchpreview(plitemid,pllevid)=cfunc64(RET_INT64,BASS_SampleGetChannel,plitem_hsmppreview(plitemid,pllevid),0)
 						sdim tmpstr
+					}
+				loop
+				UpdateMusicSelectPreloader 0,0
+			loop
+		return
+
+	//ライブラリをスキャン
+	#define global ScanAllPlaylist(%1=0) _ScanAllPlaylist %1
+	#deffunc _ScanAllPlaylist int _flag
+
+			//変数初期化
+			dim plitem_mybest_score,numitem,3
+			sdim plitem_mybest_rank,4,numitem,3
+			sdim plitem_mybest_rate,5,numitem,3
+			sdim plitem_mybest_cleartype,16,numitem,3
+			dim plitem_mybest_judge,numitem,3,7
+			sdim plitem_mybest_ratio,8,numitem,3
+			sdim plitem_mybest_gauge,350,numitem,3
+			sdim plitem_ir_name,32,numitem,3,100
+			dim plitem_ir_score,numitem,3,100
+			dim plitem_ir_myrank,numitem,3
+			dim plitem_ir_maxrank,numitem,3
+			dim plitem_unlockflag,numitem,3
+			dim numUnlocked
+			ddim RegPfPoint@portalsync,1
+			ddim PfPointArr,10
+			dim PfPointArrMax
+
+			//解析
+			repeat numitem
+				dim plitemid:plitemid=cnt
+				repeat 3
+					;DrawLoadScreen
+					dim pllevid:pllevid=cnt
 
 						//アンロック状況
 						;SetMainWindowText"Checking unlock information"
@@ -566,17 +580,18 @@
 						//総合能力値を計算
 						PfPointArr(PfPointArrMax)=plitem_pfpoint(plitemid,pllevid)
 						PfPointArrMax++
-					}
-					if rnd(4)==0 {
-						if _flag=IRSYNC_FULLSCREEN_PRELOADER :DrawLoadScreen
-						UpdateMusicSelectPreloader int(50+50.0/double(numitem*3)*double(plitemid*3+pllevid)),_flag
-					}
+					;if rnd(4)==0 {
+					;}
 				loop
+				DispLogMsg@="Now loading Music Select items... ["+(plitemid+1)+"/"+numitem+"]"
+				if _flag=IRSYNC_FULLSCREEN_PRELOADER&rnd(4)==0 :DrawLoadScreen
+				UpdateMusicSelectPreloader int(50+50.0/double(numitem*3)*double(plitemid*3+pllevid)),_flag
 
 				//DB出力
 				;INIInit"core.ini"
 				;INISet"Recommand","ID."+plitemid,plitem_Title(plitemid,0)+","+plitem_Artist(plitemid,0)
 			loop
+			DispLogMsg@=""
 
 			//総合能力値の算出
 			sortval PfPointArr,1
@@ -665,7 +680,7 @@
 			dim JumpSceneCount
 			dim JumpSceneID
 			ddim PreviewBPM,1
-			dim PreviewPosY
+			ddim PreviewPosY,1
 			dim SceneTransID
 			dim SkipStartDarkFlag
 			dim UnlockDialogID
@@ -676,6 +691,13 @@
 			dim TutorialWindowCount
 			dim usefragmentWindowID
 			dim usefragmentWindowCount
+			dim downloadfinishFlag
+			sdim downloadcueURL
+			sdim downloadcueName
+			dim downloadcueSize
+			ddim downloadcueProg,1
+			dim downloadcueBuffer
+			dim downloadcueCount
 			TutorialWindowID=-1
 			DecideCount=-1
 
@@ -806,28 +828,6 @@
 				}
 			}
 
-			//楽曲選択時にランキング解析＆反映
-			if SongChangeCount==0 {
-				//IR同期
-				plitemid=c(ActiveColumnID(ID_SONGS),CurSelLev)
-				pllevid=lv(ActiveColumnID(ID_SONGS),CurSelLev)
-
-				//世界ランキング
-				repeat 100
-					sdim tmpstr:tmpstr=GetINIvalue(IRrankbuf,"SAVEDATA",plitem_UUID(plitemid,pllevid)+".RANK#"+(cnt+1))
-					split tmpstr,",",plitem_ir_name(plitemid,pllevid,cnt),tmpstr(1)
-					plitem_ir_score(plitemid,pllevid,cnt)=int(tmpstr(1))
-				loop
-				//自分の順位を取得
-				plitem_ir_myrank(plitemid,pllevid)=-1
-				repeat
-					sdim tmpstr:tmpstr=GetINIvalue(IRrankbuf,"SAVEDATA",plitem_UUID(plitemid,pllevid)+".RANK#"+(cnt+1))
-					split tmpstr,",",tmpstr(1),tmpstr(2)
-					if tmpstr(1)==LoginUserInfo@(ID_NAME@) :plitem_ir_myrank(plitemid,pllevid)=cnt
-					if tmpstr(1)==""&tmpstr(2)=="" :plitem_ir_maxrank(plitemid,pllevid)=cnt:break
-				loop
-			}
-
 			repeat 3
 				if plitem_UUID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))=="*"|plitem_UUID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))=="" {
 					switch CurSelLev
@@ -842,9 +842,7 @@
 			musicselect_LevelID@=CurSelLev
 
 		//背景動画
-			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
-			DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
-			;if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+		DrawMainBackground FrameCount@
 
 		//----以下、シーン別レイヤー-----
 		SetDrawScreen hdximg(ilayer_all)
@@ -1009,6 +1007,12 @@
 					DrawExtendGraph DrawPosX,DrawPosY,DrawPosX+EaseWidth,DrawPosY+EaseWidth,hdximg(iIcon_Artwork_Locked),FALSE
 				}
 				
+			}
+
+		//エフェクト
+			if SongChangeCount<35 {
+				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
+				DrawGraph 840,206,hdximg_arr_songselect(SongChangeCount),TRUE
 			}
 
 		//詳細
@@ -1214,6 +1218,9 @@
 							PlayMovieToGraph hdximg(ibg_Load),DX_PLAYTYPE_LOOP
 							DecideCount=0
 							SceneTransID=ID_TRANS_PLAY
+
+							;existいろいろ～～
+							downloadfinishFlag=FALSE
 						} else {
 							DrawGraph 1620,960,hdximg(ibutton_start_1),TRUE
 						}
@@ -1225,6 +1232,7 @@
 					if insquare(CursorPosX,CursorPosY,1620,960,1620+280,960+64)&(usefragmentWindowID==0) {
 						if (MouseInput&MOUSE_INPUT_LEFT)&DecideCount==-1 {
 							DrawGraph 1620,960,hdximg(ibutton_start_2),TRUE
+							PlaySE int(hbasschannel(sndDecide)),1.0
 							usefragmentWindowID=ID_FRAGMENTS_CONFIRM
 							usefragmentWindowCount=0
 						} else {
@@ -1266,7 +1274,7 @@
 							DrawGraph 1254,826,hdximg(ibutton_normal_2),TRUE
 						} else {
 							if insquare(CursorPosX,CursorPosY,1254,826,1254+150,826+32)&(usefragmentWindowID==0) {
-								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=0:PushButtonFlag=TRUE
+								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=0:PushButtonFlag=TRUE:SongChangeCount=0
 								DrawGraph 1254,826,hdximg(ibutton_normal_1),TRUE
 							} else {
 								DrawGraph 1254,826,hdximg(ibutton_normal_0),TRUE
@@ -1278,7 +1286,7 @@
 							DrawGraph 1254,866,hdximg(ibutton_hard_2),TRUE
 						} else {
 							if insquare(CursorPosX,CursorPosY,1254,866,1254+150,866+32)&(usefragmentWindowID==0) {
-								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=1:PushButtonFlag=TRUE
+								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=1:PushButtonFlag=TRUE:SongChangeCount=0
 								DrawGraph 1254,866,hdximg(ibutton_hard_1),TRUE
 							} else {
 								DrawGraph 1254,866,hdximg(ibutton_hard_0),TRUE
@@ -1290,7 +1298,7 @@
 							DrawGraph 1254,906,hdximg(ibutton_chaos_2),TRUE
 						} else {
 							if insquare(CursorPosX,CursorPosY,1254,906,1254+150,906+32)&(usefragmentWindowID==0) {
-								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=2:PushButtonFlag=TRUE
+								if MouseInput&MOUSE_INPUT_LEFT :CurSelLev=2:PushButtonFlag=TRUE:SongChangeCount=0
 								DrawGraph 1254,906,hdximg(ibutton_chaos_1),TRUE
 							} else {
 								DrawGraph 1254,906,hdximg(ibutton_chaos_0),TRUE
@@ -1541,14 +1549,14 @@
 			swend
 
 		//リロード
-		if insquare(CursorPosX,CursorPosY,1789,63,1789+64,63+64)&(OptionWindowFlag==0|OptionWindowFlag==2) {
+		if insquare(CursorPosX,CursorPosY,1789,63,1789+64,63+64)&OptionWindowFlag==0 {
 			SetDrawBlendMode DX_BLENDMODE_ALPHA,50
 			DrawBox 1789,63,1789+64,63+64,$000000,TRUE
 			if (MouseInput&MOUSE_INPUT_LEFT)==TRUE&(bfMouseInput&MOUSE_INPUT_LEFT)==FALSE {
 				PlaySE int(hbasschannel(sndDecide)),1.0
 				PlaySE int(hcommonsech@(vocWait@)),1.0
 				cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,d2f(0.65)
-				DeleteMusicSelectResource
+				cfunc64v BASS_ChannelPause,plitem_hchpreview(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
 				IRsync IRSYNC_WITHOUT_PRELOADER
 				ScanAllPlaylist IRSYNC_WITHOUT_PRELOADER
 			}
@@ -1640,6 +1648,49 @@
 			EasePosX=BufWidth@/2-EaseWidth/2:EasePosY=BufHeight@/2-EaseHeight/2
 			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg(ibg_Load),TRUE
 
+			if DecideCount==0 {
+				//不足ファイルをチェック
+				tmpstr=plitem_bgmov(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
+				dim exist_generalmov:dim exist_onlymov
+				exist"Data/res_movie_"+tmpstr+".bin"
+				exist_generalmov=strsize
+				exist"Data/"+plitem_resID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))+"/"+tmpstr
+				exist_onlymov=strsize
+				if exist_generalmov==-1&exist_onlymov==-1 {
+					downloadfinishFlag=FALSE
+					downloadcueName="Data/"+plitem_resID(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))+"/"+tmpstr
+					downloadcueURL=GetINIvalue(coredlBuf@,"Download",downloadcueName)
+					if downloadcueURL=="" {
+						downloadcueName="Data/res_movie_"+tmpstr+".bin"
+						downloadcueURL=GetINIvalue(coredlBuf@,"Download",downloadcueName)
+					}
+					downloadcueSize=int(GetINIvalue(coredlBuf@,"Download","#SIZE#"+downloadcueName))
+				}
+			}
+			if DecideCount==50 {
+				if exist_generalmov==-1&exist_onlymov==-1 {
+					sdim tmpdownloadbuf
+					PlaySE int(hcommonsech@(vocDownload@)),1.0
+					downloadcueBuffer=1024*1024
+					WebAPI_Get_bin_async_A downloadcueURL,downloadcueBuffer
+				} else {
+					downloadfinishFlag=TRUE
+				}
+			}
+			if DecideCount>50&downloadfinishFlag==FALSE {
+				dim tmpdownloadsize
+				WebAPI_Get_bin_async_LOOP tmpdownloadbuf,downloadcueBuffer
+				tmpdownloadsize=stat
+				if tmpdownloadsize==-1 {
+					bsave downloadcueName,tmpdownloadbuf
+					sdim tmpdownloadbuf
+					downloadfinishFlag=TRUE
+				} else {
+					downloadcueProg=double(tmpdownloadsize)/double(downloadcueSize)*100.0
+				}
+				AddCount downloadcueCount
+			}
+
 			if DecideCount>10 {
 				//背景
 				setease 0,256,ease_cubic_out
@@ -1676,7 +1727,7 @@
 				//画像
 				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(DecideCount-35,15)
 				EasePosX=820
-				DrawExtendGraph EasePosX,290,EasePosX+280,290+280,plitem_artwork(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),TRUE
+				DrawExtendGraph EasePosX,290,EasePosX+280,290+280,plitem_artwork(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev)),FALSE
 
 				//ナビゲーション
 				SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
@@ -1690,6 +1741,25 @@
 
 				setease 0.65,0,ease_linear
 				cfunc64v BASS_ChannelSetAttribute,hcommonchannel@,BASS_ATTRIB_VOL,d2f(geteasef(DecideCount-(10+25+60*2+30),20))
+
+				//ダウンロード中表示
+				if downloadfinishFlag==FALSE&exist_generalmov==-1&exist_onlymov==-1 {
+					if DecideCount>30 {
+						setease 256,100,ease_linear+ease_loop
+						EaseAlpha=getease(downloadcueCount,30)
+					} else {
+						setease 0,256,ease_linear
+						EaseAlpha=getease(DecideCount-20,30)
+					}
+					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,EaseAlpha
+					setease 0,-BufWidth@,ease_linear
+					EasePosX=getease(SceneCount\480,480)
+					DrawGraph EasePosX,900,hdximg(ibg_downloading),TRUE
+					DrawGraph EasePosX+BufWidth@,900,hdximg(ibg_downloading),TRUE
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,EaseAlpha
+					DrawStringXAlignRightToHandle 1093+EasePosX,914,"\""+downloadcueName+"\"をダウンロード中・・・["+strf("%.2f",downloadcueProg)+"%]",667,$000000,hdxfont(fNSCJM24)
+					DrawStringXAlignRightToHandle 1093+EasePosX+BufWidth@,914,"\""+downloadcueName+"\"をダウンロード中・・・["+strf("%.2f",downloadcueProg)+"%]",667,$000000,hdxfont(fNSCJM24)
+				}
 			}
 		}
 
@@ -1856,11 +1926,11 @@
 					SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(OptionWindowCount,20)
 					DrawGraph 0,0,hdximg(ibg_lanepreview),TRUE
 					PreviewBPM=plitem_defbpm(c(ActiveColumnID(ID_SONGS),CurSelLev),lv(ActiveColumnID(ID_SONGS),CurSelLev))
-					if OptionWindowCount==0 :PreviewPosY=0
-					PreviewPosY+1000.0/FPSvalue@*PreviewBPM/400.0*AddSpeed@
-					if PreviewPosY>864+(60000.0/PreviewBPM)*4*(PreviewBPM/400.0)*AddSpeed@ :PreviewPosY=0
+					if OptionWindowCount==0 :PreviewPosY=0.0
+					PreviewPosY+1000.0/double(FPSvalue@)*double(PreviewBPM)/400.0*AddSpeed@
+					if PreviewPosY>864.0+(60000.0/double(PreviewBPM))*4.0*(double(PreviewBPM)/400.0)*AddSpeed@ :PreviewPosY=0.0
 					repeat 4
-						DrawPosY=int(PreviewPosY-(60000.0/PreviewBPM)*double(cnt)*(PreviewBPM/400.0)*AddSpeed@)
+						DrawPosY=int(double(PreviewPosY)-(60000.0/double(PreviewBPM))*double(cnt)*(PreviewBPM/400.0)*AddSpeed@)
 						if DrawPosY>864-32 :continue
 						DrawGraph 418+90*cnt,DrawPosY,hdximg(inote_preview),TRUE
 					loop
@@ -2030,26 +2100,44 @@
 			SceneTransID=FALSE
 		}
 
+		//楽曲選択時にランキング解析＆反映
+		if SongChangeCount==0 {
+			//IR同期
+			plitemid=c(ActiveColumnID(ID_SONGS),CurSelLev)
+			pllevid=lv(ActiveColumnID(ID_SONGS),CurSelLev)
+
+			//世界ランキング
+			repeat 100
+				sdim tmpstr:tmpstr=GetINIvalue(IRrankbuf,"SAVEDATA",plitem_UUID(plitemid,pllevid)+".RANK#"+(cnt+1))
+				split tmpstr,",",plitem_ir_name(plitemid,pllevid,cnt),tmpstr(1)
+				plitem_ir_score(plitemid,pllevid,cnt)=int(tmpstr(1))
+			loop
+			//自分の順位を取得
+			plitem_ir_myrank(plitemid,pllevid)=-1
+			repeat
+				sdim tmpstr:tmpstr=GetINIvalue(IRrankbuf,"SAVEDATA",plitem_UUID(plitemid,pllevid)+".RANK#"+(cnt+1))
+				split tmpstr,",",tmpstr(1),tmpstr(2)
+				if tmpstr(1)==LoginUserInfo@(ID_NAME@) :plitem_ir_myrank(plitemid,pllevid)=cnt
+				if tmpstr(1)==""&tmpstr(2)=="" :plitem_ir_maxrank(plitemid,pllevid)=cnt:break
+			loop
+		}
+
 		//各種カウンタ
 		AddCount SceneCount
 		AddCount SongChangeCount
 		AddCount CatChangeCount
 		bfMouseInput=MouseInput
-		if DecideCount!-1 :AddCount DecideCount
+		if DecideCount!-1 {
+			if SceneTransID==ID_TRANS_PLAY {
+				if downloadfinishFlag==TRUE :AddCount DecideCount:else {
+					if DecideCount<(10+25+60*2+30) :AddCount DecideCount
+				}
+			} else {
+				AddCount DecideCount
+			}
+		}
 		if MouseInput&MOUSE_INPUT_LEFT :AddCount LClickKeepCount:else:LClickKeepCount=0
 		AddCount usefragmentWindowCount
 
 	return
-
-	#deffunc DeleteMusicSelectResource
-		repeat numitem
-			plitemid=cnt
-			repeat 3
-				pllevid=cnt
-				DeleteGraph plitem_artwork(plitemid,pllevid)
-				cfunc64v BASS_ChannelFree,plitem_hchpreview(plitemid,pllevid)
-				cfunc64v BASS_SampleFree,plitem_hsmppreview(plitemid,pllevid)
-			loop
-		loop
-		return
 #global

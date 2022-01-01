@@ -96,13 +96,6 @@
 	#enum OBJ_holdSTART
 	#enum OBJ_holdEND
 
-	//判定幅
-	#const jWid_Excellent	40
-	#const jWid_Great		80
-	#const jWid_Good		120
-	#const jWid_Bad		160
-	#const jWid_Miss		240
-
 	//判定の種類
 	#enum jres_Unknown		=	0
 	#enum jres_Excellent
@@ -431,8 +424,11 @@
 						if hsmpSndDB(hLoadCnt)==0 :logmes""+SoundDBFileName(hLoadCnt)+"\nError Code : "+BASS_ErrorGetCode()
 						hSndDB(hLoadCnt)=cfunc64(RET_INT64,BASS_SampleGetChannel,hsmpSndDB(hLoadCnt),TRUE)
 						cfunc64v BASS_ChannelSetAttribute,hSndDB(hLoadCnt),BASS_ATTRIB_VOL,d2f(0.7)
-						hLoadCnt++
+					} else {
+						//dummy
+						hSndDB(hLoadCnt)=int64(0)
 					}
+					hLoadCnt++
 					if cnt\100==0 :DrawLoadScreen
 				loop
 				binpkg_Free
@@ -581,6 +577,31 @@
 			SetDrawScreen hdximg(ihold_r_0)
 				DrawGraph 0,cnt*90,hdximg(ihold_org_r),TRUE
 		loop
+
+		//判定幅設定
+		switch getpath(chartMetaInfo(META_DIFFICULTY),16)
+			case"normal"
+				jWid_Excellent=40
+				jWid_Great=80
+				jWid_Good=120
+				jWid_Bad=160
+				jWid_Miss=240
+			swbreak
+			case"hard"
+				jWid_Excellent=30
+				jWid_Great=60
+				jWid_Good=100
+				jWid_Bad=120
+				jWid_Miss=200
+			swbreak
+			case"chaos"
+				jWid_Excellent=20
+				jWid_Great=40
+				jWid_Good=80
+				jWid_Bad=120
+				jWid_Miss=160
+			swbreak
+		swend
 
 	return
 
@@ -796,7 +817,7 @@
 					LaneEffCount(ProgLaneID)=0
 
 					if KeyAssignID(ProgLaneID)!-1 {
-						if ObjSoundID(KeyAssignID(ProgLaneID))!-1 {
+						if ObjSoundID(KeyAssignID(ProgLaneID))!-1&hLoadCnt>ObjSoundID(KeyAssignID(ProgLaneID)) {
 							cfunc64v BASS_ChannelSetPosition,hSndDB(ObjSoundID(KeyAssignID(ProgLaneID))),0,0,0
 							cfunc64v BASS_ChannelPlay,hSndDB(ObjSoundID(KeyAssignID(ProgLaneID)))
 						}
@@ -1020,6 +1041,23 @@
 					DrawExtendGraph JudgeresPosX(0),JudgeresPosY(0),JudgeresPosX(1),JudgeresPosY(1),hdximg(ijudge_miss),TRUE
 				swbreak
 			swend
+			if ResJudge!jres_Excellent&ResJudge!jres_Miss&JudgeAfCnt<30 {
+				if JudgeAfCnt<25 {
+					setease 0,256,ease_linear
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(judgeAfCnt,5)
+				} else {
+					setease 256,0,ease_linear
+					SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(judgeAfCnt-25,5)
+				}
+				if judgeSign<0 {
+					//early
+					DrawStringToHandle 1100,683,"EARLY "+str(judgeSign)+"ms",$FF00FF,hdxfont(fPS20)
+				}
+				if judgeSign>0 {
+					//late
+					DrawStringToHandle 1100,683,"LATE +"+str(judgeSign)+"ms",$00FFFF,hdxfont(fPS20)
+				}
+			}
 
 		//バースト
 			if burstCount!-1&drawbonusFlag@==TRUE {
@@ -1527,10 +1565,10 @@
 			ParticleEffImg(ProgLaneID)=rnd(8)
 			if ResJudge!jres_Excellent {
 				if ObjTiming(NearNoteID(ProgLaneID))-(curCount+JudgeOffset@)>0 {
-					judgeSign=-1
+					judgeSign=-1*abs(NearNoteGap(ProgLaneID))
 					numEarly++
 				} else {
-					judgeSign=1
+					judgeSign=1*abs(NearNoteGap(ProgLaneID))
 					numLate++
 				}
 			}
@@ -1676,7 +1714,7 @@
 				numLate=int(MybestRecordBuf(ID_REC_LATE))
 				maxcombo=int(MybestRecordBuf(ID_REC_MAXCOMBO))
 			} else :UpdateScoreFlag=TRUE
-				sdim HTTPpostdata
+			sdim HTTPpostdata
 				HTTPpostdata=""
 				HTTPpostdata+"key="+GetINIvalue(coreBuf@_load_,"PortalSvc","APIkey_SendNewRecord")+"&"
 				HTTPpostdata+"id="+GetChartInfo(META_UUID)+"&"
@@ -1786,10 +1824,12 @@
 
 			//能力値
 			if double(MybestRecordBuf(ID_REC_AP))>curPfPoint {
-				HTTPpostdata+"ability="+MybestRecordBuf(ID_REC_AP)
+				HTTPpostdata+"ability="+str(MybestRecordBuf(ID_REC_AP))
 			} else {
-				HTTPpostdata+"ability="+curPfPoint
+				HTTPpostdata+"ability="+strf("%.2f",curPfPoint)
 			}
+
+			FillfromFirstNullToAll HTTPpostdata
 
 			//自己ベストを更新している場合、送信
 			sdim tmpsendstr,strlen(HTTPpostdata)

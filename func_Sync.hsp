@@ -501,7 +501,6 @@
 		if OfflinePass@ :return
 		if RegName@portalsync=="" :return
 		if RegAuth@portalsync=="" :return
-		if InitLoadFlag@==FALSE :return
 		CheckNetworkConnection
 		WebAPI_mSendProfile_Init
 		WebAPI_mSendProfile_Reg"XODA.LEVEL",str(RegLev@portalsync)

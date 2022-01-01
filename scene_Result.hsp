@@ -55,6 +55,15 @@
 	#enum bgmResult_0	=	0
 	#enum bgmResult_1
 	#enum sndImpact
+	#enum sndClear_0
+	#enum sndClear_1
+	#enum sndClear_2
+	#enum sndClear_3
+	#enum sndClear_4
+	#enum sndFailed_0
+	#enum sndFailed_1
+	#enum sndFailed_2
+	#enum sndBuzz
 
 	#deffunc LoadResultImages
 		;DrawLoadScreen
@@ -122,6 +131,15 @@
 		LoadBASSsample"Data/bgm_Result_0.ogg",hbasschannel(bgmResult_0),hbasssample(bgmResult_0),BASS_SAMPLE_LOOP
 		LoadBASSsample"Data/bgm_Result_1.ogg",hbasschannel(bgmResult_1),hbasssample(bgmResult_1),BASS_SAMPLE_LOOP
 		LoadBASSsample"Data/snd_Impact.wav",hbasschannel(sndImpact),hbasssample(sndImpact),0
+		LoadBASSsample"Data/voc_Clear_0.wav",hbasschannel(sndClear_0),hbasssample(sndClear_0),0
+		LoadBASSsample"Data/voc_Clear_1.wav",hbasschannel(sndClear_1),hbasssample(sndClear_1),0
+		LoadBASSsample"Data/voc_Clear_2.wav",hbasschannel(sndClear_2),hbasssample(sndClear_2),0
+		LoadBASSsample"Data/voc_Clear_3.wav",hbasschannel(sndClear_3),hbasssample(sndClear_3),0
+		LoadBASSsample"Data/voc_Clear_4.wav",hbasschannel(sndClear_4),hbasssample(sndClear_4),0
+		LoadBASSsample"Data/voc_Failed_0.wav",hbasschannel(sndFailed_0),hbasssample(sndFailed_0),0
+		LoadBASSsample"Data/voc_Failed_1.wav",hbasschannel(sndFailed_1),hbasssample(sndFailed_1),0
+		LoadBASSsample"Data/voc_Failed_2.wav",hbasschannel(sndFailed_2),hbasssample(sndFailed_2),0
+		LoadBASSsample"Data/voc_Buzz.wav",hbasschannel(sndBuzz),hbasssample(sndBuzz),0
 	return
 
 	#deffunc StartResult int _itemid,int _levid
@@ -587,6 +605,18 @@
 			}
 		}
 
+		if SceneCount==10 {
+			if OldClearType@_play_!"FAILED" :PlaySE int(hbasschannel(sndBuzz)),0.5
+		}
+		if SceneCount==20 {
+			if OldClearType@_play_!"FAILED" {
+				//ÉNÉäÉA
+				PlaySE int(hbasschannel(sndClear_0+rnd(5))),1.0
+			} else {
+				//é∏îs
+				PlaySE int(hbasschannel(sndFailed_0+rnd(3))),1.0
+			}
+		}
 		if SceneCount==35 :PlaySE int(hbasschannel@_musicselect_(sndText@_musicselect_)),0.4
 		if SceneCount==60 :PlaySE int(hbasschannel(sndImpact)),0.9
 

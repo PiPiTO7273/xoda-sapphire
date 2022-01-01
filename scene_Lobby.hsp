@@ -172,9 +172,7 @@
 		PushButtonFlag=FALSE
 
 		//背景（動画）
-		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
-		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
-		;if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+		DrawMainBackground FrameCount@
 
 		//項目更新
 			SetDrawScreen hdximg(iwindow)
@@ -351,6 +349,23 @@
 			}
 		}
 
+		//シーンチェンジ
+		if DecideFlag==TRUE&(ActiveItemID==0|ActiveItemID==3) {
+			SetDrawScreen hdximg@(iscenechange)
+			DrawCommonBackground FrameCount@
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256:DrawGraph 0,0,hdximg@(ibg_scenechange),TRUE
+			SetDrawScreen hdximg@(iScene)
+
+			setease 1.2,1,ease_cubic_out
+			dim EasePosX:dim EasePosY:dim EaseWidth:dim EaseHeight
+			EaseWidth=int(double(BufWidth@)*geteasef(DecideCount,25))
+			EaseHeight=int(double(BufHeight@)*geteasef(DecideCount,25))
+			EasePosX=BufWidth@/2-EaseWidth/2:EasePosY=BufHeight@/2-EaseHeight/2
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,25)
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg@(iscenechange),TRUE
+		}
+
 		//プリローダー
 		if SceneCount>40 {
 			setease 400,0,ease_cubic_out
@@ -361,29 +376,6 @@
 			EaseWidth=getease(DecideCount,20)
 		}
 		DrawExtendGraph BufWidth@/2-EaseWidth/2,BufHeight@/2-EaseWidth/2,BufWidth@/2+EaseWidth/2,BufHeight@/2+EaseWidth/2,hdximg_arr_preloader_2@(FrameCount@\74),TRUE
-
-		//ロード処理
-			if InitLoadFlag@==FALSE {
-				switch SceneCount-20
-					case 0:WebAPI_SyncProfile:swbreak
-					case 1:LoadMusicSelectImages:swbreak
-					case 2:LoadMusicSelectSounds:swbreak
-					case 3:LoadGamePlayImages:swbreak
-					case 4:LoadPartnerIcon:swbreak
-					case 5:InitGamePlaySounds:swbreak
-					case 6:LoadKeyConfigImages:swbreak
-					case 7:LoadResultImages:swbreak
-					case 8:LoadResultSounds:swbreak
-					case 9:LoadPartnerSelectImages:swbreak
-					case 10:LoadChallengeModeMap"Data/map-challenge.bin":swbreak
-					case 11:LoadChallengeImages:swbreak
-					case 12:LoadLibraryImages:swbreak
-					case 13:LoadShopImages:swbreak
-					case 14:LoadShopItems:swbreak
-					case 15:librec_logincount@++:swbreak
-					case 16:InitLoadFlag@=TRUE:swbreak
-				swend
-			}
 
 		//カウンタ
 		AddCount OnScrollCount

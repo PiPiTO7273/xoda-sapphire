@@ -109,9 +109,7 @@
 		CursorPosY=int(double(CursorPosY@)*(double(BufHeight@)/double(DispHeight@)))
 
 		//背景（動画）
-		SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
-		DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
-		;if LowQuaFlag@==FALSE :GraphFilterRectBltS hdximg@(iScene),hdximg@(iScene),0,0,BufWidth@,BufHeight@,0,0,DX_GRAPH_FILTER_GAUSS,32,800
+		DrawMainBackground FrameCount@
 
 		SetDrawScreen hdximg(ilayer_all)
 		ClearDrawScreen
@@ -341,6 +339,23 @@
 
 		//ステータス
 		DrawDefaultStatus"Sapphire - Partner Select",hdxfont(fPS16),TRUE,CursorPosX,CursorPosY
+
+		//シーンチェンジ
+		if DecideCount!-1 {
+			SetDrawScreen hdximg@(iscenechange)
+			DrawCommonBackground FrameCount@
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256:DrawGraph 0,0,hdximg@(ibg_scenechange),TRUE
+			SetDrawScreen hdximg@(iScene)
+
+			setease 1.2,1,ease_cubic_out
+			dim EasePosX:dim EasePosY:dim EaseWidth:dim EaseHeight
+			EaseWidth=int(double(BufWidth@)*geteasef(DecideCount,20))
+			EaseHeight=int(double(BufHeight@)*geteasef(DecideCount,20))
+			EasePosX=BufWidth@/2-EaseWidth/2:EasePosY=BufHeight@/2-EaseHeight/2
+			setease 0,256,ease_cubic_out
+			SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,getease(DecideCount,20)
+			DrawExtendGraph EasePosX,EasePosY,EasePosX+EaseWidth,EasePosY+EaseHeight,hdximg@(iscenechange),TRUE
+		}
 
 		//プリローダー
 		if DecideCount!-1 {

@@ -20,6 +20,12 @@
 		noteload"Data/res_scene_0.bin"
 		coreBuf+"\n"+coresysBuf
 
+		//ダウンロード関連
+		exist"Data/res_scene_1.bin"
+		sdim coredlBuf@,strsize
+		notesel coredlBuf@
+		noteload"Data/res_scene_1.bin"
+
 		//キーの置き換え
 		if GetINIvalue(coreBuf,"Hash","acckey")=="%_keymac%" {
 			strrep coreBuf,"acckey=%_keymac%","acckey="+_keymac_acckey@
@@ -170,6 +176,7 @@
 		LoadBASSsample"Data/voc_PartnerSelect.wav",hcommonsech@(vocPartnerSelect@),hcommonsesmp@(vocPartnerSelect@),NULL
 		LoadBASSsample"Data/voc_Wait.wav",hcommonsech@(vocWait@),hcommonsesmp@(vocWait@),NULL
 		LoadBASSsample"Data/voc_Buy.wav",hcommonsech@(vocBuy@),hcommonsesmp@(vocBuy@),NULL
+		LoadBASSsample"Data/voc_Download.wav",hcommonsech@(vocDownload@),hcommonsesmp@(vocDownload@),NULL
 	return
 
 	//グローバル空間のグラフィックを作成
@@ -191,6 +198,7 @@
 		loop
 		hdximg@(ibg_common_0)=LoadGraph("Data/bg_Main.ogv")
 		hdximg@(ibg_common_1)=LoadGraph("Data/bg_Load.ogv")
+		hdximg@(ibg_common_0_layer)=LoadGraph("Data/bg_Layer.png")
 		hdximg@(ibutton_backscene)=LoadGraph("Data/layer_common_back.png")
 		hdximg@(ibutton_gameexit)=LoadGraph("Data/layer_common_exit.png")
 		hdximg@(iStatus_Fragment)=LoadGraph("Data/Icon_Status_Fragment.png")
@@ -198,6 +206,17 @@
 		hdximg@(iStatus_Lilly)=LoadGraph("Data/Icon_Status_Lilly.png")
 		hdximg@(ishape_commonbg)=LoadGraph("Data/layer_common_bg.png")
 		hdximg@(ibg_dummyscene)=LoadGraph("Data/bg_Dummy.png")
+		hdximg@(iscenechange)=MakeScreen(BufWidth@,BufHeight@,TRUE)
+		hdximg@(ibg_scenechange)=LoadGraph("Data/common_SceneChange.png")
+		hdximg@(ibg_rep)=LoadGraph("Data/layer_bg_rep.png")
+		hdximg@(ibg_tr0)=LoadGraph("Data/layer_bg_tr0.png")
+		hdximg@(ibg_tr1)=LoadGraph("Data/layer_bg_tr1.png")
+		hdximg@(ibg_tx)=LoadGraph("Data/bg_Layer_tx.mp4")
+		hdximg@(itmp_bgscreen)=MakeScreen(BufWidth@,BufHeight@,FALSE)
+		dim hdximg_arr_titleanim@,281
+		repeat 281
+			hdximg_arr_titleanim@(cnt)=LoadGraph("Data/res_title_0/a"+strf("%04d",cnt)+".png")
+		loop
 	return
 
 	//グローバル空間の変数を初期化
@@ -208,10 +227,10 @@
 		dim WheelVal@
 		dim TotalScrollVal@
 		dim FPSawaitLoop@
-		dim InitLoadFlag@
 		dim FatalErrorFlag@
 		dim DebugStringFlag@
 		sdim ExtraPlayInfo@
+		sdim DispLogMsg@
 	return
 
 	//シーンを初期化

@@ -268,6 +268,22 @@
 		}
 
 		AddCount SceneCount
+
+	#deffunc FillfromFirstNullToAll var _buf
+		dim startpos:startpos=-1
+		repeat varsize(_buf)
+		if peek(_buf,cnt)==0 :startpos=cnt:break
+		loop
+		if startpos==-1 :dialog"?":return
+		repeat varsize(_buf)-startpos
+		poke _buf,startpos+cnt,0
+		loop
+		size=varsize(_buf)
+		sdim tmpbk,size
+		memcpy tmpbk,_buf,varsize(_buf)
+		sdim _buf,startpos
+		memcpy _buf,tmpbk,startpos
+		return
 		
 		return
 #global

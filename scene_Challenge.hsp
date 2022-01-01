@@ -18,6 +18,7 @@
 	#enum iticketpay_error0
 	#enum iticketpay_error1
 	#enum iticketpay_error2
+	#enum iwindow_download
 	#enum istep_lilly
 	#enum istep_fragments
 	#enum istep_mission_desc
@@ -53,6 +54,7 @@
 	#enum ID_ERROR_0
 	#enum ID_ERROR_1
 	#enum ID_ERROR_2
+	#enum ID_DOWNLOAD
 
 	#deffunc LoadChallengeImages
 		dim hdximg
@@ -74,6 +76,7 @@
 		hdximg(iticketpay_error0)=LoadGraph("Data/layer_challenge_ticketpayments_error_0.png")
 		hdximg(iticketpay_error1)=LoadGraph("Data/layer_challenge_ticketpayments_error_1.png")
 		hdximg(iticketpay_error2)=LoadGraph("Data/layer_challenge_ticketpayments_error_2.png")
+		hdximg(iwindow_download)=LoadGraph("Data/layer_challenge_download.png")
 		hdximg(istep_lilly)=LoadGraph("Data/Icon_Lilly_40x40.png")
 		hdximg(istep_fragments)=LoadGraph("Data/Icon_Fragments_40x40.png")
 		hdximg(istep_mission_desc)=LoadGraph("Data/layer_challenge_missiondesc.png")
@@ -148,8 +151,7 @@
 
 		//背景（動画）
 		if SceneCount<20|DecideCount>20 {
-			SetDrawBlendMode DX_BLENDMODE_NOBLEND,256
-			DrawExtendGraph 0,0,BufWidth@,BufHeight@,hdximg(ibg),FALSE
+			DrawMainBackground FrameCount@
 		} else {
 			DrawCommonBackground FrameCount@
 		}
@@ -427,11 +429,49 @@
 							PlaySE int(hcommonsech@(sndDecide@)),1.0
 							NumTickets@portalsync--
 							librec_consticket@++
-							//開始
-							ChallengeStartFlag=TRUE
-							PushButtonFlag=TRUE
-							DecideCount=0
-							WindowID*-1
+
+							exist"Data/map-"+GetMapUUIDfromMissionUUID(stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync))+".bin"
+							sdim tmpchartbuf,strsize
+							notesel tmpchartbuf
+							noteload"Data/map-"+GetMapUUIDfromMissionUUID(stepPrm@(ChapterMapID@portalsync,ChapterStepID@portalsync))+".bin"
+							tmpstr=GetINIvalue(tmpchartbuf,"Metadata","Background.Video")
+							tmpstr(1)=GetINIvalue(tmpchartbuf,"Metadata","Resource")
+
+							sdim downloadcueName
+							sdim downloadcueURL
+							dim downloadfinishFlag
+							dim downloadcueSize
+
+							dim exist_generalmov:dim exist_onlymov
+							exist"Data/res_movie_"+tmpstr+".bin"
+							exist_generalmov=strsize
+							exist"Data/"+tmpstr(1)+"/"+tmpstr
+							exist_onlymov=strsize
+							if exist_generalmov==-1&exist_onlymov==-1 {
+								downloadfinishFlag=FALSE
+								downloadcueName="Data/"+tmpstr(1)+"/"+tmpstr
+								downloadcueURL=GetINIvalue(coredlBuf@,"Download",downloadcueName)
+								if downloadcueURL=="" {
+									downloadcueName="Data/res_movie_"+tmpstr+".bin"
+									downloadcueURL=GetINIvalue(coredlBuf@,"Download",downloadcueName)
+								}
+								downloadcueSize=int(GetINIvalue(coredlBuf@,"Download","#SIZE#"+downloadcueName))
+
+								sdim tmpdownloadbuf
+								PlaySE int(hcommonsech@(vocDownload@)),1.0
+								downloadcueBuffer=1024*1024
+								WebAPI_Get_bin_async_A downloadcueURL,downloadcueBuffer
+
+								WindowID=ID_DOWNLOAD:WindowCount=0
+							} else {
+								downloadfinishFlag=TRUE
+
+								//開始
+								ChallengeStartFlag=TRUE
+								PushButtonFlag=TRUE
+								DecideCount=0
+								WindowID*-1
+							}
 						}
 						WindowCount=0
 					}
@@ -535,6 +575,31 @@
 					}
 				}
 			swbreak
+			case ID_DOWNLOAD
+				if exist_generalmov==-1&exist_onlymov==-1&downloadfinishFlag==FALSE&WindowCount>20 {
+					dim tmpdownloadsize
+					WebAPI_Get_bin_async_LOOP tmpdownloadbuf,downloadcueBuffer
+					tmpdownloadsize=stat
+					if tmpdownloadsize==-1 {
+						bsave downloadcueName,tmpdownloadbuf
+						sdim tmpdownloadbuf
+						downloadfinishFlag=TRUE
+					} else {
+						downloadcueProg=double(tmpdownloadsize)/double(downloadcueSize)*100.0
+					}
+					AddCount downloadcueCount
+				}
+				setease 0,256,ease_linear+ease_loop
+				SetDrawBlendMode DX_BLENDMODE_ALPHA,getease(WindowCount,20)
+				DrawStringXCenterToHandle 716,633,"\""+downloadcueName+"\"をダウンロード中・・・["+strf("%.2f",downloadcueProg)+"%]",488,$00E5FF,hdxfont(fNSCJM20)
+				if downloadfinishFlag==TRUE&DecideCount==-1 {
+					WindowID*-1:WindowCount=0
+					//開始
+					ChallengeStartFlag=TRUE
+					PushButtonFlag=TRUE
+					DecideCount=0
+				}
+			swbreak
 		swend
 
 		SetDrawBlendMode DX_BLENDMODE_PMA_ALPHA,256
@@ -622,7 +687,9 @@
 		}
 
 		AddCount SceneCount
-		if DecideCount!-1 :AddCount DecideCount
+		if DecideCount!-1 {
+			AddCount DecideCount
+		}
 		if DecideCount>60 {
 
 			repeat 10

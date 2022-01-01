@@ -6,6 +6,7 @@
 #enum global iCursor
 #enum global ibg_common_0
 #enum global ibg_common_1
+#enum global ibg_common_0_layer
 #enum global ibutton_backscene
 #enum global ibutton_gameexit
 #enum global iStatus_Fragment
@@ -13,6 +14,13 @@
 #enum global iStatus_Lilly
 #enum global ishape_commonbg
 #enum global ibg_dummyscene
+#enum global iscenechange
+#enum global ibg_scenechange
+#enum global ibg_rep
+#enum global ibg_tr0
+#enum global ibg_tr1
+#enum global ibg_tx
+#enum global itmp_bgscreen
 
 //ƒV[ƒ“ID
 #enum global ID_BOOT		=	0
@@ -46,6 +54,7 @@
 #enum vocPartnerSelect
 #enum vocWait
 #enum vocBuy
+#enum vocDownload
 
 //•ˆ–Êî•ñ‚Ì¯•Êq
 #enum global META_TITLE	=	0

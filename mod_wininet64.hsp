@@ -1,4 +1,8 @@
 
+//テスト用
+;#include"hsp3_64.as"
+;#include"hspint64.as"
+
 #module _wininetwrap64_
 #uselib "wininet.dll"
 #cfunc InternetOpen "InternetOpenA" int,int,int,int,int
@@ -9,6 +13,10 @@
 #cfunc HttpQueryInfo "HttpQueryInfoA" int,int,int,int,int
 #func InternetCloseHandle "InternetCloseHandle" int
 #func DeleteUrlCacheEntry "DeleteUrlCacheEntry" sptr
+
+
+#define DOWNLOAD_BUFFER		200000
+
 
 #deffunc setProxy str s1, str s2
 	sdim proxy,256
@@ -119,6 +127,32 @@ return 0
 	if index {
 	}
 return 0
+
+#deffunc httpGet_async_A var v1,var v2, int p3, int p4,int p5
+	phead=varptr64(v1)
+	headsize=p3
+	bufsize=p4
+	sdim tmp,p5
+	size=0
+	len=0
+	return
+#deffunc httpGet_async_LOOP var v1,var v2, int p3,int p4, int p5
+		test=1
+		rt=cfunc64(RET_INT64,InternetReadFile,hRequest,varptr64(tmp),DOWNLOAD_BUFFER,varptr64(size))
+		if varsize(v2)<len+size :memexpand v2,len+size+p5*16	//余裕を持って確保
+		memcpy v2,tmp,size,len,0
+		len+size
+	return size
+#deffunc httpGet_async_B var v1,var v2, int p3, int p
+	;ヘッダの取得
+	flg=HTTP_QUERY_RAW_HEADERS_CRLF
+	rt=cfunc64(RET_INT64,HttpQueryInfo,hRequest,flg,phead,varptr64(headsize),varptr64(index))
+	if rt==0 {
+		return 1
+	}
+	if index {
+	}
+return 0
 #deffunc closeHttp
     if hRequest!0 :cfunc64v InternetCloseHandle,hRequest
     if hConnect!0 :cfunc64v InternetCloseHandle,hConnect
@@ -147,6 +181,30 @@ return
 	strrep httpres,code_cr,""
 	strrep httpres,"</br>","\n"
 return httpres
+#deffunc WebAPI_Get_bin_async_A str _url,int _maxbuf
+	dpost=""
+	sdim header,1024
+	header+="Connection: close\n"
+	sdim rhead,1024
+	sdim httpres,1024*1024
+	setProxy httpproxy@,""		//プロキシのアドレス:ポート , bypass
+	setHeader header,""
+	if openHttp("puoro.sapphire/*",geturl_server(_url),80)==0 {
+		if httpRequest(geturl_withoutserver(_url),dpost,0)==0 {
+			httpGet_async_A rhead, httpres, varsize(rhead), varsize(httpres),_maxbuf
+		}
+	}
+return
+#deffunc WebAPI_Get_bin_async_LOOP var _dest,int _buf
+	httpGet_async_LOOP rhead, httpres, varsize(rhead), varsize(httpres),_buf
+	if size<1 {
+		httpGet_async_B rhead, httpres, varsize(rhead), varsize(httpres)
+		closeHttp
+		sdim _dest,len
+		memcpy _dest,httpres,len
+		return -1
+	}
+return len
 #defcfunc WebAPI_Post str _url,str _prm
 	dpost=_prm
 	sdim header,1024
@@ -185,3 +243,24 @@ return httpres
 	strrep tmpstr2,geturl_server(tmpstr2),""
 	return tmpstr2
 #global
+
+/*
+//サンプル（俺のゲームで接続確認する用のページ）
+httpproxy@=""
+title"ちょっとまて"
+dialog webapi_get("http://puoro.ml/apiv2/connection.php")
+title"文字OK"
+
+//バイナリ（マヨネーズを表示）
+webapi_get_bin_async_a "https://i.imgur.com/pfXMfvb.jpg",1024*1024	//第2パラは最大のバッファ容量
+repeat
+webapi_get_bin_async_loop tmppic,1024*1024	//第2パラはバッファ容量、async_aの最大以下だったら自由に設定できる（途中で変更も可）
+size=stat
+if size==-1 :break
+title str(size)+"byte 取得した"
+wait
+loop
+title"ok"
+memfile tmppic
+picload"MEM:test.jpg",0
+*/
